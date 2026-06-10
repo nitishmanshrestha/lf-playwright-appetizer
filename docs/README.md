@@ -1,29 +1,64 @@
-# Playwright Automation Boilerplate — Documentation
+# Playwright Boilerplate — Documentation Hub
 
-> A production-ready, helper-first Playwright framework any team can fork, adapt, and ship.
+Complete guide to setting up, writing, and maintaining automated tests with this framework.
 
-## Contents
+---
 
-| Doc                                                                 | Purpose                                                                     |
-| ------------------------------------------------------------------- | --------------------------------------------------------------------------- |
-| [Getting Started](getting-started.md)                               | Setup, first test, running locally                                          |
-| [Framework Standards](framework-standards.md)                       | Architecture rules, naming conventions, selector strategy                   |
-| [API Layer Guide](api-layer-guide.md)                               | API engine, route interception, schema validation                           |
-| [Framework Maintenance Guide](framework-maintenance-guide.md)       | Adding modules, updating configs                                            |
-| [Support Helpers Guide](support-helpers-guide.md)                   | Helper authoring patterns                                                   |
-| [Feature Context Guide](feature-capture-guide.md)                   | Retain MCP or Playwright CLI feature context for AI-assisted test authoring |
-| [Workflow](workflow.md)                                             | End-to-end process: MCP exploration → passing tests                         |
-| [Bootstrap and Evidence Guide](bootstrap-evidence-guide.md)         | One-command setup responsibilities and evidence artifact locations          |
-| [Doc Impact Map](doc-impact-map.md)                                 | Path-to-doc enforcement map for framework changes                           |
-| [Playwright CLI Getting Started](playwright-cli-getting-started.md) | CLI setup, required items, and token-efficient workflow in this framework   |
-| [Prompts Guide](../.github/prompts/README.md)                       | When and how to use the Copilot prompt files                                |
+## 🚀 New to This Project?
 
-## Quick Links
+Start here → **[Getting Started](./01-getting-started/)**
 
-- **Run tests:** `npm test`
-- **Bootstrap setup:** `npm run bootstrap`
-- **Check doc impact:** `npm run check:doc-impact`
-- **Smoke only:** `npm run test:smoke`
-- **UI mode:** `npm run test:ui`
-- **See report:** `npm run report`
-- **Create feature context:** Use MCP in VS Code or `npm run context:codegen`
+- [Setup & Environment](./01-getting-started/setup.md)
+- [Discovery Process](./01-getting-started/discovery-process.md)
+- [Your First Test Module](./01-getting-started/first-test-module.md)
+
+---
+
+## 📚 Documentation By Use Case
+
+### I want to...
+
+#### Write Tests
+👉 [Writing Tests Guide](./02-guides/writing-tests.md) — spec-driven testing patterns
+
+#### Record & Generate Tests
+👉 [Recording Tests](./02-guides/recording-tests.md) — Playwright Codegen workflow
+
+#### Find the Right Selector
+👉 [Selector Strategies](./02-guides/selector-strategies.md) — data-testid, getByRole, and best practices
+
+#### Mock API Requests
+👉 [API Mocking](./02-guides/api-mocking.md) — request interception patterns
+
+#### Debug a Failing Test
+👉 [Debugging Tests](./02-guides/debugging-tests.md) — trace recording, video capture, live debugging
+
+#### Manage Session & Auth State
+👉 [Session & Authentication](./03-features/session-and-auth.md) — storage state, cookies, persistent profiles
+
+#### Capture Video/Traces
+👉 [Video Recording](./03-features/video-recording.md) — video capture setup  
+👉 [Trace Recording](./03-features/trace-recording.md) — detailed trace inspection
+
+#### Run Tests in Parallel
+👉 [Performance & Parallel Execution](./03-features/parallel-execution.md)
+
+---
+
+## 🎓 Deep Dives
+
+- [Three-Layer Architecture](./05-architecture/three-layer-pattern.md) — Why Config → Helpers → Tests?
+- [Module Anatomy](./05-architecture/module-anatomy.md) — Structure of a complete test module
+- [Patterns & Anti-Patterns](./05-architecture/patterns-and-anti-patterns.md) — Do's and don'ts
+
+---
+
+## 📖 Quick Reference
+
+- [Playwright API Cheatsheet](./04-reference/playwright-api-cheatsheet.md)
+- [Configuration Reference](./04-reference/config-reference.md)
+- [CLI Commands](./04-reference/cli-commands.md)
+
+---
+
+Last updated: 2026-06-10

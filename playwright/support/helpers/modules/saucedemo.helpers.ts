@@ -257,4 +257,88 @@ export class SaucedemoHelpers {
     await expect(this.page.getByTestId(SAUCEDEMO_UI.LOGIN.USERNAME_INPUT)).toHaveValue("");
     await expect(this.page.getByTestId(SAUCEDEMO_UI.LOGIN.PASSWORD_INPUT)).toHaveValue("");
   }
+
+  // ─── Negative Cases: Cart Error Scenarios ─────────────────────────────────
+
+  async assertCheckoutIsVisibleOnEmptyCart(): Promise<void> {
+    // Button is still visible on empty cart (app allows navigating to checkout)
+    const checkoutBtn = this.byTestIdOrRole(SAUCEDEMO_UI.CART.CHECKOUT_BTN, "button", /checkout/i);
+    await expect(checkoutBtn.first()).toBeVisible();
+  }
+
+  async assertCheckoutErrorWhenFirstNameEmpty(): Promise<void> {
+    // Proceed to checkout with empty first name
+    await this.byTestIdOrLabel(SAUCEDEMO_UI.CHECKOUT.LAST_NAME, /last ?name/i)
+      .first()
+      .fill("User");
+    await this.byTestIdOrLabel(SAUCEDEMO_UI.CHECKOUT.POSTAL_CODE, /(zip|postal)/i)
+      .first()
+      .fill("12345");
+    await this.byTestIdOrRole(SAUCEDEMO_UI.CHECKOUT.CONTINUE_BTN, "button", /continue/i)
+      .first()
+      .click();
+    // Error message should appear
+    const errorElement = this.page.getByText(/first ?name.*required/i);
+    await expect(errorElement).toBeVisible();
+  }
+
+  async assertCheckoutErrorWhenLastNameEmpty(): Promise<void> {
+    // Proceed to checkout with empty last name
+    await this.byTestIdOrLabel(SAUCEDEMO_UI.CHECKOUT.FIRST_NAME, /first ?name/i)
+      .first()
+      .fill("Test");
+    await this.byTestIdOrLabel(SAUCEDEMO_UI.CHECKOUT.POSTAL_CODE, /(zip|postal)/i)
+      .first()
+      .fill("12345");
+    await this.byTestIdOrRole(SAUCEDEMO_UI.CHECKOUT.CONTINUE_BTN, "button", /continue/i)
+      .first()
+      .click();
+    // Error message should appear
+    const errorElement = this.page.getByText(/last ?name.*required/i);
+    await expect(errorElement).toBeVisible();
+  }
+
+  async assertCheckoutErrorWhenPostalCodeEmpty(): Promise<void> {
+    // Proceed to checkout with empty postal code
+    await this.byTestIdOrLabel(SAUCEDEMO_UI.CHECKOUT.FIRST_NAME, /first ?name/i)
+      .first()
+      .fill("Test");
+    await this.byTestIdOrLabel(SAUCEDEMO_UI.CHECKOUT.LAST_NAME, /last ?name/i)
+      .first()
+      .fill("User");
+    await this.byTestIdOrRole(SAUCEDEMO_UI.CHECKOUT.CONTINUE_BTN, "button", /continue/i)
+      .first()
+      .click();
+    // Error message should appear
+    const errorElement = this.page.getByText(/(zip|postal).*required/i);
+    await expect(errorElement).toBeVisible();
+  }
+
+  async assertCancelCheckoutReturnsToCart(): Promise<void> {
+    await this.byTestIdOrRole(SAUCEDEMO_UI.CHECKOUT.CANCEL_BTN, "button", /cancel/i)
+      .first()
+      .click();
+    await expect(this.page).toHaveURL(/cart\.html$/);
+    await expect(this.page.getByTestId(SAUCEDEMO_UI.CART.CONTAINER)).toBeVisible();
+  }
+
+  async assertRemoveFromCartDecreasesBadge(): Promise<void> {
+    // Get current badge count
+    const badgeText = await this.page.getByTestId(SAUCEDEMO_UI.HEADER.CART_BADGE).textContent();
+    const currentCount = parseInt(badgeText ?? "0", 10);
+
+    // Remove an item and verify badge decreased
+    await this.page
+      .getByTestId(SAUCEDEMO_UI.PRODUCT_ITEM.REMOVE_BTN("sauce-labs-backpack"))
+      .click();
+
+    if (currentCount > 1) {
+      await expect(this.page.getByTestId(SAUCEDEMO_UI.HEADER.CART_BADGE)).toHaveText(
+        String(currentCount - 1),
+      );
+    } else {
+      // Badge should disappear if last item removed
+      await expect(this.page.getByTestId(SAUCEDEMO_UI.HEADER.CART_BADGE)).not.toBeVisible();
+    }
+  }
 }

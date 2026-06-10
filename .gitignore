@@ -29,6 +29,10 @@ playwright/fixtures/har/
 playwright/environments/.env.*
 !playwright/environments/.env.qa.example
 
+# Claude Code personal settings and caches
+.claude/settings.local.json
+.claude/**/*.cache
+
 # OS/editor noise
 .DS_Store
 Thumbs.db

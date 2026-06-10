@@ -16,6 +16,54 @@ This boilerplate is application-agnostic. Swap out the example modules for your 
 
 ---
 
+## Before You Code: Discovery Workflow
+
+**IMPORTANT:** Never write tests without first exploring the application.
+
+### Three Guides to Get You Started
+
+1. **[DISCOVERY.md](./DISCOVERY.md)** — Complete discovery process (4 phases)
+   - Phase 1: Explore app with Playwright Codegen
+   - Phase 2: Document findings
+   - Phase 3: Get team approval
+   - Phase 4: Implement tests
+
+2. **[DISCOVERY_TEMPLATE.md](./DISCOVERY_TEMPLATE.md)** — Fillable template
+   - Use while exploring with codegen
+   - Document selectors, routes, flows
+   - Get sign-off before implementation
+
+3. **[CODEGEN_QUICKSTART.md](./CODEGEN_QUICKSTART.md)** — Quick reference
+   - How to use Playwright Codegen
+   - Recording interactions
+   - Extracting selectors
+   - Validating selectors work
+
+### The Process (Checklist)
+
+```
+BEFORE WRITING ANY CODE:
+
+☐ 1. Run: npx playwright codegen <your-app-url>
+☐ 2. Explore all pages in the app
+☐ 3. Record key user flows
+☐ 4. Copy generated code
+☐ 5. Fill in DISCOVERY_TEMPLATE.md
+☐ 6. Share with team/Claude Code for approval
+☐ 7. Get sign-off: "Approved for Implementation"
+☐ 8. NOW you can start coding tests
+```
+
+### Why This Matters
+
+- ✅ **Accurate Selectors** — Based on actual app, not guesses
+- ✅ **Meaningful Tests** — Cover real user flows, not implementation details
+- ✅ **Stable Tests** — Use data-testid, not fragile CSS selectors
+- ✅ **Clear Scope** — Team agrees what to test before coding
+- ✅ **Faster Implementation** — No re-discovering during development
+
+---
+
 ## What is this?
 
 A three-layer Playwright framework with a single, non-negotiable architecture:
