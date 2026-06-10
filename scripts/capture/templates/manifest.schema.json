@@ -1,0 +1,66 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Feature Capture Manifest",
+  "type": "object",
+  "required": ["schemaVersion", "feature", "iterations", "redaction"],
+  "properties": {
+    "schemaVersion": { "const": "1.0" },
+    "capturedAt": { "type": "string" },
+    "capturedBy": { "type": "string" },
+    "feature": {
+      "type": "object",
+      "required": ["app", "module", "key", "startUrl"],
+      "properties": {
+        "app": { "type": "string" },
+        "module": { "type": "string" },
+        "key": { "type": "string" },
+        "startUrl": { "type": "string" },
+        "testIdAttribute": { "type": "string" },
+        "storageState": { "type": ["string", "null"] }
+      }
+    },
+    "iterations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["key", "description", "states"],
+        "properties": {
+          "key": { "type": "string" },
+          "description": { "type": "string" },
+          "states": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["id", "file", "capturedAt"],
+              "properties": {
+                "id": { "type": "string" },
+                "file": { "type": "string" },
+                "capturedAt": { "type": "string" }
+              }
+            }
+          },
+          "codegenScript": { "type": ["string", "null"] }
+        }
+      }
+    },
+    "redaction": {
+      "type": "object",
+      "required": ["defaultPatterns", "customPatterns", "hiddenSelectors"],
+      "properties": {
+        "defaultPatterns": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "customPatterns": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "hiddenSelectors": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "freeFormNotes": { "type": "string" }
+  }
+}

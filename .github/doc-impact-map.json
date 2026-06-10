@@ -1,0 +1,52 @@
+{
+  "rules": [
+    {
+      "trigger": ["playwright.config.ts"],
+      "docs": [
+        "docs/framework-standards.md",
+        "docs/getting-started.md",
+        "docs/bootstrap-evidence-guide.md"
+      ]
+    },
+    {
+      "triggerPrefix": ["playwright/configs/app/"],
+      "docs": [
+        "docs/framework-standards.md",
+        "docs/framework-maintenance-guide.md",
+        "docs/bootstrap-evidence-guide.md"
+      ]
+    },
+    {
+      "triggerPrefix": ["playwright/configs/api/"],
+      "docs": ["docs/api-layer-guide.md", "docs/framework-maintenance-guide.md"]
+    },
+    {
+      "triggerPrefix": ["playwright/configs/ui/"],
+      "docs": ["docs/framework-standards.md", "docs/framework-maintenance-guide.md"]
+    },
+    {
+      "triggerPrefix": ["playwright/support/helpers/"],
+      "docs": ["docs/support-helpers-guide.md", "docs/framework-maintenance-guide.md"]
+    },
+    {
+      "triggerPrefix": ["playwright/tests/"],
+      "docs": ["docs/workflow.md", "docs/framework-maintenance-guide.md"]
+    },
+    {
+      "triggerPrefix": ["playwright/fixtures/"],
+      "docs": ["docs/workflow.md", "docs/framework-maintenance-guide.md"]
+    },
+    {
+      "trigger": ["scripts/bootstrap.js"],
+      "docs": ["docs/getting-started.md", "docs/bootstrap-evidence-guide.md"]
+    },
+    {
+      "trigger": ["scripts/check-locator-strategy.js"],
+      "docs": ["docs/support-helpers-guide.md", "docs/framework-standards.md"]
+    },
+    {
+      "triggerPrefix": ["scripts/capture/"],
+      "docs": ["docs/feature-capture-guide.md", "docs/playwright-cli-getting-started.md"]
+    }
+  ]
+}

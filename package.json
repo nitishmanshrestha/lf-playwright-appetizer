@@ -1,0 +1,48 @@
+{
+  "name": "playwright-automation-boilerplate",
+  "version": "1.0.0",
+  "description": "Production-ready Playwright automation boilerplate — Config → Helpers → Tests. AI-powered with GitHub Copilot ecosystem.",
+  "keywords": [
+    "playwright",
+    "automation",
+    "testing",
+    "e2e",
+    "helper-first",
+    "boilerplate"
+  ],
+  "scripts": {
+    "test": "npx playwright test",
+    "test:smoke": "npx playwright test --grep @smoke",
+    "test:e2e": "npx playwright test --grep @e2e",
+    "test:saucedemo": "npx playwright test --project=saucedemo",
+    "test:headed": "npx playwright test --headed",
+    "test:ui": "npx playwright test --ui",
+    "test:debug": "npx playwright test --debug",
+    "test:trace": "npx playwright show-trace",
+    "report": "npx playwright show-report",
+    "bootstrap": "node scripts/bootstrap.js",
+    "check:doc-impact": "node scripts/check-doc-impact.js",
+    "check:locator-strategy": "node scripts/check-locator-strategy.js",
+    "context:capture": "node scripts/capture/wizard.js",
+    "context:codegen": "npx playwright codegen",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.52.0",
+    "@types/node": "^25.6.0",
+    "@typescript-eslint/eslint-plugin": "^8.0.0",
+    "@typescript-eslint/parser": "^8.0.0",
+    "dotenv": "^16.4.0",
+    "eslint": "^9.15.0",
+    "eslint-config-prettier": "^9.1.0",
+    "prettier": "^3.3.3",
+    "prompts": "^2.4.2",
+    "typescript": "^5.6.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

@@ -1,0 +1,36 @@
+# Feature: {{FEATURE_TITLE}}
+
+**Application:** {{APP}}
+**Module:** {{MODULE}}
+**Feature key:** {{FEATURE_KEY}}
+**Captured:** {{CAPTURED_AT}}
+**Captured by:** {{CAPTURED_BY}}
+
+## Starting URL
+{{START_URL}}
+
+## Authentication
+storageState: {{STORAGE_STATE}}
+
+## Iterations Captured
+{{ITERATION_TABLE}}
+
+## Redaction Applied
+- Default patterns: {{DEFAULT_PATTERNS}}
+- Custom patterns: {{CUSTOM_PATTERNS}}
+- Hidden selectors: {{HIDDEN_SELECTORS}}
+
+## Free-form Notes
+{{FREE_FORM_NOTES}}
+
+## How to Use This Capture
+Reference this brief plus relevant state files when generating tests:
+
+```
+Build smoke + e2e tests for `{{MODULE}}` module.
+Brief: {{BRIEF_PATH}}
+Cover all iterations listed above.
+```
+
+The companion `_capture-manifest.json` contains a machine-readable index of
+every captured state for AI-driven test generation.

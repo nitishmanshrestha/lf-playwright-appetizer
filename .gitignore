@@ -1,0 +1,34 @@
+# Dependencies
+node_modules/
+
+# Playwright run artifacts
+test-results/
+playwright-report/
+blob-report/
+
+# Playwright CLI / MCP local runtime state
+.playwright/
+.playwright-cli/
+.playwright-mcp/
+
+# Framework evidence outputs (generated)
+playwright/evidence/bootstrap/
+playwright/evidence/tests/
+
+# Auth and captured runtime artifacts
+playwright/.auth/
+playwright/.context-capture/
+playwright/fixtures/har/
+# Un-ignore HAR files explicitly when you want them committed:
+# !playwright/fixtures/har/payments/list.har
+
+# Environment files
+.env
+.env.*
+!.env.example
+playwright/environments/.env.*
+!playwright/environments/.env.qa.example
+
+# OS/editor noise
+.DS_Store
+Thumbs.db
