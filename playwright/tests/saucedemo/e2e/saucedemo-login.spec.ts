@@ -1,76 +1,91 @@
 /**
- * @fileoverview Saucedemo — Login feature E2E tests.
+ * @fileoverview Saucedemo — Login E2E Tests (Data-Driven)
  *
- * Covers the login surface only. These tests deliberately bypass the cached
- * saucedemo storageState so each scenario starts from a signed-out session.
+ * Covers the login surface with data-driven test scenarios.
+ * Each scenario is parameterized from JSON test data.
  *
  * Architecture rules:
+ *   ✅ Test data in playwright/testdata/saucedemo/login-*.json
+ *   ✅ Assertion values from testdata (no hardcoding)
  *   ✅ Selectors via SAUCEDEMO_UI
  *   ✅ Routes via ROUTES.SAUCEDEMO
- *   ✅ Credentials via env (SAUCEDEMO_USERNAME / SAUCEDEMO_PASSWORD)
- *   ✅ All assertions deterministic — no waitForTimeout
+ *   ✅ Parameterized via for...of loops
+ *   ✅ Negative cases marked with @negative tag
  */
 
 import { test, expect } from "../../../fixtures/base.fixture";
 import { SAUCEDEMO_UI } from "@configs/ui/modules/saucedemo/saucedemo.ui";
 import { ROUTES } from "@configs/app/routes";
+import validCredentials from "../../../testdata/saucedemo/login-valid-credentials.json";
+import invalidCredentials from "../../../testdata/saucedemo/login-invalid-credentials.json";
+import validationErrors from "../../../testdata/saucedemo/login-validation-errors.json";
 
 // Run every login scenario from a clean, signed-out session.
 test.use({ storageState: { cookies: [], origins: [] } });
 
-const VALID_USERNAME = process.env.SAUCEDEMO_USERNAME ?? "standard_user";
-const VALID_PASSWORD = process.env.SAUCEDEMO_PASSWORD ?? "secret_sauce";
-
-test.describe("Saucedemo — Login", { tag: ["@saucedemo", "@login"] }, () => {
+test.describe("Saucedemo — Login (Parameterized)", { tag: ["@login", "@e2e"] }, () => {
   test.beforeEach(async ({ saucedemoHelpers }) => {
     await saucedemoHelpers.visitLogin();
   });
 
-  test(
-    "logs in successfully with valid credentials",
-    { tag: ["@smoke"] },
-    async ({ page, saucedemoHelpers }) => {
-      await saucedemoHelpers.login(VALID_USERNAME, VALID_PASSWORD);
-      await saucedemoHelpers.assertLoginSucceeded();
-      await expect(page).toHaveURL(new RegExp(`${ROUTES.SAUCEDEMO.INVENTORY}$`));
-    },
-  );
+  // ─── Valid Credentials (Happy Path) ──────────────────────────────────────
 
-  test("blocks login for a locked-out user", async ({ saucedemoHelpers }) => {
-    await saucedemoHelpers.login("locked_out_user", VALID_PASSWORD);
-    await saucedemoHelpers.assertLoginError("Sorry, this user has been locked out");
-  });
+  for (const creds of validCredentials) {
+    test(
+      `logs in successfully as ${creds.username}`,
+      { tag: ["@smoke"] },
+      async ({ page, saucedemoHelpers }) => {
+        // Execute
+        await saucedemoHelpers.login(creds.username, creds.password);
 
-  test("rejects an invalid password", async ({ saucedemoHelpers }) => {
-    await saucedemoHelpers.login(VALID_USERNAME, "wrong_password");
-    await saucedemoHelpers.assertLoginError(
-      "Username and password do not match any user in this service",
+        // Assert — using testdata values
+        await saucedemoHelpers.assertLoginSucceeded();
+        await expect(page).toHaveURL(new RegExp(`${creds.expectedUrl}$`));
+      },
     );
-  });
+  }
 
-  test("rejects an unknown username", async ({ saucedemoHelpers }) => {
-    await saucedemoHelpers.login("ghost_user", VALID_PASSWORD);
-    await saucedemoHelpers.assertLoginError(
-      "Username and password do not match any user in this service",
+  // ─── Invalid Credentials (Negative Cases) ───────────────────────────────
+
+  for (const creds of invalidCredentials) {
+    test(
+      `rejects login for ${creds.username} with wrong credentials`,
+      { tag: ["@negative"] },
+      async ({ saucedemoHelpers }) => {
+        // Execute
+        await saucedemoHelpers.login(creds.username, creds.password);
+
+        // Assert — using testdata error message
+        await saucedemoHelpers.assertLoginError(creds.expectedErrorText);
+      },
     );
-  });
+  }
 
-  test("requires username when submitting empty form", async ({ page, saucedemoHelpers }) => {
-    await saucedemoHelpers.login("", "");
-    await saucedemoHelpers.assertLoginError("Username is required");
-    await expect(page.getByTestId(SAUCEDEMO_UI.LOGIN.USERNAME_INPUT)).toBeVisible();
-  });
+  // ─── Validation Errors (Empty/Missing Fields) ────────────────────────────
 
-  test("requires password when username is provided alone", async ({ saucedemoHelpers }) => {
-    await saucedemoHelpers.login(VALID_USERNAME, "");
-    await saucedemoHelpers.assertLoginError("Password is required");
-  });
+  for (const validation of validationErrors) {
+    test(
+      `requires ${validation.expectedErrorText.toLowerCase()}`,
+      { tag: ["@negative", "@validation"] },
+      async ({ page, saucedemoHelpers }) => {
+        // Execute
+        await saucedemoHelpers.login(validation.username, validation.password);
+
+        // Assert — using testdata error message
+        await saucedemoHelpers.assertLoginError(validation.expectedErrorText);
+        await expect(page.getByTestId(SAUCEDEMO_UI.LOGIN.USERNAME_INPUT)).toBeVisible();
+      },
+    );
+  }
+
+  // ─── Logout (Single Test) ───────────────────────────────────────────────
 
   test(
     "logout redirects to login page with empty form",
-    { tag: ["@logout"] },
+    { tag: ["@logout", "@smoke"] },
     async ({ saucedemoHelpers }) => {
-      await saucedemoHelpers.login(VALID_USERNAME, VALID_PASSWORD);
+      const validUser = validCredentials[0];
+      await saucedemoHelpers.login(validUser.username, validUser.password);
       await saucedemoHelpers.assertLoginSucceeded();
       await saucedemoHelpers.logout();
       await saucedemoHelpers.assertLoggedOut();

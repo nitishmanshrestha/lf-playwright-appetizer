@@ -32,7 +32,7 @@ const PRODUCTS = {
   },
 } as const;
 
-test.describe("Saucedemo — Cart Negative Cases", { tag: ["@saucedemo", "@cart", "@negative"] }, () => {
+test.describe("Saucedemo — Cart Negative Cases", { tag: ["@cart"] }, () => {
   // ─── Checkout Form Validation Errors ──────────────────────────────────────
 
   test.describe("Checkout form validation", () => {
@@ -85,7 +85,7 @@ test.describe("Saucedemo — Cart Negative Cases", { tag: ["@saucedemo", "@cart"
 
     test(
       "removing all items hides the cart badge",
-      { tag: ["@cart", "@negative"] },
+      { tag: ["@negative"] },
       async ({ saucedemoHelpers }) => {
         // Add one item
         await saucedemoHelpers.addToCart(PRODUCTS.BACKPACK.slug);
@@ -101,7 +101,7 @@ test.describe("Saucedemo — Cart Negative Cases", { tag: ["@saucedemo", "@cart"
 
     test(
       "removing a specific item decreases badge correctly",
-      { tag: ["@cart", "@negative"] },
+      { tag: ["@negative"] },
       async ({ page, saucedemoHelpers }) => {
         // Add two different items
         await saucedemoHelpers.addToCart(PRODUCTS.BACKPACK.slug);
@@ -122,7 +122,7 @@ test.describe("Saucedemo — Cart Negative Cases", { tag: ["@saucedemo", "@cart"
 
     test(
       "checkout button is still visible on empty cart (app allows navigation)",
-      { tag: ["@cart", "@checkout", "@negative"] },
+      { tag: ["@checkout", "@negative"] },
       async ({ saucedemoHelpers }) => {
         // Navigate to cart without adding items
         await saucedemoHelpers.visitCart();
@@ -138,7 +138,7 @@ test.describe("Saucedemo — Cart Negative Cases", { tag: ["@saucedemo", "@cart"
   test.describe("Inventory and cart state consistency", () => {
     test(
       "adding and removing same item toggles button state",
-      { tag: ["@cart", "@inventory", "@negative"] },
+      { tag: ["@inventory", "@negative"] },
       async ({ page, saucedemoHelpers }) => {
         await saucedemoHelpers.visitInventory();
 
@@ -167,7 +167,7 @@ test.describe("Saucedemo — Cart Negative Cases", { tag: ["@saucedemo", "@cart"
 
     test(
       "cart badge persists when navigating between pages",
-      { tag: ["@cart", "@navigation", "@negative"] },
+      { tag: ["@navigation", "@negative"] },
       async ({ saucedemoHelpers }) => {
         await saucedemoHelpers.visitInventory();
         await saucedemoHelpers.addToCart(PRODUCTS.BACKPACK.slug);

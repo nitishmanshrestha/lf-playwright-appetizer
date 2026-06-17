@@ -29,7 +29,7 @@ export default defineConfig({
 
   // ── Reporter ──
   reporter: [
-    ["html", { open: "never", outputFolder: FRAMEWORK_EVIDENCE.TESTS.HTML_REPORT_DIR }],
+    ["html", {  outputFolder: FRAMEWORK_EVIDENCE.TESTS.HTML_REPORT_DIR }],
     ["json", { outputFile: FRAMEWORK_EVIDENCE.TESTS.JSON_REPORT_FILE }],
     ["junit", { outputFile: FRAMEWORK_EVIDENCE.TESTS.JUNIT_REPORT_FILE }],
     ["list"],
@@ -52,10 +52,9 @@ export default defineConfig({
   // ── Projects ──
   projects: [
     // Auth setup — runs before all dependent projects
-    {
-      name: "auth-setup",
-      testMatch: /global\.setup\.ts$/,
-    },
+    // {
+    //   name: "auth-setup",
+    // },
 
     // Main test project — real app only; ignored until BASE_URL points to a real app
     {
@@ -64,7 +63,6 @@ export default defineConfig({
         ...devices["Desktop Chrome"],
         storageState: "playwright/.auth/user.json",
       },
-      dependencies: ["auth-setup"],
       testIgnore: /saucedemo/,
       grep: process.env.RUN_GLOBAL_AUTH ? undefined : /^$/,
     },

@@ -41,6 +41,26 @@ Config → Helpers → Tests
 
 See [docs/README.md](docs/README.md) for full documentation.
 
+## AI Agent Usage
+
+Use the `playwright-cli` agent in chat when you want CLI-first browser automation through the AI workflow:
+
+```text
+Use the playwright-cli agent to inspect the checkout flow and capture selectors for a new test.
+```
+
+You can also run `playwright-cli` directly in a terminal:
+
+```bash
+playwright-cli open https://example.com
+playwright-cli snapshot
+```
+
+Rule of thumb:
+
+- Chat + agent: best when you want the model to decide the next CLI steps and convert findings into framework code.
+- Terminal only: best when you already know the exact `playwright-cli` commands you want to run.
+
 ## Scripts
 
 | Command                   | What it does                                                        |

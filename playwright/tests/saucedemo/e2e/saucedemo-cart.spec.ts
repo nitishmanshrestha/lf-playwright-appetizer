@@ -47,7 +47,7 @@ const PRODUCTS = {
 
 const CHECKOUT_INFO = { firstName: "Test", lastName: "User", postalCode: "12345" };
 
-test.describe("Saucedemo — Cart & Checkout", { tag: ["@saucedemo", "@cart", "@checkout"] }, () => {
+test.describe("Saucedemo — Cart & Checkout", { tag: ["@cart", "@checkout"] }, () => {
   test.beforeEach(async ({ saucedemoHelpers }) => {
     await saucedemoHelpers.visitInventory();
   });

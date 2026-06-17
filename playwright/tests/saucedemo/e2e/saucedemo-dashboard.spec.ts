@@ -17,7 +17,7 @@ import { test, expect } from "../../../fixtures/base.fixture";
 import { SAUCEDEMO_UI } from "@configs/ui/modules/saucedemo/saucedemo.ui";
 import { ROUTES } from "@configs/app/routes";
 
-test.describe("Saucedemo — Dashboard", { tag: ["@saucedemo", "@dashboard"] }, () => {
+test.describe("Saucedemo — Dashboard", { tag: ["@dashboard"] }, () => {
   test.beforeEach(async ({ saucedemoHelpers }) => {
     await saucedemoHelpers.visitInventory();
   });

@@ -21,7 +21,7 @@
 import { test, expect } from "../../../fixtures/base.fixture";
 import { SAUCEDEMO_UI } from "@configs/ui/modules/saucedemo/saucedemo.ui";
 
-test.describe("Saucedemo — Smoke Tests", { tag: ["@saucedemo"] }, () => {
+test.describe("Saucedemo — Smoke Tests", {}, () => {
   test.beforeEach(async ({ saucedemoHelpers }) => {
     await saucedemoHelpers.visitInventory();
   });

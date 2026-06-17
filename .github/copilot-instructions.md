@@ -19,6 +19,12 @@ Preferred model: Claude Sonnet 4.6
 - Prefer locator order: `getByRole()` → `getByLabel()` → `getByText()` → `getByTestId()`.
 - Use locator filtering (`filter({ hasText })`, `filter({ has })`) before fallback selectors.
 - Treat CSS/XPath locator chains as last resort only.
+- **DDT Pattern:** Use JSON test data with `for...of` loops for parameterized tests.
+  - Store test data in `playwright/testdata/<module>/*.json`
+  - Include assertion values in test data (no hardcoding)
+  - Place tests in existing `smoke/` or `e2e/` folders
+  - Use template literals for test names: `` `test for ${item}` ``
+  - See `/docs/02-guides/data-driven-testing.md` for patterns and examples
 
 ## Canonical Documentation
 
@@ -111,10 +117,12 @@ Prefer reuse and consolidation over new file creation.
 | Task                                | Use This                               |
 | ----------------------------------- | -------------------------------------- |
 | Write or migrate a test             | `playwright-test-automation` agent     |
+| Drive CLI-first browser automation  | `playwright-cli` agent                 |
 | Review before merge                 | `playwright-reviewer` agent            |
 | Investigate CI failures             | `playwright-ci-investigator` agent     |
 | Debug a failing test (local/manual) | `playwright-bug-hunter` agent          |
 | Optimize slow/flaky tests           | `playwright-performance-auditor` agent |
+| Identify DDT candidates             | `identify-ddt-candidates` skill        |
 | Full QA gate (all checks)           | `pre-merge-qa-gate` agent              |
 | Write documentation                 | `documentation-writer` agent           |
 | Open a pull request                 | `pr-creator` agent                     |

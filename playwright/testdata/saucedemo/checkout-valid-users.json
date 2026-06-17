@@ -1,0 +1,20 @@
+[
+  {
+    "firstName": "John",
+    "lastName": "Doe",
+    "postalCode": "10001",
+    "expectedConfirmationText": "Thank you for your order"
+  },
+  {
+    "firstName": "Jane",
+    "lastName": "Smith",
+    "postalCode": "90210",
+    "expectedConfirmationText": "Thank you for your order"
+  },
+  {
+    "firstName": "Bob",
+    "lastName": "Johnson",
+    "postalCode": "60601",
+    "expectedConfirmationText": "Thank you for your order"
+  }
+]

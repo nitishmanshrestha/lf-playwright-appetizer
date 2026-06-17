@@ -1,0 +1,14 @@
+[
+  {
+    "username": "",
+    "password": "",
+    "shouldFail": true,
+    "expectedErrorText": "Username is required"
+  },
+  {
+    "username": "standard_user",
+    "password": "",
+    "shouldFail": true,
+    "expectedErrorText": "Password is required"
+  }
+]
