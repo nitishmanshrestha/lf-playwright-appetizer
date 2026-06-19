@@ -47,7 +47,7 @@ export const SAUCEDEMO_UI = {
     LAST_NAME: "lastName",
     POSTAL_CODE: "postalCode",
     CONTINUE_BTN: "continue",
-    FINISH_BTN: "finish",
+    ERROR_MSG: "error",
     CANCEL_BTN: "cancel",
     SUMMARY_CONTAINER: "checkout-summary-container",
     SUBTOTAL_LABEL: "subtotal-label",

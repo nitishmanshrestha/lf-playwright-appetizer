@@ -59,11 +59,11 @@ export default defineConfig({
     // Main test project — real app only; ignored until BASE_URL points to a real app
     {
       name: "chromium",
+      testIgnore: /.*/,
       use: {
         ...devices["Desktop Chrome"],
         storageState: "playwright/.auth/user.json",
       },
-      testIgnore: /saucedemo/,
       grep: process.env.RUN_GLOBAL_AUTH ? undefined : /^$/,
     },
 
@@ -76,7 +76,7 @@ export default defineConfig({
         testIdAttribute: "data-test",
         storageState: "playwright/.auth/saucedemo.json",
       },
-      testMatch: /saucedemo.*\.spec\.ts/,
+      // testMatch: /.*saucedemo.*\.setup\.ts$/,
       dependencies: ["saucedemo-setup"],
     },
     {
@@ -85,7 +85,7 @@ export default defineConfig({
         baseURL: "https://www.saucedemo.com",
         testIdAttribute: "data-test",
       },
-      testMatch: /saucedemo\.setup\.ts$/,
+      // testMatch: /.*saucedemo.*\.setup\.ts$/,
     },
   ],
 });

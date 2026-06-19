@@ -177,7 +177,7 @@ export class SaucedemoHelpers {
   }
 
   async finishOrder(): Promise<void> {
-    await this.byTestIdOrRole(SAUCEDEMO_UI.CHECKOUT.FINISH_BTN, "button", /finish/i)
+    await this.byTestIdOrRole(SAUCEDEMO_UI.CHECKOUT.ERROR_MSG, "button", /finish/i)
       .first()
       .click();
   }
