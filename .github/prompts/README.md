@@ -30,6 +30,7 @@ Use these when discovery should happen in a live browser session through MCP.
 - Purpose: Explore → Document → Create → Verify in a 4-tier gated flow
 - Best for: unknown features, multi-step journeys, discovery-heavy work
 - Requires: MCP server running (`playwright` in VS Code MCP list)
+- Recommended post-capture step: `npm run capture:post -- --module <module> --feature <feature> --capture ./capture.json`
 
 ### CLI / Manual Prompts
 
@@ -41,6 +42,7 @@ Playwright CLI codegen or manual selector notes.
 - Purpose: Use Playwright CLI codegen artifacts plus workflow notes to scaffold tests
 - Best for: environments where MCP is unavailable or where teams prefer codegen-first discovery
 - Requires: `npm run context:codegen` output or equivalent recorded flow
+- Recommended post-capture step: `npm run scaffold:ddt -- --module <module> --feature <feature> --capture ./capture.json`
 
 #### `cli/iterative-cli-collaboration.prompt.md`
 
@@ -82,11 +84,11 @@ Prompt files should not restate long rule blocks unless a flow-specific exceptio
 
 ## Related Docs
 
-| Topic                         | File                                                                             |
-| ----------------------------- | -------------------------------------------------------------------------------- |
-| Full workflow                 | [docs/workflow.md](../../docs/workflow.md)                                       |
-| MCP/CLI feature context model | [docs/feature-capture-guide.md](../../docs/feature-capture-guide.md)             |
-| Architecture rules            | [docs/framework-standards.md](../../docs/framework-standards.md)                 |
-| Helper patterns               | [docs/support-helpers-guide.md](../../docs/support-helpers-guide.md)             |
-| Add a new module              | [docs/framework-maintenance-guide.md](../../docs/framework-maintenance-guide.md) |
-| MCP server config             | [.vscode/mcp.json](../../.vscode/mcp.json)                                       |
+| Topic              | File                                                                                     |
+| ------------------ | ---------------------------------------------------------------------------------------- |
+| Full workflow      | [docs/workflow.md](../../docs/workflow.md)                                               |
+| Workflow utilities | [docs/04-reference/workflow-utilities.md](../../docs/04-reference/workflow-utilities.md) |
+| Architecture rules | [docs/framework-standards.md](../../docs/framework-standards.md)                         |
+| Helper patterns    | [docs/support-helpers-guide.md](../../docs/support-helpers-guide.md)                     |
+| Add a new module   | [docs/framework-maintenance-guide.md](../../docs/framework-maintenance-guide.md)         |
+| MCP server config  | [.vscode/mcp.json](../../.vscode/mcp.json)                                               |

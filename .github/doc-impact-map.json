@@ -43,10 +43,6 @@
     {
       "trigger": ["scripts/check-locator-strategy.js"],
       "docs": ["docs/support-helpers-guide.md", "docs/framework-standards.md"]
-    },
-    {
-      "triggerPrefix": ["scripts/capture/"],
-      "docs": ["docs/feature-capture-guide.md", "docs/playwright-cli-getting-started.md"]
     }
   ]
 }

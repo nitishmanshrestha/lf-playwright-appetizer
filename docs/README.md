@@ -19,8 +19,9 @@ playwright-cli click e15
 
 - **Browser automation:** [playwright-cli Complete Guide](./04-reference/playwright-cli-agents.md) — 100+ commands, workflows, best practices
 - **Repo custom agent:** `.github/agents/playwright-cli.md` — token-efficient CLI-first Playwright routing for this workspace
+- **Workflow utilities:** [scripts folder guide](./04-reference/workflow-utilities.md) — plain-English explanation of setup, checks, and capture scripts
 - **Test execution:** [npm Scripts](./04-reference/cli-commands.md) — how to run & debug tests
-- **Selectors:** [Selector Strategies](./02-guides/selector-strategies.md) — getByRole, data-testid, best practices
+- **Selectors:** [Selector Strategies](./02-guides/selector-strategies.md) — prefer getByRole, data-testid as fallback
 - **Methods:** [API Cheatsheet](./04-reference/playwright-api-cheatsheet.md) — common Playwright methods
 - **Architecture:** [Three-Layer Pattern](./05-architecture/three-layer-pattern.md) — Config → Helpers → Tests
 
@@ -50,7 +51,7 @@ Start here → **[Getting Started](./01-getting-started/)**
 
 #### Find the Right Selector
 
-👉 [Selector Strategies](./02-guides/selector-strategies.md) — data-testid, getByRole, and best practices
+👉 [Selector Strategies](./02-guides/selector-strategies.md) — getByRole first, data-testid as fallback
 
 #### Mock API Requests
 
@@ -88,6 +89,7 @@ Start here → **[Getting Started](./01-getting-started/)**
 - [Playwright API Cheatsheet](./04-reference/playwright-api-cheatsheet.md)
 - [Configuration Reference](./04-reference/config-reference.md)
 - [CLI Commands](./04-reference/cli-commands.md) — **For agents: start here**
+- [Workflow Utilities](./04-reference/workflow-utilities.md) — what the scripts folder is for
 
 ---
 

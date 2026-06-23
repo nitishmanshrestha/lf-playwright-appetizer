@@ -8,10 +8,8 @@
  */
 
 import { Page, expect, Response } from "@playwright/test";
-import { EXAMPLE_CONFIG } from "@configs/api/modules/example/example.api";
 import { EXAMPLE_UI } from "@configs/ui/modules/example/example.ui";
 import { ROUTES } from "@configs/app/routes";
-import { waitForAPI } from "@core/api";
 
 export class ExampleHelpers {
   constructor(private page: Page) {}

@@ -13,6 +13,10 @@ const envFile = process.env.ENV
 
 dotenv.config({ path: envFile });
 
+// Allow overriding Playwright trace mode via environment variable `PW_TRACE`.
+// Examples: PW_TRACE=on | PW_TRACE=off | PW_TRACE=on-first-retry
+const TRACE_MODE = process.env.PW_TRACE ?? "on-first-retry";
+
 export default defineConfig({
   // ── Test Directory ──
   testDir: "./playwright/tests",
@@ -29,7 +33,7 @@ export default defineConfig({
 
   // ── Reporter ──
   reporter: [
-    ["html", {  outputFolder: FRAMEWORK_EVIDENCE.TESTS.HTML_REPORT_DIR }],
+    ["html", { outputFolder: FRAMEWORK_EVIDENCE.TESTS.HTML_REPORT_DIR }],
     ["json", { outputFile: FRAMEWORK_EVIDENCE.TESTS.JSON_REPORT_FILE }],
     ["junit", { outputFile: FRAMEWORK_EVIDENCE.TESTS.JUNIT_REPORT_FILE }],
     ["list"],
@@ -43,7 +47,7 @@ export default defineConfig({
   use: {
     baseURL: process.env.BASE_URL || "http://localhost:3000",
     testIdAttribute: "data-testid",
-    trace: "on-first-retry",
+    trace: TRACE_MODE as any,
     screenshot: "only-on-failure",
     actionTimeout: 10_000,
     navigationTimeout: 15_000,
@@ -85,7 +89,8 @@ export default defineConfig({
         baseURL: "https://www.saucedemo.com",
         testIdAttribute: "data-test",
       },
-      // testMatch: /.*saucedemo.*\.setup\.ts$/,
+      testMatch: /.*saucedemo.*\.setup\.ts$/,
     },
+    // (no lightweight experiment projects configured)
   ],
 });

@@ -3,10 +3,10 @@
 > Copy this template and fill it in as you explore a new application.
 > Use Playwright Codegen to interact with the app and capture selectors.
 
-**Project Name:** ________________  
-**App URL:** ________________  
-**Explorer Name:** ________________  
-**Date:** ________________  
+**Project Name:** ******\_\_\_\_******  
+**App URL:** ******\_\_\_\_******  
+**Explorer Name:** ******\_\_\_\_******  
+**Date:** ******\_\_\_\_******
 
 ---
 
@@ -17,6 +17,7 @@ _[Describe the main purpose in 1-2 sentences]_
 
 **Authentication Required?** ☐ Yes ☐ No  
 **Test Credentials:**
+
 ```
 Username: _________________
 Password: _________________
@@ -39,21 +40,23 @@ For **each page** in the app, fill in one section:
 
 **Key Elements:**
 
-| Element | Purpose | Selector Type | Value | Status ✅ |
-|---------|---------|---------------|-------|----------|
-| [Name] | [What it does] | data-testid / data-test / id / name | [Value] | Working? |
-| Username Input | User login | data-testid | "username" | ✅ |
-| Login Button | Submit form | data-testid | "login-button" | ✅ |
-| Error Message | Auth failure | data-testid | "error" | ✅ |
-| | | | | |
+| Element        | Purpose        | Selector Type                       | Value          | Status ✅ |
+| -------------- | -------------- | ----------------------------------- | -------------- | --------- |
+| [Name]         | [What it does] | data-testid / data-test / id / name | [Value]        | Working?  |
+| Username Input | User login     | data-testid                         | "username"     | ✅        |
+| Login Button   | Submit form    | data-testid                         | "login-button" | ✅        |
+| Error Message  | Auth failure   | data-testid                         | "error"        | ✅        |
+|                |                |                                     |                |           |
 
 **Interactions to Test:**
+
 - [ ] Field validation (required, format)
 - [ ] Error messages (invalid login, missing field)
 - [ ] Success path (valid credentials)
 - [ ] Accessibility (labels, tab order)
 
 **Edge Cases Found:**
+
 - _[e.g., "What if username is >50 chars?"]_
 - _[e.g., "Does form reset on logout?"]_
 
@@ -68,17 +71,19 @@ For **each page** in the app, fill in one section:
 **Key Elements:**
 
 | Element | Purpose | Selector Type | Value | Status ✅ |
-|---------|---------|---------------|-------|----------|
-| | | | | |
-| | | | | |
-| | | | | |
+| ------- | ------- | ------------- | ----- | --------- |
+|         |         |               |       |           |
+|         |         |               |       |           |
+|         |         |               |       |           |
 
 **Interactions to Test:**
-- [ ] 
-- [ ] 
-- [ ] 
+
+- [ ]
+- [ ]
+- [ ]
 
 **Edge Cases Found:**
+
 - _[...]_
 - _[...]_
 
@@ -91,15 +96,17 @@ For **each page** in the app, fill in one section:
 **Key Elements:**
 
 | Element | Purpose | Selector Type | Value | Status ✅ |
-|---------|---------|---------------|-------|----------|
-| | | | | |
-| | | | | |
+| ------- | ------- | ------------- | ----- | --------- |
+|         |         |               |       |           |
+|         |         |               |       |           |
 
 **Interactions to Test:**
-- [ ] 
-- [ ] 
+
+- [ ]
+- [ ]
 
 **Edge Cases Found:**
+
 - _[...]_
 
 ---
@@ -131,6 +138,7 @@ const ROUTES = {
 ### Flow 1: [Happy Path - e.g., "Complete Purchase"]
 
 **Steps:**
+
 1. [ ] Navigate to [page]
 2. [ ] [Action 1]
 3. [ ] [Action 2]
@@ -140,6 +148,7 @@ const ROUTES = {
 _[What should the user see?]_
 
 **Testable Assertions:**
+
 - URL changes to: `[expected path]`
 - Element visible: `[data-testid]`
 - Text contains: `[expected message]`
@@ -150,6 +159,7 @@ _[What should the user see?]_
 ### Flow 2: [Error Path - e.g., "Login Fails"]
 
 **Steps:**
+
 1. [ ] Navigate to [page]
 2. [ ] [Action 1 with invalid data]
 3. [ ] Observe [error]
@@ -158,6 +168,7 @@ _[What should the user see?]_
 _[Exact text or pattern]_
 
 **Testable Assertions:**
+
 - Error message appears: `[selector]` contains `[text]`
 - Form doesn't submit: Still on URL `[path]`
 - Field highlights: `[selector]` has error class
@@ -181,6 +192,7 @@ Test with data:
 ```
 
 **Other Calculations:**
+
 - _[...]_
 - _[...]_
 
@@ -192,16 +204,17 @@ Some elements might be hard to find. Document them:
 
 ```typescript
 // ❌ DON'T USE (too fragile):
-page.locator('button:nth-child(3)')  // What if order changes?
+page.locator("button:nth-child(3)"); // What if order changes?
 
 // ✅ USE INSTEAD:
-page.getByTestId("add-to-cart-product-123")  // Explicit, stable
+page.getByTestId("add-to-cart-product-123"); // Explicit, stable
 
 // IF data-testid doesn't exist:
-page.getByRole("button", { name: "Add to Cart" })  // User-facing text
+page.getByRole("button", { name: "Add to Cart" }); // User-facing text
 ```
 
 **Tricky Elements Found:**
+
 - Element: _[what it is]_
 - Why tricky: _[why hard to find]_
 - Best selector: _[data-testid / getByRole / etc.]_
@@ -213,15 +226,16 @@ page.getByRole("button", { name: "Add to Cart" })  // User-facing text
 
 **Elements WITHOUT data-testid:**
 
-| Element | Current Selector | Why Used | Fragile? |
-|---------|-----------------|----------|----------|
-| [Button] | getByRole("button", { name: "..." }) | No testid | ⚠️ If text changes |
-| [Text] | getByText("...") | No testid | ⚠️ If text changes |
-| [Form] | locator('[name="..."]') | id/name attr | ✅ Stable |
+| Element  | Current Selector                     | Why Used     | Fragile?                    |
+| -------- | ------------------------------------ | ------------ | --------------------------- |
+| [Button] | getByRole("button", { name: "..." }) | No testid    | ✅ Recommended (accessible) |
+| [Text]   | getByText("...")                     | No testid    | ✅ Good for assertions      |
+| [Form]   | locator('[name="..."]')              | id/name attr | ✅ Stable                   |
 
 **Recommendation:**
+
 - [ ] Ask dev team to add data-testid to missing elements
-- [ ] Use fallback selectors (getByRole, getByLabel)
+- [ ] Prefer semantic selectors (getByRole, getByLabel, getByText) over test IDs when possible
 - [ ] Note in test comments that selector is fragile
 
 ---
@@ -231,19 +245,23 @@ page.getByRole("button", { name: "Add to Cart" })  // User-facing text
 Based on your discovery, what should we test?
 
 ### Must Test (Critical Path)
+
 - [ ] [Feature 1] - [Why: users depend on this]
 - [ ] [Feature 2]
 - [ ] [Feature 3]
 
 ### Should Test (Important Features)
+
 - [ ] [Feature A]
 - [ ] [Feature B]
 
 ### Nice to Test (Edge Cases)
+
 - [ ] [Edge case 1]
 - [ ] [Edge case 2]
 
 ### Don't Test (Low Value)
+
 - [ ] CSS styling details
 - [ ] Font sizes/colors
 - [ ] Animation smoothness
@@ -254,10 +272,10 @@ Based on your discovery, what should we test?
 
 **Did you run into any issues during exploration?**
 
-| Issue | Impact | Solution |
-|-------|--------|----------|
+| Issue   | Impact                  | Solution        |
+| ------- | ----------------------- | --------------- |
 | [Issue] | [Critical / High / Low] | [How to handle] |
-| | | |
+|         |                         |                 |
 
 ---
 
@@ -284,17 +302,17 @@ Before moving to implementation, verify:
 Week 1:
   1. Create UI Config (selectors)
      File: playwright/configs/ui/[module]/[module].ui.ts
-  
+
   2. Add Routes
      File: playwright/configs/app/routes.ts
-  
+
   3. Write Helpers
      File: playwright/support/helpers/modules/[module].helpers.ts
 
 Week 2:
   4. Write Smoke Tests (critical path only)
      File: playwright/tests/[module]/smoke/[module]-smoke.spec.ts
-  
+
   5. Write E2E Tests (full flows)
      File: playwright/tests/[module]/e2e/[module]-*.spec.ts
 
@@ -304,10 +322,11 @@ Week 3:
 ```
 
 **Estimated Test Count:**
-- Smoke: __ tests
-- E2E: __ tests
-- Negative: __ tests
-- **Total:** __ tests
+
+- Smoke: \_\_ tests
+- E2E: \_\_ tests
+- Negative: \_\_ tests
+- **Total:** \_\_ tests
 
 ---
 
@@ -318,6 +337,7 @@ Week 3:
 _[Any special patterns, conventions, or rules specific to this app?]_
 
 _Example:_
+
 - "All product IDs are slugs, not numeric IDs"
 - "Timestamps are always in ISO format"
 - "Currency is always formatted as $X.XX (two decimals)"
@@ -327,9 +347,9 @@ _Example:_
 
 ## Sign-Off
 
-**Explorer:** _________________________ **Date:** _________
+**Explorer:** ************\_************ **Date:** ****\_****
 
-**Reviewed By:** _________________________ **Date:** _________
+**Reviewed By:** ************\_************ **Date:** ****\_****
 
 **Approved For Implementation:** ☐ Yes ☐ No ☐ With changes
 
@@ -348,7 +368,7 @@ _[Any final notes before implementation starts]_
 // Date: [date]
 // Steps recorded: [number]
 
-page.goto('https://example.com');
+page.goto("https://example.com");
 // ... paste code here ...
 ```
 

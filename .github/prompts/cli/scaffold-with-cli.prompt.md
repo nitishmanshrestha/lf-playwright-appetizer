@@ -1,5 +1,5 @@
 ---
-mode: agent
+agent: playwright-cli
 description: "Scaffold tests from Playwright CLI codegen + workflow notes using Config → Helpers → Tests architecture."
 ---
 
@@ -16,6 +16,7 @@ You are an Automation Engineer. Use Playwright CLI codegen output and workflow n
 - **Codegen script path** (optional): {{codegenScriptPath}}
 - **Workflow steps**:
   {{workflowSteps}}
+- **DDT enabled** (default true): {{ddtEnabled}}
 
 ---
 
@@ -93,6 +94,22 @@ File: `playwright/tests/{{moduleName}}/e2e/{{moduleName}}-{{featureName}}.spec.t
 - Import `test` and `expect` from `base.fixture.ts`
 - Thin orchestration only: 2-5 helper calls per test
 - Tag with `@{{moduleName}}` and scenario tags (`@smoke`/`@e2e`)
+
+### 3g. DDT Candidate Detection (auto)
+
+- If `{{ddtEnabled}}` is true (default), run the `identify-ddt-candidates` skill on the captured flow after extracting selectors.
+- If the skill returns `DDT_CANDIDATE`:
+  - Create a JSON fixture under `playwright/testdata/{{moduleName}}/{{featureName}}-data.json` with dataset objects including assertion values.
+  - Generate a parameterized spec under `playwright/tests/{{moduleName}}/smoke/{{featureName}}-ddt.spec.ts` using a `for...of` loop.
+  - Ensure assertion keys (e.g., `expectedMessage`, `expectedConfirmationText`) are present in each dataset.
+- If the skill returns `NOT_CANDIDATE`, generate a single-scenario spec as usual.
+- Respect an opt-out flag to skip DDT scaffolding when the user requests `--no-ddt`.
+
+Example command (agent):
+
+```
+node scripts/scaffold-runner.js --module {{moduleName}} --feature {{featureName}} --capture ./capture.json
+```
 
 ---
 

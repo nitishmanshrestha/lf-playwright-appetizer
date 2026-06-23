@@ -33,7 +33,7 @@ Preferred model: Claude Sonnet 4.6
 - `/docs/framework-maintenance-guide.md`
 - `/docs/support-helpers-guide.md`
 - `/docs/api-layer-guide.md`
-- `/docs/feature-capture-guide.md`
+- `/docs/04-reference/workflow-utilities.md`
 - `/docs/workflow.md`
 - `/.github/prompts/README.md`
 
@@ -55,8 +55,8 @@ If the user instead references the legacy path
 `playwright/.context-capture/<app>/<module>/<feature>/`, treat it as older
 feature context and read the brief, manifest, and state files the same way.
 
-See `/docs/feature-capture-guide.md` and `/docs/workflow.md` for the preferred
-MCP/CLI context workflow.
+See `/docs/04-reference/workflow-utilities.md` and `/docs/workflow.md` for the
+preferred workflow and repo utility guidance.
 
 ## Copilot Operating Reference
 
@@ -123,6 +123,7 @@ Prefer reuse and consolidation over new file creation.
 | Debug a failing test (local/manual) | `playwright-bug-hunter` agent          |
 | Optimize slow/flaky tests           | `playwright-performance-auditor` agent |
 | Identify DDT candidates             | `identify-ddt-candidates` skill        |
+| Maintain workflow scripts and docs  | `workflow-maintainer` agent            |
 | Full QA gate (all checks)           | `pre-merge-qa-gate` agent              |
 | Write documentation                 | `documentation-writer` agent           |
 | Open a pull request                 | `pr-creator` agent                     |

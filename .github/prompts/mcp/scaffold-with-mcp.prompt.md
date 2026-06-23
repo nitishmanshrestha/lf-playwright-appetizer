@@ -1,5 +1,5 @@
 ---
-mode: agent
+agent: true
 description: "Three-tier MCP workflow: Explore → Document → Create Tests following Config → Helpers → Tests architecture."
 ---
 
@@ -25,30 +25,30 @@ These files are non-negotiable checkpoints. Read them at the start of Tier 3 and
 
 ### Config Files (Source of Truth)
 
-| File | What It Contains | Rule |
-|------|-----------------|------|
-| `playwright/configs/app/routes.ts` | All URL paths for every module | NEVER hardcode a URL — use `ROUTES.MODULE.PATH` |
-| `playwright/configs/ui/modules/{{moduleName}}/{{moduleName}}.ui.ts` | All `data-test` selectors for this module | NEVER hardcode a selector — use `MODULE_UI.SECTION.ELEMENT` |
-| `playwright/configs/api/modules/{{moduleName}}/{{moduleName}}.api.ts` | API endpoint intercept definitions | Use for `waitForResponse()` patterns |
-| `playwright/configs/ui/shared/navigation.ui.ts` | Shared nav selectors (hamburger menu, sidebar) | Check here before adding nav selectors to module config |
-| `playwright/configs/ui/shared/feedback.ui.ts` | Shared feedback selectors (toasts, errors) | Check here before adding error selectors to module config |
+| File                                                                  | What It Contains                               | Rule                                                        |
+| --------------------------------------------------------------------- | ---------------------------------------------- | ----------------------------------------------------------- |
+| `playwright/configs/app/routes.ts`                                    | All URL paths for every module                 | NEVER hardcode a URL — use `ROUTES.MODULE.PATH`             |
+| `playwright/configs/ui/modules/{{moduleName}}/{{moduleName}}.ui.ts`   | All `data-test` selectors for this module      | NEVER hardcode a selector — use `MODULE_UI.SECTION.ELEMENT` |
+| `playwright/configs/api/modules/{{moduleName}}/{{moduleName}}.api.ts` | API endpoint intercept definitions             | Use for `waitForResponse()` patterns                        |
+| `playwright/configs/ui/shared/navigation.ui.ts`                       | Shared nav selectors (hamburger menu, sidebar) | Check here before adding nav selectors to module config     |
+| `playwright/configs/ui/shared/feedback.ui.ts`                         | Shared feedback selectors (toasts, errors)     | Check here before adding error selectors to module config   |
 
 ### Helper Files (Behavior Owners)
 
-| File | What It Owns | Rule |
-|------|-------------|------|
-| `playwright/support/helpers/modules/{{moduleName}}.helpers.ts` | All reusable actions for this module | One helper = one owner. Don't duplicate. |
-| `playwright/support/helpers/common/api.helpers.ts` | API interception, stubbing, response waiting | Check before adding API wait logic |
-| `playwright/support/helpers/common/navigation.helpers.ts` | Generic navigation utilities | Check before adding `goto` wrappers |
-| `playwright/support/helpers/common/ui.helpers.ts` | Generic UI assertions (toasts, modals, loading) | Check before adding generic assertions |
+| File                                                           | What It Owns                                    | Rule                                     |
+| -------------------------------------------------------------- | ----------------------------------------------- | ---------------------------------------- |
+| `playwright/support/helpers/modules/{{moduleName}}.helpers.ts` | All reusable actions for this module            | One helper = one owner. Don't duplicate. |
+| `playwright/support/helpers/common/api.helpers.ts`             | API interception, stubbing, response waiting    | Check before adding API wait logic       |
+| `playwright/support/helpers/common/navigation.helpers.ts`      | Generic navigation utilities                    | Check before adding `goto` wrappers      |
+| `playwright/support/helpers/common/ui.helpers.ts`              | Generic UI assertions (toasts, modals, loading) | Check before adding generic assertions   |
 
 ### Fixture & Test Files
 
-| File | What It Contains | Rule |
-|------|-----------------|------|
-| `playwright/fixtures/base.fixture.ts` | All helper registrations + custom fixtures | New helpers MUST be registered here |
-| `playwright/tests/{{moduleName}}.setup.ts` | Auth setup for this module (if exists) | Understand what auth state is cached |
-| `playwright/tests/{{moduleName}}/` | Existing specs for this module | Don't duplicate existing test coverage |
+| File                                       | What It Contains                           | Rule                                   |
+| ------------------------------------------ | ------------------------------------------ | -------------------------------------- |
+| `playwright/fixtures/base.fixture.ts`      | All helper registrations + custom fixtures | New helpers MUST be registered here    |
+| `playwright/tests/{{moduleName}}.setup.ts` | Auth setup for this module (if exists)     | Understand what auth state is cached   |
+| `playwright/tests/{{moduleName}}/`         | Existing specs for this module             | Don't duplicate existing test coverage |
 
 ---
 
@@ -78,6 +78,7 @@ For each step in the workflow:
 6. Record all findings before stopping
 
 **Token optimization:**
+
 - Use `browser_evaluate` with targeted queries over full `browser_snapshot` when possible
 - Extract only `data-test` attributes, roles, labels — not full DOM trees
 - One evaluate per page state, not per element
@@ -94,37 +95,37 @@ Using findings from Tier 1, generate:
 
 ### A. Selector Inventory
 
-| Page/Section | Element | Attribute | Value |
-|---|---|---|---|
-| Login | Username input | data-test | `user-name` |
+| Page/Section | Element        | Attribute | Value       |
+| ------------ | -------------- | --------- | ----------- |
+| Login        | Username input | data-test | `user-name` |
 
 ### B. Route Map
 
-| Page | URL Path | Already in routes.ts? |
-|---|---|---|
-| Inventory | `/inventory.html` | ✅ Yes / ❌ No |
+| Page      | URL Path          | Already in routes.ts? |
+| --------- | ----------------- | --------------------- |
+| Inventory | `/inventory.html` | ✅ Yes / ❌ No        |
 
 ### C. API Endpoints (if any)
 
 | Endpoint | Method | Triggered By | Expected Status |
-|---|---|---|---|
+| -------- | ------ | ------------ | --------------- |
 
 ### D. Test Coverage Matrix
 
-| Test Case | Type | Steps | Key Assertions |
-|---|---|---|---|
-| Happy path | @e2e | Step 1 → Step 2 | URL, element visible, text |
-| Validation error | @e2e | Empty submit | Error message visible |
+| Test Case        | Type | Steps           | Key Assertions             |
+| ---------------- | ---- | --------------- | -------------------------- |
+| Happy path       | @e2e | Step 1 → Step 2 | URL, element visible, text |
+| Validation error | @e2e | Empty submit    | Error message visible      |
 
 ### E. Business Logic / Calculations
 
 | Calculation | Formula | Example |
-|---|---|---|
+| ----------- | ------- | ------- |
 
 ### F. State Transitions
 
-| Element | Before | After |
-|---|---|---|
+| Element     | Before        | After    |
+| ----------- | ------------- | -------- |
 | Button text | "Add to cart" | "Remove" |
 
 **⛔ STOP after Tier 2. Present the coverage matrix and wait for user approval before Tier 3.**
@@ -206,6 +207,28 @@ File: `playwright/tests/{{moduleName}}/e2e/{{moduleName}}-{{featureName}}.spec.t
 - Each test = 2–5 helper calls maximum (thin orchestration)
 - Validate after each significant interaction
 
+### Step 7 — DDT Candidate Detection (auto)
+
+- After Tier 1 discoveries are documented and before creating specs, run the `identify-ddt-candidates` skill on each candidate flow.
+- If `DDT_CANDIDATE`:
+  - Create `playwright/testdata/{{moduleName}}/{{featureName}}-data.json` with dataset objects that include assertion keys.
+  - Create a parameterized spec `playwright/tests/{{moduleName}}/smoke/{{featureName}}-ddt.spec.ts` using a `for...of` loop.
+  - Register the generated spec under appropriate tags (`@smoke`/`@e2e`) depending on the coverage matrix.
+- If `NOT_CANDIDATE`, create the single-scenario spec normally.
+- Allow user to opt out of DDT scaffolding during Tier 2 approval (ask `Enable DDT scaffolding? [Y/n]`).
+
+Example command (agent):
+
+```
+node scripts/scaffold-runner.js --module {{moduleName}} --feature {{featureName}} --capture ./capture.json
+```
+
+Automated post-capture hook (optional):
+
+```
+npm run capture:post -- --module {{moduleName}} --feature {{featureName}} --capture ./capture.json
+```
+
 ---
 
 ## Tier 4 — RUN AND VERIFY
@@ -242,8 +265,8 @@ ALWAYS validate calculations where applicable
 
 ## Output Contract
 
-| Tier | Deliverable | Gate |
-|------|-------------|------|
-| 1 — Explore | Raw findings: selectors, routes, states, network calls | User says "proceed" |
+| Tier         | Deliverable                                            | Gate                |
+| ------------ | ------------------------------------------------------ | ------------------- |
+| 1 — Explore  | Raw findings: selectors, routes, states, network calls | User says "proceed" |
 | 2 — Document | Coverage matrix, selector inventory, state transitions | User says "proceed" |
-| 3 — Create | Config + Helper + Fixture + Spec (in strict order) | Tests pass |
+| 3 — Create   | Config + Helper + Fixture + Spec (in strict order)     | Tests pass          |

@@ -26,6 +26,16 @@ Use this guide for prompt flows that depend on Playwright MCP browser exploratio
 3. Tier 3 framework-compliant code changes
 4. Tier 4 test execution verification
 
+## Recommended Safe Default
+
+After a capture artifact is produced, prefer the repo hook instead of manual scaffolding:
+
+```bash
+npm run capture:post -- --module <module> --feature <feature> --capture ./capture.json
+```
+
+This keeps DDT scaffolding centralized, respects `--no-ddt`, and avoids changing the MCP server itself.
+
 ## Enforcement
 
 The prompt must still follow framework rules from:

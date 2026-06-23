@@ -15,7 +15,6 @@
 
 import { test, expect } from "../../../fixtures/base.fixture";
 import { SAUCEDEMO_UI } from "@configs/ui/modules/saucedemo/saucedemo.ui";
-import { ROUTES } from "@configs/app/routes";
 import validCredentials from "../../../testdata/saucedemo/login-valid-credentials.json";
 import invalidCredentials from "../../../testdata/saucedemo/login-invalid-credentials.json";
 import validationErrors from "../../../testdata/saucedemo/login-validation-errors.json";

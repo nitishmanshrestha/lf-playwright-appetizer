@@ -4,13 +4,12 @@ applyTo: "playwright/support/helpers/**/*.ts"
 
 # Helper Files Instructions
 
-## Structure
+Helpers are reusable methods that orchestrate page interactions. All selectors and routes come from config files.
 
-Every helper file follows this structure:
+## Structure Template
 
 ```typescript
 import { Page, expect } from "@playwright/test";
-import { MODULE_API } from "@configs/api/modules/[name]/[name].api";
 import { MODULE_UI } from "@configs/ui/modules/[name]/[name].ui";
 import { ROUTES } from "@configs/app/routes";
 
@@ -21,24 +20,119 @@ export class ModuleHelpers {
   async visitList(): Promise<void> { ... }
 
   // ─── Actions ───────────────────────────────────────────────
-  async search(query: string): Promise<void> { ... }
+  async create(data: object): Promise<void> { ... }
 
   // ─── Assertions ────────────────────────────────────────────
   async assertLoaded(): Promise<void> { ... }
 }
 ```
 
+## Real Example: Navigation + Locator Composition
+
+```typescript
+import { Locator, Page, expect } from "@playwright/test";
+import { SAUCEDEMO_UI } from "@configs/ui/modules/saucedemo/saucedemo.ui";
+import { ROUTES } from "@configs/app/routes";
+
+export class SaucedemoHelpers {
+  constructor(private page: Page) {}
+
+  // Reusable locator fallback pattern
+  private byTestIdOrRole(testId: string, role: "button" | "link", name: string | RegExp): Locator {
+    return this.page.getByTestId(testId).or(this.page.getByRole(role, { name }));
+  }
+
+  async visitInventory(): Promise<void> {
+    await this.page.goto(ROUTES.SAUCEDEMO.INVENTORY);
+    await expect(this.page.getByTestId(SAUCEDEMO_UI.INVENTORY.CONTAINER)).toBeVisible();
+  }
+
+  async login(username: string, password: string): Promise<void> {
+    await this.page.getByTestId(SAUCEDEMO_UI.LOGIN.USERNAME_INPUT).fill(username);
+    await this.page.getByTestId(SAUCEDEMO_UI.LOGIN.PASSWORD_INPUT).fill(password);
+    await this.byTestIdOrRole(SAUCEDEMO_UI.LOGIN.LOGIN_BTN, "button", /login/i).first().click();
+  }
+
+  async assertLoginSucceeded(): Promise<void> {
+    await expect(this.page).toHaveURL(/inventory\.html$/);
+    await expect(this.page.getByTestId(SAUCEDEMO_UI.INVENTORY.CONTAINER)).toBeVisible();
+  }
+}
+```
+
 ## Rules
 
-- Import all selectors from UI config — never hardcode
-- Import all routes from ROUTES — never hardcode URLs
-- Methods are verb-first: `visit*`, `create*`, `search*`, `assert*`
-- No `page.waitForTimeout()` — use `waitForResponse()` or `expect()` assertions
-- Register route interceptions BEFORE navigation (waitForResponse pattern)
-- Each method does one thing. If it triggers a network request, wait for the response.
-- Assertion methods use Playwright's auto-retry assertions (`expect(locator).toBeVisible()`)
-- Prefer locator priority: `getByRole()` → `getByLabel()` → `getByText()` → `getByTestId()`.
-- For action locators (`click`, `fill`, `check`, `uncheck`, `press`, `selectOption`), enforce at least two strategies by composing locators with `.or()`.
-- Use locator filtering to resolve strictness: `.filter({ hasText })`, `.filter({ has })`, `.filter({ hasNotText })`.
-- Use `.first()` / `.nth()` only when UI order is a stable product contract.
-- If selector fallback is needed, compose locators with `.or()` rather than hardcoded CSS chains.
+**Imports & Constants:**
+
+- Import selectors from `@configs/ui/modules/[name]/[name].ui`
+- Import routes from `@configs/app/routes`
+- Never hardcode selectors or URLs in methods
+
+**Method Naming:**
+
+- Verb-first: `visit*`, `create*`, `search*`, `assert*`, `fill*`
+- One action per method
+- Descriptive names that reveal intent
+
+**Locator Strategy:**
+
+- Priority: `getByRole()` → `getByLabel()` → `getByText()` → `getByTestId()`
+- Use `.or()` for fallback: `getByTestId(id).or(getByRole(role))`
+- Filter before index: `.filter({ hasText })` before `.first()`
+- Use `.first()` / `.nth()` only when order is guaranteed
+
+**Timing & Assertions:**
+
+- No `page.waitForTimeout()` — use `expect()` auto-retry
+- Wait for URL changes: `await expect(page).toHaveURL(pattern)`
+- Wait for visibility: `await expect(locator).toBeVisible()`
+
+**API Interception (if needed):**
+
+```typescript
+async createItem(data: object): Promise<void> {
+  const responsePromise = this.page.waitForResponse(
+    (res) => res.url().includes("/api/items") && res.status() === 201
+  );
+  await this.page.getByRole("button", { name: /create/i }).click();
+  await responsePromise;
+}
+```
+
+## Anti-Patterns
+
+❌ **Hardcoded selectors:**
+
+```typescript
+await page.locator(".btn-primary").click(); // BAD
+```
+
+✅ **Config constants:**
+
+```typescript
+await page.getByTestId(MODULE_UI.SUBMIT_BTN).click(); // GOOD
+```
+
+❌ **Hardcoded URLs:**
+
+```typescript
+await page.goto("/inventory.html"); // BAD
+```
+
+✅ **Route constants:**
+
+```typescript
+await page.goto(ROUTES.SAUCEDEMO.INVENTORY); // GOOD
+```
+
+❌ **Arbitrary waits:**
+
+```typescript
+await page.waitForTimeout(3000); // BAD
+```
+
+✅ **Deterministic waits:**
+
+```typescript
+await expect(page.getByText("Success")).toBeVisible(); // GOOD
+```

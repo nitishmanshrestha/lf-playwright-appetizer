@@ -19,6 +19,7 @@ npx playwright codegen https://www.saucedemo.com
 ```
 
 **What you see:**
+
 - 🌐 Browser window opens (your app)
 - 📝 Inspector window (code generation panel)
 
@@ -122,12 +123,13 @@ This tells you:
 **In Inspector, you see:**
 
 ```typescript
-await page.getByTestId('username').fill('standard_user');
-await page.getByTestId('password').fill('secret_sauce');
-await page.getByTestId('login-button').click();
+await page.getByTestId("username").fill("standard_user");
+await page.getByTestId("password").fill("secret_sauce");
+await page.getByTestId("login-button").click();
 ```
 
 **What you learned:**
+
 - ✅ Username selector: `data-testid="username"`
 - ✅ Password selector: `data-testid="password"`
 - ✅ Login button selector: `data-testid="login-button"`
@@ -155,11 +157,12 @@ await page.getByTestId('login-button').click();
 **In Inspector:**
 
 ```typescript
-await page.getByTestId('add-to-cart-sauce-labs-backpack').click();
-await page.getByTestId('shopping-cart-badge').click();
+await page.getByTestId("add-to-cart-sauce-labs-backpack").click();
+await page.getByTestId("shopping-cart-badge").click();
 ```
 
 **What you learned:**
+
 - ✅ Add to cart button: `data-testid="add-to-cart-{product-slug}"`
 - ✅ Cart badge: `data-testid="shopping-cart-badge"`
 - ✅ Badge increments when you add items
@@ -176,20 +179,23 @@ await page.getByTestId('shopping-cart-badge').click();
 ```
 
 **What to note:**
+
 ```typescript
 // Primary selector (most reliable):
-page.getByTestId('username')
+page.getByTestId("username");
 
 // Alternative (fallback):
-page.getByLabel(/username/i)
-page.locator('input[name="user-name"]')
+page.getByLabel(/username/i);
+page.locator('input[name="user-name"]');
 ```
 
 **Priority:**
-1. ✅ Use `data-testid` if it exists
-2. ⚠️ Use `getByRole` if testid missing
-3. ⚠️ Use `getByLabel` if form field with label
-4. ❌ Avoid CSS selectors (fragile)
+
+1. ✅ Prefer `getByRole()` for accessible, user-facing elements (buttons, textboxes, links)
+2. ✅ Use `getByLabel()` for form fields with associated labels
+3. ✅ Use `getByText()` for non-interactive assertions
+4. ✅ Use `getByTestId()` only when semantic selectors don't work or are unstable
+5. ❌ Avoid CSS selectors (fragile)
 
 ---
 
@@ -235,15 +241,15 @@ After codegen captures a selector, **verify it works**:
 // Paste and run:
 
 // Test 1: Does the element exist?
-document.querySelector('[data-testid="username"]')
+document.querySelector('[data-testid="username"]');
 // Should return: <input ...> not null
 
 // Test 2: Can you access its value?
-document.querySelector('[data-testid="username"]').value
+document.querySelector('[data-testid="username"]').value;
 // Should return: (empty string if empty)
 
 // Test 3: Can you interact with it?
-document.querySelector('[data-testid="username"]').focus()
+document.querySelector('[data-testid="username"]').focus();
 // Should highlight the input field
 
 // ✅ If all three work, the selector is good!
@@ -256,6 +262,7 @@ document.querySelector('[data-testid="username"]').focus()
 ### Issue 1: No data-testid Attribute
 
 **You see:**
+
 ```html
 <button class="btn btn-login">Login</button>
 ```
@@ -265,11 +272,13 @@ Ask developers to add: `data-testid="login-button"`
 
 **Solution 2 (Fallback):**
 Use `getByRole`:
+
 ```typescript
-page.getByRole('button', { name: /login/i })
+page.getByRole("button", { name: /login/i });
 ```
 
 **Note:** This is less stable because:
+
 - Button text might change
 - Multiple buttons might have same text
 - Internationalization breaks this
@@ -279,6 +288,7 @@ page.getByRole('button', { name: /login/i })
 ### Issue 2: Dynamic IDs
 
 **You see:**
+
 ```html
 <button id="item_12345_remove">Remove</button>
 <!-- ID changes every session! -->
@@ -286,14 +296,16 @@ page.getByRole('button', { name: /login/i })
 
 **Solution:**
 Look for data-testid first:
+
 ```html
 <!-- Better: -->
-<button id="item_12345_remove" data-testid="remove-item-sauce-labs-backpack">
+<button id="item_12345_remove" data-testid="remove-item-sauce-labs-backpack"></button>
 ```
 
 Use the testid:
+
 ```typescript
-page.getByTestId('remove-item-sauce-labs-backpack')
+page.getByTestId("remove-item-sauce-labs-backpack");
 ```
 
 ---
@@ -301,6 +313,7 @@ page.getByTestId('remove-item-sauce-labs-backpack')
 ### Issue 3: Element Inside Container
 
 **You see:**
+
 ```html
 <div data-testid="inventory-item">
   <span data-testid="inventory-item-name">Sauce Labs Backpack</span>
@@ -309,17 +322,17 @@ page.getByTestId('remove-item-sauce-labs-backpack')
 ```
 
 **How to target:**
+
 ```typescript
 // Get the container
-const item = page.getByTestId('inventory-item').first();
+const item = page.getByTestId("inventory-item").first();
 
 // Get specific element inside
-const name = item.getByTestId('inventory-item-name');
-const price = item.getByTestId('inventory-item-price');
+const name = item.getByTestId("inventory-item-name");
+const price = item.getByTestId("inventory-item-price");
 
 // Better (more specific):
-const item = page.getByTestId('inventory-item')
-  .filter({ hasText: 'Sauce Labs Backpack' });
+const item = page.getByTestId("inventory-item").filter({ hasText: "Sauce Labs Backpack" });
 ```
 
 ---
@@ -337,7 +350,7 @@ const item = page.getByTestId('inventory-item')
    ├─ Click password input
    ├─ Type: secret_sauce
    └─ Click login button
-   
+
    Inspector shows: 3 actions with selectors
 
 3. INVENTORY:
@@ -345,7 +358,7 @@ const item = page.getByTestId('inventory-item')
    ├─ Watch badge change from hidden → "1"
    ├─ Click cart badge
    └─ Browser navigates to /cart.html
-   
+
    Inspector shows: 2 actions, new route
 
 4. CART:
@@ -353,7 +366,7 @@ const item = page.getByTestId('inventory-item')
    ├─ Verify price shown: "$29.99"
    ├─ Click checkout button
    └─ Browser navigates to /checkout-step-one.html
-   
+
    Inspector shows: Click action, new route
 
 5. CHECKOUT FORM:
@@ -365,7 +378,7 @@ const item = page.getByTestId('inventory-item')
    ├─ Type: 12345
    ├─ Click continue button
    └─ Browser navigates to /checkout-step-two.html
-   
+
    Inspector shows: 4 fill actions, 1 click
 
 6. ORDER SUMMARY:
@@ -373,7 +386,7 @@ const item = page.getByTestId('inventory-item')
    ├─ Verify total shown: $32.39 (with tax)
    ├─ Click finish button
    └─ Browser navigates to /checkout-complete.html
-   
+
    Inspector shows: Click action, new route
 
 7. CONFIRMATION:
@@ -383,6 +396,7 @@ const item = page.getByTestId('inventory-item')
 ```
 
 **Now you have:**
+
 - ✅ All selectors used in the flow
 - ✅ All routes discovered
 - ✅ All interactions recorded
@@ -406,7 +420,7 @@ npx playwright codegen https://www.saucedemo.com
 **Generated code will look like:**
 
 ```typescript
-const { chromium } = require('playwright');
+const { chromium } = require("playwright");
 
 (async () => {
   const browser = await chromium.launch();
@@ -414,26 +428,26 @@ const { chromium } = require('playwright');
   const page = await context.newPage();
 
   // Step 1: Login
-  await page.goto('https://www.saucedemo.com/');
-  await page.getByTestId('username').fill('standard_user');
-  await page.getByTestId('password').fill('secret_sauce');
-  await page.getByTestId('login-button').click();
+  await page.goto("https://www.saucedemo.com/");
+  await page.getByTestId("username").fill("standard_user");
+  await page.getByTestId("password").fill("secret_sauce");
+  await page.getByTestId("login-button").click();
 
   // Step 2: Add to cart
-  await page.getByTestId('add-to-cart-sauce-labs-backpack').click();
-  await page.getByTestId('shopping-cart-badge').click();
+  await page.getByTestId("add-to-cart-sauce-labs-backpack").click();
+  await page.getByTestId("shopping-cart-badge").click();
 
   // Step 3: Checkout
-  await page.getByTestId('checkout').click();
+  await page.getByTestId("checkout").click();
 
   // Step 4: Fill form
-  await page.getByTestId('firstName').fill('Test');
-  await page.getByTestId('lastName').fill('User');
-  await page.getByTestId('postalCode').fill('12345');
-  await page.getByTestId('continue').click();
+  await page.getByTestId("firstName").fill("Test");
+  await page.getByTestId("lastName").fill("User");
+  await page.getByTestId("postalCode").fill("12345");
+  await page.getByTestId("continue").click();
 
   // Step 5: Finish
-  await page.getByTestId('finish').click();
+  await page.getByTestId("finish").click();
 
   // ✅ You have all selectors and routes!
   await context.close();
@@ -490,13 +504,13 @@ export const ROUTES = {
 
 ## Troubleshooting Codegen
 
-| Problem | Solution |
-|---------|----------|
-| **Inspector not recording actions** | Close all other browser windows, restart codegen |
-| **Selector changes between runs** | That's a fragile selector — use getByRole or ask devs to add testid |
-| **Can't find an element** | Element might be hidden. Interact with parent first (hover, click) |
-| **Code won't paste into terminal** | Right-click inspector → Copy code → Paste in editor |
-| **Codegen closes unexpectedly** | Network issue or app crashed. Start fresh session |
+| Problem                             | Solution                                                            |
+| ----------------------------------- | ------------------------------------------------------------------- |
+| **Inspector not recording actions** | Close all other browser windows, restart codegen                    |
+| **Selector changes between runs**   | That's a fragile selector — use getByRole or ask devs to add testid |
+| **Can't find an element**           | Element might be hidden. Interact with parent first (hover, click)  |
+| **Code won't paste into terminal**  | Right-click inspector → Copy code → Paste in editor                 |
+| **Codegen closes unexpectedly**     | Network issue or app crashed. Start fresh session                   |
 
 ---
 

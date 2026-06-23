@@ -17,7 +17,6 @@
 
 import { test, expect } from "../../../fixtures/base.fixture";
 import { SAUCEDEMO_UI } from "@configs/ui/modules/saucedemo/saucedemo.ui";
-import { ROUTES } from "@configs/app/routes";
 
 const PRODUCTS = {
   BACKPACK: {
@@ -48,7 +47,7 @@ test.describe("Saucedemo — Cart Negative Cases", { tag: ["@cart"] }, () => {
       { tag: ["@checkout", "@negative"] },
       async ({ saucedemoHelpers }) => {
         await saucedemoHelpers.assertCheckoutErrorWhenFirstNameEmpty();
-      }
+      },
     );
 
     test(
@@ -56,7 +55,7 @@ test.describe("Saucedemo — Cart Negative Cases", { tag: ["@cart"] }, () => {
       { tag: ["@checkout", "@negative"] },
       async ({ saucedemoHelpers }) => {
         await saucedemoHelpers.assertCheckoutErrorWhenLastNameEmpty();
-      }
+      },
     );
 
     test(
@@ -64,7 +63,7 @@ test.describe("Saucedemo — Cart Negative Cases", { tag: ["@cart"] }, () => {
       { tag: ["@checkout", "@negative"] },
       async ({ saucedemoHelpers }) => {
         await saucedemoHelpers.assertCheckoutErrorWhenPostalCodeEmpty();
-      }
+      },
     );
 
     test(
@@ -72,7 +71,7 @@ test.describe("Saucedemo — Cart Negative Cases", { tag: ["@cart"] }, () => {
       { tag: ["@checkout", "@negative"] },
       async ({ saucedemoHelpers }) => {
         await saucedemoHelpers.assertCancelCheckoutReturnsToCart();
-      }
+      },
     );
   });
 
@@ -96,7 +95,7 @@ test.describe("Saucedemo — Cart Negative Cases", { tag: ["@cart"] }, () => {
 
         // Badge should be gone
         await saucedemoHelpers.assertCartIsEmpty();
-      }
+      },
     );
 
     test(
@@ -117,7 +116,7 @@ test.describe("Saucedemo — Cart Negative Cases", { tag: ["@cart"] }, () => {
         // Verify remaining item is bike light
         await saucedemoHelpers.visitCart();
         await expect(page.getByTestId(SAUCEDEMO_UI.CART.ITEM_NAME)).toContainText("Bike Light");
-      }
+      },
     );
 
     test(
@@ -129,7 +128,7 @@ test.describe("Saucedemo — Cart Negative Cases", { tag: ["@cart"] }, () => {
 
         // Checkout button is visible (app allows navigating even with empty cart)
         await saucedemoHelpers.assertCheckoutIsVisibleOnEmptyCart();
-      }
+      },
     );
   });
 
@@ -143,7 +142,9 @@ test.describe("Saucedemo — Cart Negative Cases", { tag: ["@cart"] }, () => {
         await saucedemoHelpers.visitInventory();
 
         // Get the add button (should be visible)
-        let button = page.getByTestId(SAUCEDEMO_UI.PRODUCT_ITEM.ADD_TO_CART_BTN(PRODUCTS.BACKPACK.slug));
+        let button = page.getByTestId(
+          SAUCEDEMO_UI.PRODUCT_ITEM.ADD_TO_CART_BTN(PRODUCTS.BACKPACK.slug),
+        );
         let buttonText = await button.textContent();
         expect(buttonText).toContain("Add to cart");
 
@@ -159,10 +160,12 @@ test.describe("Saucedemo — Cart Negative Cases", { tag: ["@cart"] }, () => {
         await saucedemoHelpers.removeFromCart(PRODUCTS.BACKPACK.slug);
 
         // Button should be back to "Add to cart"
-        button = page.getByTestId(SAUCEDEMO_UI.PRODUCT_ITEM.ADD_TO_CART_BTN(PRODUCTS.BACKPACK.slug));
+        button = page.getByTestId(
+          SAUCEDEMO_UI.PRODUCT_ITEM.ADD_TO_CART_BTN(PRODUCTS.BACKPACK.slug),
+        );
         buttonText = await button.textContent();
         expect(buttonText).toContain("Add to cart");
-      }
+      },
     );
 
     test(
@@ -179,7 +182,7 @@ test.describe("Saucedemo — Cart Negative Cases", { tag: ["@cart"] }, () => {
 
         // Badge should still be 1
         await saucedemoHelpers.assertCartBadge(1);
-      }
+      },
     );
   });
 });

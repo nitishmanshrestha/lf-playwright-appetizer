@@ -19,7 +19,12 @@ If you are a coding agent (Claude Code, GitHub Copilot, etc.):
    - Debug mode with automatic code generation
    - Running with tags, specific browsers, different environments
 
-3. **For implementation help:** [Playwright API Cheatsheet](./playwright-api-cheatsheet.md)
+3. **Workflow scripts:** [Workflow Utilities](./workflow-utilities.md)
+   - What lives in `scripts/`
+   - Which scripts are still worth keeping
+   - When to use setup checks vs capture tools
+
+4. **For implementation help:** [Playwright API Cheatsheet](./playwright-api-cheatsheet.md)
    - Common Playwright methods and locators
    - Assertions and wait conditions
    - Best practices for stable tests
@@ -38,6 +43,7 @@ For step-by-step guides and tutorials, see:
 | --------------------------------------------------------------- | --------------------------------------------------------- | --------------------------------------------------- |
 | **[playwright-cli Agents](./playwright-cli-agents.md)**         | 100+ `playwright-cli` commands, workflows, best practices | Agent automation, browser control, token efficiency |
 | **[CLI Commands](./cli-commands.md)**                           | npm test scripts, simple reference                        | Running tests locally, CI/CD, test execution        |
+| **[Workflow Utilities](./workflow-utilities.md)**               | Plain-English guide to `scripts/`                         | Setup, policy checks, and capture workflow review   |
 | **[Playwright API Cheatsheet](./playwright-api-cheatsheet.md)** | Common Playwright methods, locators, assertions           | Test implementation, syntax lookup                  |
 | **[Configuration Reference](./config-reference.md)**            | All configuration options explained                       | Understanding playwright.config.ts setup            |
 
@@ -50,6 +56,7 @@ The repo-specific agent entry point for CLI work is `.github/agents/playwright-c
 | Run a test locally                           | [npm Scripts](./cli-commands.md#npm-scripts-for-test-execution) |
 | Debug a failing test                         | [npm Scripts Debug](./cli-commands.md#debug--inspection)        |
 | Use playwright-cli for browser automation    | [playwright-cli Guide](./playwright-cli-agents.md)              |
+| Understand repo workflow scripts             | [Workflow Utilities](./workflow-utilities.md)                   |
 | Click elements, fill forms, take screenshots | [playwright-cli](./playwright-cli-agents.md)                    |
 | Find a Playwright method                     | [API Cheatsheet](./playwright-api-cheatsheet.md)                |
 | Configure playwright.config.ts               | [Configuration Reference](./config-reference.md)                |
@@ -92,6 +99,7 @@ See [Three-Layer Pattern](../05-architecture/three-layer-pattern.md) for details
 - ✅ Use the `playwright-cli` agent for CLI-first repo workflows
 - ✅ Check [CLI Commands](./cli-commands.md) for all available commands
 - ✅ Use element refs from `snapshot` to target elements
-- ✅ Use role selectors (`role=button[name='text']`) for accessibility
+- ✅ Prefer `getByRole()` first for accessible, user-facing elements
+- ✅ Use `getByTestId()` as a fallback when role-based selection is not stable or meaningful
 - ❌ Never hardcode selectors — check `playwright/configs/ui/**`
 - ❌ Never hardcode URLs — check `playwright/configs/app/routes.ts`

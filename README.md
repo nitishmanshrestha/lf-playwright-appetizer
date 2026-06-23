@@ -30,7 +30,8 @@ Config → Helpers → Tests
 - `saucedemo/` module — working tests against a real demo app
 - API engine — config-driven route interception with `waitForResponse()`
 - `storageState` auth — session-cached via project dependencies
-- `page.getByTestId()` — configured for `data-cy` (customizable per project)
+- `page.getByRole()` — preferred first choice for accessible, user-facing selectors
+- `page.getByTestId()` — fallback for stable hooks when semantic selectors are not enough
 - Multi-environment support (`.env.qa`, `.env.prod`)
 - HTML test reports (built-in Playwright reporter)
 - Tag-based test filtering via `--grep`
@@ -40,6 +41,22 @@ Config → Helpers → Tests
 ## Documentation
 
 See [docs/README.md](docs/README.md) for full documentation.
+
+## New User Path
+
+If this is your first time in the repo, use this order:
+
+1. Install dependencies and browsers: `npm run bootstrap`
+2. Read setup and onboarding: [docs/01-getting-started/README.md](docs/01-getting-started/README.md)
+3. Learn the workflow: [docs/04-reference/workflow-utilities.md](docs/04-reference/workflow-utilities.md)
+4. Explore the app and selectors: [docs/01-getting-started/discovery-process.md](docs/01-getting-started/discovery-process.md)
+5. Run the example suite: `npm run test:saucedemo`
+
+If you are changing framework code, also read:
+
+- [docs/framework-standards.md](docs/framework-standards.md)
+- [docs/framework-maintenance-guide.md](docs/framework-maintenance-guide.md)
+- [docs/support-helpers-guide.md](docs/support-helpers-guide.md)
 
 ## AI Agent Usage
 
@@ -63,15 +80,27 @@ Rule of thumb:
 
 ## Scripts
 
-| Command                   | What it does                                                        |
-| ------------------------- | ------------------------------------------------------------------- |
-| `npm test`                | Run all tests                                                       |
-| `npm run test:smoke`      | Run @smoke tagged tests                                             |
-| `npm run test:saucedemo`  | Run saucedemo project                                               |
-| `npm run test:ui`         | Open Playwright UI mode                                             |
-| `npm run test:debug`      | Run with debugger                                                   |
-| `npm run report`          | Open HTML report                                                    |
-| `npm run context:codegen` | Open Playwright codegen for CLI-assisted feature context collection |
+Use these as setup and maintenance tools, not as a required step before every test run.
+
+- `npm run bootstrap` for a new clone or when you need to install dependencies and browsers
+- `npm run check:doc-impact` after framework-level changes to confirm the docs were updated
+- `npm run check:locator-strategy` after helper changes to confirm locator usage stays safe
+- `npm run check:ddt-fixtures` after generating or editing JSON-driven tests to ensure assertion keys exist
+- `npm run context:codegen` when you want Playwright Codegen for manual browser recording
+- `npm run capture:post -- --module <module> --feature <feature> --capture ./capture.json` after MCP discovery to trigger safe DDT-aware scaffolding
+
+| Command                                                                                  | What it does                                                                       |
+| ---------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| `npm test`                                                                               | Run all tests                                                                      |
+| `npm run test:smoke`                                                                     | Run @smoke tagged tests                                                            |
+| `npm run test:saucedemo`                                                                 | Run saucedemo project                                                              |
+| `npm run test:ui`                                                                        | Open Playwright UI mode                                                            |
+| `npm run test:debug`                                                                     | Run with debugger                                                                  |
+| `npm run report`                                                                         | Open HTML report                                                                   |
+| `npm run context:codegen`                                                                | Open Playwright codegen for CLI-assisted feature context collection                |
+| `npm run scaffold:ddt -- --module <module> --feature <feature> --capture ./capture.json` | Generate DDT scaffolding from a captured flow when the generator deems it suitable |
+| `npm run capture:post -- --module <module> --feature <feature> --capture ./capture.json` | Run the recommended post-capture hook for MCP-driven discovery                     |
+| `npm run check:ddt-fixtures`                                                             | Validate JSON-driven fixtures contain required assertion structure                 |
 
 ## License
 

@@ -19,16 +19,20 @@
     "test:ui": "npx playwright test --ui",
     "test:debug": "npx playwright test --debug",
     "test:trace": "npx playwright show-trace",
+    "test:trace-all": "PW_TRACE=on npx playwright test",
+    "test:no-trace": "PW_TRACE=off npx playwright test",
     "report": "npx playwright show-report",
     "bootstrap": "node scripts/bootstrap.js",
     "check:doc-impact": "node scripts/check-doc-impact.js",
     "check:locator-strategy": "node scripts/check-locator-strategy.js",
-    "context:capture": "node scripts/capture/wizard.js",
     "context:codegen": "npx playwright codegen",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "scaffold:ddt": "node scripts/generate-ddt-scaffold.js",
+    "capture:post": "node scripts/capture/post-capture.js",
+    "check:ddt-fixtures": "node scripts/check-ddt-fixtures.js"
   },
   "devDependencies": {
     "@playwright/test": "^1.52.0",

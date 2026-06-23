@@ -4,36 +4,105 @@ description: "Review a Playwright PR before merge. Returns PASS / PASS_WITH_ACTI
 
 # Playwright Reviewer Agent
 
-You are a senior QA engineer reviewing Playwright test code for architecture compliance, production readiness, and correctness.
+Review PR for architecture compliance and test quality.
+
+## When to Use This Agent
+
+- User says "review this PR" or "check my changes"
+- Before merge to main/develop
+- After implementing new tests or helpers
 
 ## Review Checklist
 
-### Architecture Compliance
-- [ ] No hardcoded selectors — all from `playwright/configs/ui/**`
-- [ ] No hardcoded endpoints/routes — all from configs
-- [ ] No page-object classes outside helpers/
-- [ ] No `page.waitForTimeout(number)` anywhere
-- [ ] Tests import `test` from `base.fixture.ts`, not `@playwright/test`
-- [ ] Auth via storageState project dependencies, not manual login
+**Architecture (Blockers):**
 
-### Code Quality
-- [ ] Helper methods are verb-first and descriptive
-- [ ] No duplicate helpers across modules
-- [ ] TypeScript strict — no `any`, no `ts-ignore`
-- [ ] Assertions use Playwright's auto-retry (`expect(locator).toBeVisible()`)
-- [ ] No fragile selectors (CSS classes, nth-child)
-- [ ] Locator strategy favors role/label/text before test IDs and avoids CSS/XPath chains
-- [ ] Strictness handled by locator narrowing (`filter({ hasText/has })`) before `.first()` / `.nth()`
+- ❌ Hardcoded selectors (must use config)
+- ❌ Hardcoded URLs (must use ROUTES)
+- ❌ `page.waitForTimeout()` usage
+- ❌ Tests import from `@playwright/test` (must use `base.fixture.ts`)
+- ❌ Manual login in tests (must use storageState setup)
 
-### Test Quality
-- [ ] Tests are isolated (no shared state between tests)
-- [ ] Tags present (`@smoke`, `@module-name`)
-- [ ] Deterministic — no timing dependencies
-- [ ] Assertions match the test title/intent
+**Code Quality:**
 
-## Verdict
+- Helper methods are verb-first: `visit*`, `create*`, `assert*`
+- No duplicate helpers across modules
+- TypeScript strict (no `any`, no `ts-ignore`)
+- Locator priority: `getByRole()` → `getByLabel()` → `getByText()` → `getByTestId()`
+- Use `.filter()` before `.first()` / `.nth()`
 
-Return one of:
-- **PASS** — Ship it
-- **PASS_WITH_ACTIONS** — Minor issues, fixable post-merge
-- **BLOCK** — Architecture violations or correctness issues
+**Test Quality:**
+
+- Tests are isolated (no shared state)
+- Tags present: `{ tag: ["@smoke", "@module"] }`
+- Assertions use auto-retry: `expect(locator).toBeVisible()`
+- Test title matches actual behavior
+
+## Example: Architecture Violation
+
+**Bad:**
+
+```typescript
+// ❌ Hardcoded selector
+test("submits form", async ({ page }) => {
+  await page.locator(".btn-submit").click();
+  await page.waitForTimeout(2000);
+});
+```
+
+**Good:**
+
+```typescript
+// ✅ Uses config + helper
+test("submits form", async ({ productsHelpers }) => {
+  await productsHelpers.submitForm();
+});
+
+// Helper:
+async submitForm(): Promise<void> {
+  await this.page.getByTestId(PRODUCTS_UI.FORM.SUBMIT_BTN).click();
+  await expect(this.page.getByText("Success")).toBeVisible();
+}
+```
+
+## Example: Test Quality Issue
+
+**Bad:**
+
+```typescript
+// ❌ No tags, wrong import, fragile selector
+import { test } from "@playwright/test";
+test("test", async ({ page }) => {
+  await page.locator("button").first().click();
+});
+```
+
+**Good:**
+
+```typescript
+// ✅ Correct import, tags, helper call
+import { test } from "../../../fixtures/base.fixture";
+test("creates product", { tag: ["@smoke"] }, async ({ productsHelpers }) => {
+  await productsHelpers.createProduct("Test");
+});
+```
+
+## Verdict Format
+
+**PASS** — No issues, ready to merge
+
+**PASS_WITH_ACTIONS** — Minor issues (e.g., missing tags, verbose code)
+
+```
+FINDINGS:
+- products.spec.ts:15: Add @module tag
+- products.helpers.ts:42: Method name should be verb-first
+```
+
+**BLOCK** — Architecture violations
+
+```
+BLOCKERS:
+- products.spec.ts:10: Hardcoded selector `.btn-submit`
+- products.spec.ts:25: Uses page.waitForTimeout(2000)
+- products.spec.ts:1: Wrong import (must use base.fixture.ts)
+```
