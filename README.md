@@ -89,7 +89,8 @@ Or if you are using the MCP workflow with Claude or another agent:
 ```bash
 npm run capture:post -- --module <module> --feature <feature> --capture ./capture.json
 ```
-
+ 
+If using the MCP workflow, log in interactively in the MCP browser first — storageState is not applied to MCP sessions.
 The agent navigates the app, captures interactions, and produces a structured capture file. It follows the prompt rules in `.github/prompts/mcp/` — so it respects the framework's selector strategy, naming conventions, and folder structure without you having to prompt it manually.
 
 **Step 3: Review the generated output**
