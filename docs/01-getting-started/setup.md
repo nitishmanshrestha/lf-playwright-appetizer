@@ -116,5 +116,6 @@ npm run lint:fix # Fix linting issues
 ## Next Steps
 
 1. ✅ Environment is set up
-2. 👉 **Next:** [Discovery Process](./discovery-process.md) — Learn how to explore your app
-3. Then: [Your First Test](./first-test-module.md) — Write your first test
+2. 👉 **Adapting to your app?** → [ADAPTING.md](../../ADAPTING.md) — strip sample modules, update config, scaffold first module
+3. **Next:** [Discovery Process](./discovery-process.md) — Learn how to explore your app
+4. Then: [Your First Test](./first-test-module.md) — Write your first test

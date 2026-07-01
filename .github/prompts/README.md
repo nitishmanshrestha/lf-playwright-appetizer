@@ -21,6 +21,17 @@ Quick links:
 - MCP-focused guide: [mcp/README.md](mcp/README.md)
 - CLI-focused guide: [cli/README.md](cli/README.md)
 
+### Onboarding Prompt
+
+Use this first when adapting the boilerplate to your own application with minimal inputs.
+
+#### `onboard-your-app.prompt.md`
+
+- Purpose: Gather app URL, auth env variable names, routes, and desired test scope, then scaffold Config → Helper → Fixture
+- Best for: first-time users who want a guided setup without generating tests yet
+- Credentials safety: never asks for credential values; users fill `.env` directly
+- Follow-up: write tests using [docs/02-guides/writing-tests.md](../../docs/02-guides/writing-tests.md)
+
 ### MCP Prompts
 
 Use these when discovery should happen in a live browser session through MCP.

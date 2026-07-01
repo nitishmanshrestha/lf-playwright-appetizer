@@ -16,6 +16,17 @@ This boilerplate is application-agnostic. Swap out the example modules for your 
 
 ---
 
+## Adapting This Boilerplate to a New App
+
+If you are pointing this framework at a real application for the first time, start here before writing any tests:
+
+- **[ADAPTING.md](./ADAPTING.md)** — Step-by-step human checklist: set credentials, remove sample modules, revamp config, scaffold first module.
+- **`.github/prompts/adapt-boilerplate.prompt.md`** — LLM workflow prompt. Invoke with `/adapt-boilerplate` in GitHub Copilot Chat or ask Claude to run it. The prompt interviews the user, strips samples, and scaffolds the first real module in strict Config → Helpers → Tests order.
+
+> If a user says "I want to use this for my app" or "replace saucedemo with my application", use the `adapt-boilerplate` prompt as the primary guide.
+
+---
+
 ## Before You Code: Discovery Workflow
 
 **IMPORTANT:** Never write tests without first exploring the application.

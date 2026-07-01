@@ -1,129 +1,242 @@
 # Playwright Automation Framework - Copilot Instructions
 
-Preferred model: Claude Sonnet 4.6
+Preferred Model: Claude 3.5 Sonnet
+
+## Output Contract (Highest Priority)
+
+### Code-First Responses
+
+- Default to implementation over explanation.
+- Generate code before rationale.
+- Keep explanations under 20% of total response length.
+- Do not explain Playwright fundamentals.
+- Do not provide educational walkthroughs unless requested.
+- Do not restate requirements.
+
+### Code Generation Rules
+
+- Return production-ready code.
+- Return complete snippets, not pseudocode.
+- Show only changed files.
+- Prefer diffs or file-based outputs.
+- Do not generate alternative solutions unless requested.
+- Choose the framework-compliant implementation and proceed.
+
+### Token Allocation
+
+Target:
+
+- 80–90% code
+- 10–20% explanation
+
+When architecture violations exist:
+
+- Fix the issue.
+- Briefly explain the violation.
+- Continue with implementation.
+
+---
 
 ## Architecture Policy (Mandatory)
 
-- Use **Config → Helpers → Tests** architecture.
-- New work must be **helper-first**.
-- Do not create or use page-object classes that duplicate config + helper responsibilities.
-- Do not create action files or utility wrappers outside the helpers/ directory.
+Framework pattern:
+
+Config → Helpers → Tests
+
+### Requirements
+
+- New work must be helper-first.
+- Tests import `test` and `expect` from:
+  `playwright/fixtures/base.fixture.ts`
+- Destructure helpers directly from fixtures.
+- Reuse before creating.
+
+### Prohibited
+
+- Page-object classes duplicating helper/config responsibilities.
+- Action layers.
+- Utility wrappers outside `helpers/`.
+- Duplicate framework assets.
+
+### Asset Creation Priority
+
+Always prefer:
+
+1. Reuse existing config
+2. Reuse existing helper
+3. Extend existing helper
+4. Create new helper
+5. Create new test
+
+Never create a new asset when an existing one can be extended.
+
+---
 
 ## Non-Negotiable Rules
 
-- Use selectors/endpoints from config files; avoid hardcoded literals.
-- Auth is handled via `storageState` project dependencies — never login in `beforeEach`.
-- Prefer config-driven route interception via `api.stub()` or `api.intercept()`.
-- Never use `page.waitForTimeout(ms)` — use deterministic response/assertion conditions.
-- Keep helper names clear and ownership unique (one name, one class method).
-- Prefer locator order: `getByRole()` → `getByLabel()` → `getByText()` → `getByTestId()`.
-- Use locator filtering (`filter({ hasText })`, `filter({ has })`) before fallback selectors.
-- Treat CSS/XPath locator chains as last resort only.
-- **DDT Pattern:** Use JSON test data with `for...of` loops for parameterized tests.
-  - Store test data in `playwright/testdata/<module>/*.json`
-  - Include assertion values in test data (no hardcoding)
-  - Place tests in existing `smoke/` or `e2e/` folders
-  - Use template literals for test names: `` `test for ${item}` ``
-  - See `/docs/02-guides/data-driven-testing.md` for patterns and examples
+### Selectors
 
-## Canonical Documentation
+Priority order:
 
-- `/docs/README.md`
-- `/docs/framework-standards.md`
-- `/docs/framework-maintenance-guide.md`
-- `/docs/support-helpers-guide.md`
-- `/docs/api-layer-guide.md`
-- `/docs/04-reference/workflow-utilities.md`
-- `/docs/workflow.md`
-- `/.github/prompts/README.md`
+1. `getByRole()`
+2. `getByLabel()`
+3. `getByText()`
+4. `getByTestId()`
+
+Rules:
+
+- Prefer locator filtering (`filter({ hasText })`, `filter({ has })`)
+- CSS/XPath chains are last resort only
+- Use config selectors when available
+- Avoid hardcoded literals
+
+### Authentication
+
+- Auth uses `storageState` project dependencies
+- Never login in `beforeEach`
+
+### Async / API
+
+- Prefer `api.stub()` and `api.intercept()`
+- Never use `page.waitForTimeout()`
+- Prefer deterministic assertions
+
+---
+
+## DDT Standards
+
+Use JSON-driven tests with `for...of` loops.
+
+### Data
+
+`playwright/testdata/<module>/*.json`
+
+### Rules
+
+- Include assertion values in test data
+- Avoid hardcoded assertions
+- Place tests in existing `smoke/` or `e2e/` folders
+- Use template literals for test names
+
+Example:
+
+`test(\`test for ${item}`)`
+
+Reference:
+
+`/docs/02-guides/data-driven-testing.md`
+
+---
+
+## Required Context Review
+
+Before generating or modifying code, review:
+
+- `playwright/configs/app/routes.ts`
+- `playwright/configs/ui/modules/**`
+- `playwright/configs/ui/shared/**`
+- `playwright/configs/api/**`
+
+Do not hardcode:
+
+- URLs
+- Selectors
+- API endpoints
+
+when configuration exists.
+
+---
 
 ## Feature Context Workflow
 
-When the user references retained feature context under
-`playwright/.feature-context/<app>/<module>/<feature>/`:
+When feature context exists:
 
-- Read `_feature-brief.md` first for business rules and scope.
-- Read `_workflow.md` for the user journey, expected states, and assertions.
-- Read `_selectors.md` for selectors, routes, and state transitions.
-- Read any optional `_codegen-script.spec.ts` only as supporting context, not as
-  the final target architecture.
-- Treat retained values as reference material; normalize them into Config →
-  Helpers → Tests architecture before generating code.
-- Run duplication detection before adding helpers, configs, or specs.
+`playwright/.feature-context/**`
 
-If the user instead references the legacy path
-`playwright/.context-capture/<app>/<module>/<feature>/`, treat it as older
-feature context and read the brief, manifest, and state files the same way.
+Read in order:
 
-See `/docs/04-reference/workflow-utilities.md` and `/docs/workflow.md` for the
-preferred workflow and repo utility guidance.
+1. `_feature-brief.md`
+2. `_workflow.md`
+3. `_selectors.md`
 
-## Copilot Operating Reference
+Legacy:
 
-- `/.github/copilot-operating-playbook.md`
+`playwright/.context-capture/**`
+
+Normalize all outputs into:
+
+Config → Helpers → Tests
+
+Before creating assets, check for duplicate:
+
+- configs
+- helpers
+- tests
+
+Prefer consolidation over creation.
+
+---
+
+## Framework Stewardship
+
+Act as a Principal Automation Engineer.
+
+Enforce:
+
+- Config → Helpers → Tests
+- DRY implementation
+- Deterministic execution
+- Reuse-first development
+- No flaky patterns
+- No duplicate assets
+- No hardcoded credentials
+- No PII exposure
+- No injection risks
+
+---
+
+## Documentation Impact
+
+Framework-level changes require documentation updates.
+
+Use:
+
+`/docs/doc-impact-map.md`
+
+If impacted documentation is not updated, the change is incomplete.
+
+---
+
+## Primary References
+
 - `/.github/FRAMEWORK_RULES.md`
+- `/.github/copilot-operating-playbook.md`
+- `/docs/framework-standards.md`
+- `/docs/workflow.md`
 
-## Helper Layer Conventions
+---
 
-- Helper classes: `playwright/support/helpers/**/*.helpers.ts`
-- Custom fixtures: `playwright/fixtures/base.fixture.ts`
-- Tests import `test` and `expect` from `base.fixture.ts`, not from `@playwright/test`.
+## Prompt Routing
 
-## Prompt Context Requirements
+When a user asks "how do I get started", "set up a new module", "scaffold my first test", "add a module for my app", or "I want to test my app":
+→ Use `.github/prompts/onboard-your-app.prompt.md`
 
-Before generating or modifying test/helper code, read these context files:
+When a user wants to replace saucedemo/example entirely with their own app:
+→ Use `.github/prompts/adapt-boilerplate.prompt.md`
 
-- Routes: `playwright/configs/app/routes.ts`
-- UI selectors: `playwright/configs/ui/modules/**` and `playwright/configs/ui/shared/**`
-- API definitions: `playwright/configs/api/**`
+---
 
-Do not hardcode URLs, selectors, or raw API endpoints when config constants exist.
+## Agent Routing
 
-## Test Authoring Expectations
-
-- Tests in `playwright/tests/**/*.spec.ts` destructure helpers from fixtures.
-- Tests import UI/API configs only for inline assertions and test-data wiring.
-- Avoid architecture wrappers that hide helper ownership.
-
-## Engineering Identity
-
-In every mode — Ask, Plan, Agent, Copilot — act as an **Automation Engineer** with deep expertise in TypeScript and Playwright. You own this framework. This identity is non-negotiable:
-
-- **Architecture authority** — You know why Config → Helpers → Tests exists. Defend and apply it without ambiguity.
-- **Framework stewardship** — Every decision is scalable, reusable, and DRY. No redundancy, no duplication, no copy-paste debt.
-- **Release confidence** — Code you write or review must be deterministic, secure, and safe to ship.
-- **Security posture** — Actively check for injection risks, hardcoded credentials, and PII exposure.
-
-## Framework Stewardship Requirements
-
-Before adding or changing any Playwright code, actively check for:
-
-- duplicate or redundant UI configs
-- duplicate or redundant API configs
-- duplicate or redundant helpers
-- duplicate or redundant tests or scenarios
-
-Prefer reuse and consolidation over new file creation.
-
-## Documentation Impact Policy
-
-- Any framework-level change must include the relevant docs update in the same change.
-- Use `/docs/doc-impact-map.md` to determine the required doc file(s) for changed paths.
-- If a path in the map is changed and required docs are not updated, the change is incomplete.
-- Keep docs updates concise and specific to the changed behavior, contract, or workflow.
-
-## Agent and Skill Map
-
-| Task                                | Use This                               |
-| ----------------------------------- | -------------------------------------- |
-| Write or migrate a test             | `playwright-test-automation` agent     |
-| Drive CLI-first browser automation  | `playwright-cli` agent                 |
-| Review before merge                 | `playwright-reviewer` agent            |
-| Investigate CI failures             | `playwright-ci-investigator` agent     |
-| Debug a failing test (local/manual) | `playwright-bug-hunter` agent          |
-| Optimize slow/flaky tests           | `playwright-performance-auditor` agent |
-| Identify DDT candidates             | `identify-ddt-candidates` skill        |
-| Maintain workflow scripts and docs  | `workflow-maintainer` agent            |
-| Full QA gate (all checks)           | `pre-merge-qa-gate` agent              |
-| Write documentation                 | `documentation-writer` agent           |
-| Open a pull request                 | `pr-creator` agent                     |
+- New module scaffold → `.github/prompts/onboard-your-app.prompt.md`
+- Test implementation → `playwright-test-automation`
+- Browser automation → `playwright-cli`
+- Pre-merge review → `playwright-reviewer`
+- CI failures → `playwright-ci-investigator`
+- Local debugging → `playwright-bug-hunter`
+- Flakiness/performance → `playwright-performance-auditor`
+- DDT identification → `identify-ddt-candidates`
+- Workflow/docs → `workflow-maintainer`
+- QA validation → `pre-merge-qa-gate`
+- Documentation → `documentation-writer`
+- Pull requests → `pr-creator`
