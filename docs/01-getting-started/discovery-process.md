@@ -1,5 +1,7 @@
 # Discovery Process
 
+> **Onboarding step 3 of 4** | Prev: [ADAPTING.md](../../ADAPTING.md) | Next: [First Test Module](first-test-module.md)
+
 Explore your application BEFORE writing tests.
 
 **Golden Rule:** Never write a test without first exploring the application with Playwright Codegen.
@@ -21,6 +23,7 @@ npx playwright codegen https://example.com
 ```
 
 This opens:
+
 - Your app in a real browser
 - Playwright Inspector showing the generated code
 
@@ -39,6 +42,7 @@ Examples:
 ### 3. Document Your Findings
 
 In the Codegen Inspector, note:
+
 - Which selectors are stable (use `data-testid` if available)
 - Which flows are important
 - Edge cases and error scenarios
@@ -55,19 +59,23 @@ Record:
 # Discovery: Login Feature
 
 ## Application Overview
+
 The app is a todo list. Users must log in with email + password.
 
 ## Selectors Found
+
 - Email input: data-testid="login-email"
 - Password input: data-testid="login-password"
 - Login button: "Sign In" button
 
 ## User Flows
+
 1. Login → Dashboard
 2. Login → 2FA → Dashboard
 3. Invalid credentials → Error message
 
 ## Edge Cases
+
 - Empty email field
 - Very long password
 - Disabled submit during load
@@ -78,6 +86,7 @@ The app is a todo list. Users must log in with email + password.
 Share your discovery findings with teammates.
 
 **Checklist:**
+
 - [ ] Selectors are documented
 - [ ] Flows make sense
 - [ ] Edge cases are identified
@@ -86,6 +95,7 @@ Share your discovery findings with teammates.
 ### 6. Move to Implementation
 
 Once approved, you're ready to:
+
 1. Create config files with selectors
 2. Write helper classes
 3. Create actual tests
@@ -105,6 +115,7 @@ Right-click element → "Inspect" to see the HTML:
 ### Prioritize Selectors
 
 Prefer this order:
+
 1. `data-testid` — Most stable, explicit
 2. `data-test` — Acceptable alternative
 3. `aria-label` — Accessible, semantic
@@ -115,6 +126,7 @@ Prefer this order:
 ### Record Multiple Flows
 
 Don't stop after one login. Try:
+
 - Happy path (success)
 - Error cases (invalid credentials)
 - Edge cases (missing fields)

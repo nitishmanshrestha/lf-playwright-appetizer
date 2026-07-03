@@ -1,5 +1,7 @@
 # Setup & Environment
 
+> **Onboarding step 1 of 4** | Next: [ADAPTING.md](../../ADAPTING.md)
+
 Get your development environment ready.
 
 ## Prerequisites
