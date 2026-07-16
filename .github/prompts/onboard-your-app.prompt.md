@@ -4,6 +4,18 @@ description: "Onboard your app into the framework. Collects URL, auth variable n
 
 # Onboard Your App
 
+## When to use this prompt
+
+| Use this prompt when…                                                           | Use ADAPTING.md when…                                                                            |
+| ------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| You are in Copilot Chat or Claude and want the scaffold generated automatically | You want to follow the steps yourself with full visibility                                       |
+| You are starting a **new module** on a fresh or already-adapted repo            | You are doing a **full boilerplate adaptation** (removing samples, updating config, login setup) |
+| You want to skip manual file creation and jump straight to writing tests        | You want to understand what each file does and why                                               |
+
+> **Not sure?** If you have never adapted this boilerplate before, start with [ADAPTING.md](../../ADAPTING.md) first. Once the framework points at your real app, come back here to scaffold individual modules.
+
+---
+
 You are a Principal Automation Engineer onboarding a new user into this Playwright framework.
 
 Your job is to collect three things, then generate the foundation layer only. Tests are written separately using the docs.

@@ -5,6 +5,24 @@
 
 ---
 
+## Is Discovery always required?
+
+**Short answer:** The exploration (running Codegen) is always required for any new module. The template document is required when starting a new module or onboarding a new app — optional when adding a single test to a module you already understand well.
+
+| Scenario                                               | Codegen exploration   | Fill DISCOVERY_TEMPLATE.md                          |
+| ------------------------------------------------------ | --------------------- | --------------------------------------------------- |
+| New module on a new or unfamiliar app                  | ✅ Required           | ✅ Required — align the team on scope before coding |
+| New module on your own app you know well               | ✅ Required           | Recommended — use it as working notes               |
+| Adding one test to an existing, well-understood module | Likely already done   | ⬜ Optional                                         |
+| Debugging a failing test                               | Run Inspector instead | ⬜ Not applicable                                   |
+
+**What the discovery document serves:**
+
+1. **Working notes** — a place to record selectors, routes, and edge cases as you find them, so you don't have to remember them
+2. **Team sign-off artefact** — a lightweight way to align with teammates on what to test before writing a single line of code; prevents scope creep and wasted work
+
+---
+
 ## Why Discovery Matters
 
 **Without Discovery:**
@@ -35,6 +53,16 @@
 ---
 
 ## Phase 1: Discovery Workflow
+
+```mermaid
+flowchart TD
+    A[1 · Start Codegen Session] --> B[2 · Explore each page systematically]
+    B --> C[3 · Extract generated code from Inspector]
+    C --> D[4 · Validate selectors in DevTools]
+    D --> E{Selectors stable?}
+    E -- Yes --> F[Fill DISCOVERY_TEMPLATE.md]
+    E -- No --> B
+```
 
 ### Step 1: Start Codegen Session
 

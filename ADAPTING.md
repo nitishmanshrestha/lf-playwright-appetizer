@@ -12,6 +12,10 @@ This guide walks you through replacing them with your own application in 8 order
 
 **Estimated time:** 30–45 minutes
 
+> **Prefer an AI-assisted approach?** If you use GitHub Copilot Chat or Claude, type **"onboard my app"** in the chat. The agent will interview you (URL, module name, auth details) and scaffold Config → Helper → Fixture automatically — no manual steps required. This guide is for when you want to follow the steps yourself or need full visibility into what is changing.
+>
+> Prompt file: `.github/prompts/onboard-your-app.prompt.md`
+
 ---
 
 ## Before you start
@@ -240,6 +244,15 @@ await page.context().storageState({ path: "playwright/.auth/user.json" });
 ---
 
 ## Step 8 — Create your first module
+
+```mermaid
+flowchart TD
+    A["1 · module.ui.ts<br/>selector constants"] --> B["2 · routes.ts<br/>URL paths"]
+    B --> C["3 · module.api.ts<br/>API intercepts (optional)"]
+    C --> D["4 · module.helpers.ts<br/>business actions"]
+    D --> E["5 · base.fixture.ts<br/>register helper"]
+    E --> F["6 · smoke.spec.ts<br/>write tests"]
+```
 
 **Why:** Now the framework is clean and points at your app. It is time to add real code. Modules follow a strict order — Config first, then Helpers, then Tests.
 

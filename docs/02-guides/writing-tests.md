@@ -1,4 +1,64 @@
-# Spec-driven testing (plan → generate → heal)
+# Writing Tests
+
+This guide covers two complementary approaches for authoring Playwright tests in this framework. Choose based on what you are building.
+
+---
+
+## Which approach should I use?
+
+|                    | Spec-driven (plan → generate → heal)                                     | Direct authoring (three-layer pattern)                                |
+| ------------------ | ------------------------------------------------------------------------ | --------------------------------------------------------------------- |
+| **Best for**       | New features, AI-assisted generation, complex flows with many edge cases | Adding tests to known modules, smoke coverage, quick regression tests |
+| **Starting point** | Write a `.plan.md` spec file first                                       | Go straight to Config → Helper → Test                                 |
+| **Team alignment** | Built in — plan file is reviewed before coding                           | Handled separately (e.g. ticket description)                          |
+| **Overhead**       | Higher — planning + generation + validation                              | Lower — write once, run immediately                                   |
+| **Feasible when**  | You have time to plan and the feature is genuinely new                   | You already understand the app behaviour                              |
+| **Skip it when**   | You are adding a simple smoke test to an existing module                 | You need a full new feature covered with edge cases                   |
+
+> **Default for most day-to-day work:** Direct authoring using the three-layer pattern (Config → Helpers → Tests). Use spec-driven for new features where planning ahead saves time.
+
+---
+
+## Approach A — Direct authoring (three-layer pattern)
+
+For adding tests to modules you already understand. No planning file needed.
+
+1. Check [configs/ui/modules/](../../playwright/configs/ui/modules/) for existing selectors — add any missing ones
+2. Add or extend a helper in [support/helpers/modules/](../../playwright/support/helpers/modules/)
+3. Write the spec in `playwright/tests/<module>/smoke/` or `e2e/`, importing from `base.fixture.ts`
+
+See [Your First Test Module](../01-getting-started/first-test-module.md) for a full walk-through.
+
+---
+
+## Approach B — Spec-driven testing (plan → generate → heal)
+
+### Benefits
+
+- Forces you to think through edge cases before writing code
+- Gives an AI agent enough context to generate meaningful tests (not just codegen noise)
+- Plan files serve as living documentation — they are updated when the app changes
+- The "heal" phase makes recovering stale tests systematic rather than ad-hoc
+
+### Limitations
+
+- Adds a planning step — not worth it for a single smoke test
+- Plan files must be maintained; a stale plan is worse than no plan
+- Requires `playwright-cli` — not part of the standard Playwright install
+- The generate/heal mechanic works best with an AI agent; manual use is verbose
+
+### When to use it
+
+✅ Starting a new feature from scratch with clear requirements
+✅ Covering a module that has many edge cases and data variations
+✅ Recovering a large batch of broken tests after a UI refactor
+✅ AI-assisted generation where the plan gives the agent context
+
+❌ Adding one test to a well-understood module
+❌ Quick smoke coverage on a stable page
+❌ Teams or deadlines where maintaining plan files is not feasible
+
+---
 
 End-to-end workflow for authoring and maintaining Playwright tests using `playwright-cli`. The three sections below can be used independently:
 
@@ -32,16 +92,16 @@ npm init playwright@latest
 
 ### 1.2 Prerequisite: seed test
 
-A **seed test** is a minimal test that lands the page in the state every scenario starts from: navigation to the app, any required login, feature flags, etc. Scenarios assume a fresh start *after* the seed. `--debug=cli` pauses *inside* this test, so the seed is where every planning and generation session begins.
+A **seed test** is a minimal test that lands the page in the state every scenario starts from: navigation to the app, any required login, feature flags, etc. Scenarios assume a fresh start _after_ the seed. `--debug=cli` pauses _inside_ this test, so the seed is where every planning and generation session begins.
 
 Minimum viable seed:
 
 ```ts
 // tests/seed.spec.ts
-import { test } from '@playwright/test';
+import { test } from "@playwright/test";
 
-test('seed', async ({ page }) => {
-  await page.goto('https://example.com/');
+test("seed", async ({ page }) => {
+  await page.goto("https://example.com/");
 });
 ```
 
@@ -49,12 +109,12 @@ Preferred — push navigation into a fixture so scenario tests reuse it:
 
 ```ts
 // tests/fixtures.ts
-import { test as baseTest } from '@playwright/test';
-export { expect } from '@playwright/test';
+import { test as baseTest } from "@playwright/test";
+export { expect } from "@playwright/test";
 
 export const test = baseTest.extend({
   page: async ({ page }, use) => {
-    await page.goto('https://example.com/');
+    await page.goto("https://example.com/");
     await use(page);
   },
 });
@@ -62,9 +122,9 @@ export const test = baseTest.extend({
 
 ```ts
 // tests/seed.spec.ts
-import { test } from './fixtures';
+import { test } from "./fixtures";
 
-test('seed', async ({ page }) => {
+test("seed", async ({ page }) => {
   // Fixture already navigates. This empty body tells agents where to start.
 });
 ```
@@ -124,13 +184,20 @@ Save under `specs/<feature>.plan.md`. Use this structure:
 **File:** `tests/<group>/<kebab-case-scenario-name>.spec.ts`
 
 **Steps:**
-  1. <Concrete user step>
+
+1. <Concrete user step>
+
+
     - expect: <observable outcome>
     - expect: <another observable outcome>
-  2. <Next step>
+
+2. <Next step>
+
+
     - expect: <outcome>
 
 #### 1.2. <next-scenario>
+
 ...
 
 ### 2. <Next Group>
@@ -189,23 +256,23 @@ Collect the generated code and write the test file at the path given in the spec
 ```ts
 // spec: specs/basic-operations.plan.md
 // seed: tests/seed.spec.ts
-import { test, expect } from './fixtures';   // or '@playwright/test' if no fixtures file
+import { test, expect } from "./fixtures"; // or '@playwright/test' if no fixtures file
 
-test.describe('Singing in and out', () => {
-  test('should sign in', async ({ page }) => {
+test.describe("Singing in and out", () => {
+  test("should sign in", async ({ page }) => {
     // 1. Navigate to the application
     // (handled by the seed fixture)
 
     // 2. Type 'John Doe' into the username field
-    await page.getByRole('textbox', { name: 'username' }).fill('John Doe');
+    await page.getByRole("textbox", { name: "username" }).fill("John Doe");
 
     // 3. Type password
-    await page.getByRole('textbox', { name: 'password' }).fill('TestPassword');
+    await page.getByRole("textbox", { name: "password" }).fill("TestPassword");
 
     // 4. Press Enter to submit
-    await page.getByRole('textbox', { name: 'password' }).press('Enter');
+    await page.getByRole("textbox", { name: "password" }).press("Enter");
 
-    await expect(page.getByRole('heading')).toContainText('Welcome, John Doe!');
+    await expect(page.getByRole("heading")).toContainText("Welcome, John Doe!");
   });
 });
 ```
@@ -291,15 +358,15 @@ Only after the user answers, either update the spec (intentional change) or file
 ### 3.5 Iteration and giving up
 
 - Fix failures one at a time; rerun after each.
-- If after thorough investigation you are confident the test is correct but the app is wrong *and* the user has confirmed it's a bug: mark the test `test.fixme(...)` with a comment pointing at the user's decision or issue link. Never silently skip.
+- If after thorough investigation you are confident the test is correct but the app is wrong _and_ the user has confirmed it's a bug: mark the test `test.fixme(...)` with a comment pointing at the user's decision or issue link. Never silently skip.
 
 ---
 
 ## Cross-references
 
-| For... | See |
-|---|---|
-| `--debug=cli` / attach mechanics | [playwright-tests.md](playwright-tests.md) |
-| How `playwright-cli` actions become TS | [test-generation.md](test-generation.md) |
-| Mocking requests during exploration/generation | [request-mocking.md](request-mocking.md) |
-| Managing the CLI browser session | [session-management.md](session-management.md) |
+| For...                                         | See                                            |
+| ---------------------------------------------- | ---------------------------------------------- |
+| `--debug=cli` / attach mechanics               | [playwright-tests.md](playwright-tests.md)     |
+| How `playwright-cli` actions become TS         | [test-generation.md](test-generation.md)       |
+| Mocking requests during exploration/generation | [request-mocking.md](request-mocking.md)       |
+| Managing the CLI browser session               | [session-management.md](session-management.md) |

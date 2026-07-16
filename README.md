@@ -40,6 +40,12 @@ You should see tests pass and an HTML report open with results. That's the full 
 
 ### Option B — Full walkthrough (learn the workflow end to end)
 
+```mermaid
+flowchart LR
+    A[1 · Discover feature] --> B[2 · Scaffold from recording]
+    B --> C[3 · Place test in folder] --> D[4 · Run and inspect]
+```
+
 **Step 1: Discover the feature you want to test**
 
 Read [DISCOVERY.md](DISCOVERY.md), then record a flow with Playwright Codegen:
@@ -72,6 +78,16 @@ npm run report
 ---
 
 ### Option C — AI-driven (let the agent test the app for you)
+
+<details><summary>Workflow overview</summary>
+
+```mermaid
+flowchart LR
+    A[1 · Set BASE_URL] --> B[2 · Run agent in discovery mode]
+    B --> C[3 · Review generated output] --> D[4 · Promote to real test]
+```
+
+</details>
 
 This is the most hands-off path. Instead of recording manually, you point a Playwright CLI or MCP agent at the app and it discovers, interacts, and generates tests on your behalf — guided by the prompts and rules already baked into this repo.
 

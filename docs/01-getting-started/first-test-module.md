@@ -20,6 +20,12 @@ Tests (what to verify)
 
 ## Example: Login Feature
 
+```mermaid
+flowchart LR
+    A["Step 1<br/>Config — selectors"] --> B["Step 2<br/>Routes — URLs"]
+    B --> C["Step 3<br/>Helper — actions"] --> D["Step 4<br/>Test — assertions"]
+```
+
 Let's create a complete login test module.
 
 ### Step 1: Create Config (Selectors)

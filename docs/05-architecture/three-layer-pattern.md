@@ -37,6 +37,7 @@ export const AUTH_UI = {
 ```
 
 **Benefits:**
+
 - Single source of truth for selectors
 - Easy to update when UI changes (one place)
 - Zero logic — just data
@@ -57,6 +58,7 @@ export class AuthHelper {
 ```
 
 **Benefits:**
+
 - Business logic isolated from test code
 - Reusable across many tests
 - Easy to refactor (change once, all tests benefit)
@@ -68,21 +70,35 @@ export class AuthHelper {
 
 ```typescript
 // Test: orchestrates helpers, makes assertions
-test('should login successfully', async ({ page }) => {
+test("should login successfully", async ({ page }) => {
   const authHelper = new AuthHelper(page);
-  
-  await authHelper.login('user@test.com', 'password123');
-  await expect(page).toHaveURL('**/dashboard');
+
+  await authHelper.login("user@test.com", "password123");
+  await expect(page).toHaveURL("**/dashboard");
 });
 ```
 
 **Benefits:**
+
 - Readable at a glance (what is being tested?)
 - Minimal setup/teardown
 - Focuses on behavior, not mechanics
 - Easy to maintain
 
 ## The Flow
+
+```mermaid
+sequenceDiagram
+    participant Test
+    participant Helper
+    participant Config
+    Test->>Helper: authHelper.login(email, password)
+    Helper->>Config: read AUTH_UI.email
+    Helper->>Config: read AUTH_UI.password
+    Helper->>Config: read AUTH_UI.submitButton
+    Config-->>Helper: selector constants
+    Helper-->>Test: login complete
+```
 
 **When you write a test:**
 
@@ -133,6 +149,7 @@ export class AuthHelper {
 ```
 
 **Why Helpers are better:**
+
 - Encapsulate complete business actions (not just UI interactions)
 - Easier to reuse
 - Clearer intent
@@ -151,8 +168,8 @@ export const AUTH_UI = {
 } as const;
 
 export const ROUTES = {
-  login: '/login',
-  dashboard: '/dashboard',
+  login: "/login",
+  dashboard: "/dashboard",
 } as const;
 ```
 
@@ -174,10 +191,10 @@ export class AuthHelper {
 
 ```typescript
 // WHAT to verify
-test('should login successfully', async ({ page }) => {
+test("should login successfully", async ({ page }) => {
   const authHelper = new AuthHelper(page);
-  await authHelper.login('user@test.com', 'password123');
-  await expect(page).toHaveURL('**/dashboard');
+  await authHelper.login("user@test.com", "password123");
+  await expect(page).toHaveURL("**/dashboard");
 });
 ```
 
