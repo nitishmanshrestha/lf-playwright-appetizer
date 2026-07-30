@@ -1,0 +1,32 @@
+# Dependencies
+node_modules/
+
+# Environment files (keep *.example)
+.env
+.env.*
+!.env.example
+!*.env.example
+playwright/environments/.env.*
+!playwright/environments/*.env.example
+
+# Auth / session state
+playwright/.auth/
+
+# Playwright generated artifacts & reports
+playwright/evidence/
+playwright-report/
+test-results/
+blob-report/
+playwright/.feature-context/
+**/*.har
+
+# Captures / scaffolding scratch
+capture.json
+playwright/testdata/tempflow/
+playwright/tests/tempflow/
+
+# Logs & OS/editor cruft
+*.log
+npm-debug.log*
+.DS_Store
+Thumbs.db

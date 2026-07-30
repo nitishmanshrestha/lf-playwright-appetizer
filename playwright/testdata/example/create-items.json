@@ -1,0 +1,12 @@
+[
+  {
+    "name": "Alpha",
+    "input": { "name": "Alpha" },
+    "expected": { "visible": true }
+  },
+  {
+    "name": "Beta",
+    "input": { "name": "Beta" },
+    "expected": { "visible": true }
+  }
+]

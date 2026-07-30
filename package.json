@@ -1,0 +1,45 @@
+{
+  "name": "playwright-boilerplate-apetizer",
+  "version": "0.1.0",
+  "description": "Stripped-down Playwright framework — CLI/MCP test generation + DDT evaluation only.",
+  "bin": {
+    "playwright-boilerplate-apetizer": "bin/generator.js"
+  },
+  "keywords": [
+    "playwright",
+    "automation",
+    "testing",
+    "e2e",
+    "helper-first",
+    "ddt",
+    "cli",
+    "mcp"
+  ],
+  "scripts": {
+    "test": "npx playwright test",
+    "test:smoke": "npx playwright test --grep @smoke",
+    "test:headed": "npx playwright test --headed",
+    "test:ui": "npx playwright test --ui",
+    "test:debug": "npx playwright test --debug",
+    "report": "npx playwright show-report",
+    "bootstrap": "node scripts/bootstrap.js",
+    "context:codegen": "npx playwright codegen",
+    "generate": "node bin/generator.js scaffold",
+    "scaffold:flow": "node scripts/generate-ddt-scaffold.js",
+    "capture:post": "node scripts/capture/post-capture.js",
+    "check:ddt-fixtures": "node scripts/check-ddt-fixtures.js",
+    "test:unit": "node --test tests/generator.test.js"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.52.0",
+    "@types/node": "^25.9.3",
+    "chalk": "^5.6.2",
+    "commander": "^15.0.0",
+    "dotenv": "^16.4.0",
+    "fast-glob": "^3.3.3",
+    "typescript": "^5.6.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
