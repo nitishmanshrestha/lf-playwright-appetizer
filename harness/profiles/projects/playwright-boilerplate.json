@@ -6,5 +6,5 @@
   "adapter": "playwright",
   "language": "typescript",
   "projectName": "playwright-automation-boilerplate",
-  "repo": "playwright bolierplate/lf-playwright-boilerplate"
+  "repo": "lf-playwright-boilerplate"
 }

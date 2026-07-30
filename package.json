@@ -39,7 +39,8 @@
     "harness:format:check": "prettier --check harness.config.json harness/agents harness/qa-automation-foundations.md scripts/harness/test-policy-messages.mjs .claude/hooks/pre-validate-playwright-rules.mjs .claude/hooks/shared-rules.mjs .claude/hooks/validate-playwright-rules.mjs && prettier --check --print-width 100 scripts/harness/check-drift.mjs scripts/harness/sync.mjs scripts/harness/templates.mjs scripts/harness/test-agent-adapters.mjs",
     "harness:test": "node scripts/harness/test-policy-messages.mjs && node scripts/harness/test-agent-adapters.mjs && npm run harness:profile:test && npm run harness:profile:verify && npm run evidence:test",
     "evidence:build": "node scripts/evidence.mjs --framework playwright --report playwright/evidence/tests/results.json",
-    "evidence:test": "node scripts/test-evidence.mjs",
+    "evidence:record": "node scripts/record-evidence.mjs",
+    "evidence:test": "node scripts/test-evidence.mjs && node scripts/test-record-evidence.mjs",
     "check:ddt-fixtures": "node scripts/check-ddt-fixtures.js"
   },
   "devDependencies": {
