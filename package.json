@@ -1,9 +1,9 @@
 {
-  "name": "playwright-boilerplate-apetizer",
+  "name": "playwright-boilerplate-appetizer",
   "version": "0.1.0",
   "description": "Stripped-down Playwright framework — CLI/MCP test generation + DDT evaluation only.",
   "bin": {
-    "playwright-boilerplate-apetizer": "bin/generator.js"
+    "playwright-boilerplate-appetizer": "bin/generator.js"
   },
   "keywords": [
     "playwright",

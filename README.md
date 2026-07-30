@@ -1,4 +1,4 @@
-# Playwright Boilerplate Apetizer
+# Playwright Boilerplate Appetizer
 
 > Stripped-down Playwright framework focused on CLI/MCP scaffold generation and DDT evaluation.
 
@@ -6,7 +6,7 @@
 
 ## What This Is
 
-Apetizer keeps the parts of the Playwright boilerplate that help you move fast:
+Appetizer keeps the parts of the Playwright boilerplate that help you move fast:
 
 - Scaffold a new module from templates
 - Turn captured flows into DDT-ready test scaffolding

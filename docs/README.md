@@ -1,4 +1,4 @@
-# Playwright Boilerplate Apetizer — Documentation
+# Playwright Boilerplate Appetizer — Documentation
 
 Complete guide to CLI/MCP test generation and DDT evaluation with this stripped-down framework.
 

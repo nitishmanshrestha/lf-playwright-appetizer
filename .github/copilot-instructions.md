@@ -1,4 +1,4 @@
-# Playwright Boilerplate Apetizer — Copilot Instructions
+# Playwright Boilerplate Appetizer — Copilot Instructions
 
 Preferred Model: Claude Sonnet
 
@@ -6,6 +6,7 @@ Preferred Model: Claude Sonnet
 
 This is the stripped-down version of the Playwright automation boilerplate.
 Only two workflows are active here:
+
 1. **CLI/MCP test generation** — scaffold Config → Helpers → Tests from codegen or MCP discovery
 2. **DDT evaluation** — identify data-driven candidates and scaffold JSON fixtures + spec loops
 
@@ -46,6 +47,7 @@ Framework pattern: **Config → Helpers → Tests**
 ### Selectors
 
 Priority order:
+
 1. `getByRole()`
 2. `getByLabel()`
 3. `getByText()`

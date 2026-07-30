@@ -4,18 +4,20 @@ const os = require("node:os");
 const path = require("node:path");
 const test = require("node:test");
 
-const { renderTemplate, scaffoldModule, toUpperModuleName } = require("../lib/generator");
+const {
+  renderTemplate,
+  scaffoldModule,
+  toUpperModuleName,
+} = require("../lib/generator");
 
 function makeTempRoot() {
-  const root = fs.mkdtempSync(path.join(os.tmpdir(), "apetizer-generator-"));
-  fs.mkdirSync(path.join(root, "playwright", "configs", "app"), { recursive: true });
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "appetizer-generator-"));
+  fs.mkdirSync(path.join(root, "playwright", "configs", "app"), {
+    recursive: true,
+  });
   fs.writeFileSync(
     path.join(root, "playwright", "configs", "app", "routes.ts"),
-    [
-      "export const ROUTES = {",
-      "} as const;",
-      "",
-    ].join("\n"),
+    ["export const ROUTES = {", "} as const;", ""].join("\n"),
     "utf8",
   );
   return root;
@@ -55,13 +57,27 @@ test("scaffoldModule writes module files and updates routes", () => {
     assert.match(routes, /WIDGET,/);
 
     const helper = fs.readFileSync(
-      path.join(rootDir, "playwright", "support", "helpers", "modules", "widget.helpers.ts"),
+      path.join(
+        rootDir,
+        "playwright",
+        "support",
+        "helpers",
+        "modules",
+        "widget.helpers.ts",
+      ),
       "utf8",
     );
     assert.match(helper, /class WIDGETHelpers/);
 
     const spec = fs.readFileSync(
-      path.join(rootDir, "playwright", "tests", "widget", "smoke", "widget-smoke.spec.ts"),
+      path.join(
+        rootDir,
+        "playwright",
+        "tests",
+        "widget",
+        "smoke",
+        "widget-smoke.spec.ts",
+      ),
       "utf8",
     );
     assert.match(spec, /widget scaffold/);

@@ -1,4 +1,4 @@
-# Playwright Boilerplate Apetizer — Claude Code
+# Playwright Boilerplate Appetizer — Claude Code
 
 > Stripped-down Playwright framework with one focus: generate production-ready tests fast via CLI/MCP, and evaluate DDT candidates automatically.
 
