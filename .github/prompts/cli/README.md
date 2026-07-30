@@ -6,7 +6,6 @@ Use this guide for prompt flows that do not require MCP exploration.
 
 - [scaffold-with-cli.prompt.md](scaffold-with-cli.prompt.md)
 - [scaffold-no-mcp.prompt.md](scaffold-no-mcp.prompt.md)
-- [iterative-cli-collaboration.prompt.md](iterative-cli-collaboration.prompt.md)
 
 ## When to Use
 
@@ -51,9 +50,6 @@ Before running a CLI prompt, ensure:
 2. Validate generated code with target spec
 3. If selectors or state transitions are unclear, enrich context files
 4. If still ambiguous, escalate to MCP prompt flow
-
-For human + AI co-driving loops with explicit intervention checkpoints, use
-`iterative-cli-collaboration.prompt.md`.
 
 ## Enforcement
 

@@ -41,7 +41,6 @@ Use these when discovery should happen in a live browser session through MCP.
 - Purpose: Explore → Document → Create → Verify in a 4-tier gated flow
 - Best for: unknown features, multi-step journeys, discovery-heavy work
 - Requires: MCP server running (`playwright` in VS Code MCP list)
-- Recommended post-capture step: `npm run capture:post -- --module <module> --feature <feature> --capture ./capture.json`
 
 ### CLI / Manual Prompts
 
@@ -53,13 +52,6 @@ Playwright CLI codegen or manual selector notes.
 - Purpose: Use Playwright CLI codegen artifacts plus workflow notes to scaffold tests
 - Best for: environments where MCP is unavailable or where teams prefer codegen-first discovery
 - Requires: `npm run context:codegen` output or equivalent recorded flow
-- Recommended post-capture step: `npm run scaffold:ddt -- --module <module> --feature <feature> --capture ./capture.json`
-
-#### `cli/iterative-cli-collaboration.prompt.md`
-
-- Purpose: Run a fluid human + AI CLI loop with explicit intervention checkpoints
-- Best for: iterative workflows where AI executes and distills while humans approve scope and edge-case decisions
-- Requires: Playwright CLI access plus a clear goal scenario and project target
 
 #### `cli/scaffold-no-mcp.prompt.md`
 
@@ -85,9 +77,8 @@ Need live discovery in browser now?
 
 All prompts inherit framework enforcement from canonical sources:
 
-- `.github/copilot-instructions.md`
-- `.github/FRAMEWORK_RULES.md`
-- `.github/skills/detect-duplication/SKILL.md`
+- `harness.config.json` — the single source for rules, roles, and limits
+- `.github/copilot-instructions.md` — generated projection of those rules
 
 Prompt files should not restate long rule blocks unless a flow-specific exception is required.
 

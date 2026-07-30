@@ -1,0 +1,89 @@
+name: Playwright Tests
+
+on:
+  pull_request:
+    branches: [main, develop]
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      test_scope:
+        description: Test scope
+        required: true
+        default: smoke
+        type: choice
+        options: [smoke, all]
+
+permissions:
+  contents: read
+
+env:
+  NODE_VERSION: "20"
+
+jobs:
+  smoke:
+    name: Smoke
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - name: Run framework gates
+        run: |
+          npm run check:locator-strategy
+          npm run check:ddt-fixtures
+          npm run lint
+      - name: Run smoke tests
+        run: npm run test:smoke
+        env:
+          BASE_URL: ${{ secrets.BASE_URL }}
+      - name: Build machine evidence
+        if: always()
+        run: npm run evidence:build
+      - name: Upload reports and evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-smoke-${{ github.run_id }}
+          if-no-files-found: warn
+          retention-days: 14
+          path: |
+            playwright/evidence/tests/
+            evidence/
+
+  e2e:
+    name: E2E
+    runs-on: ubuntu-latest
+    needs: smoke
+    if: >-
+      github.event_name == 'push' ||
+      (github.event_name == 'workflow_dispatch' && inputs.test_scope == 'all')
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - name: Run E2E tests
+        run: npm test
+        env:
+          BASE_URL: ${{ secrets.BASE_URL }}
+      - name: Build machine evidence
+        if: always()
+        run: npm run evidence:build
+      - name: Upload reports and evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-e2e-${{ github.run_id }}
+          if-no-files-found: warn
+          retention-days: 14
+          path: |
+            playwright/evidence/tests/
+            evidence/

@@ -24,28 +24,30 @@ Key settings:
 
 ```typescript
 use: {
-  baseURL: process.env.APP_URL || 'https://example.com',
+  baseURL: process.env.BASE_URL,
+  testIdAttribute: process.env.TEST_ID_ATTRIBUTE || 'data-testid',
   trace: 'on-first-retry',           // Enable tracing
   screenshot: 'only-on-failure',     // Capture on failure
-  video: 'retain-on-failure',        // Keep video if failed
-},
-
-webServer: {
-  command: 'npm run dev',            // Start dev server
-  port: 3000,
-  reuseExistingServer: true,
 }
 ```
 
+## Project Scoping
+
+The blank harness contains one generic Chromium project and no tests. Add browser projects,
+authentication setup, and dependencies only after project intake records the real application
+contract. Follow [START-HERE.md](../START-HERE.md).
+
 ## Environment Variables
 
-| Variable | Purpose | Example |
-|----------|---------|---------|
-| `APP_URL` | Application URL | `https://staging.example.com` |
-| `ENV` | Environment name | `qa`, `staging`, `production` |
-| `DEBUG` | Enable debug logging | `pw:api` |
-| `PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD` | Skip Playwright setup | `0` or `1` |
-| `CI` | CI environment flag | `true` |
+| Variable                           | Purpose               | Example                       |
+| ---------------------------------- | --------------------- | ----------------------------- |
+| `BASE_URL`                         | Application URL       | Project-specific              |
+| `TEST_ID_ATTRIBUTE`                | Test-id attribute     | `data-testid`                 |
+| `PW_RETRIES`                       | Explicit retry count  | `0`                           |
+| `ENV`                              | Environment name      | `qa`, `staging`, `production` |
+| `DEBUG`                            | Enable debug logging  | `pw:api`                      |
+| `PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD` | Skip Playwright setup | `0` or `1`                    |
+| `CI`                               | CI environment flag   | `true`                        |
 
 ## Storage State Files
 
@@ -55,7 +57,7 @@ Located in `playwright/fixtures/`:
 - `.gitignore` — These should NEVER be committed
 
 ```bash
-# Generate auth state
+# Generate auth state after adding an approved setup project
 npx playwright test --project=setup
 ```
 

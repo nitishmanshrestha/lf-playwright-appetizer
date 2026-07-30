@@ -1,7 +1,3 @@
-/**
- * @fileoverview Core API barrel export.
- */
-
 export { HTTP_STATUS, type HttpStatusCode } from "./status-codes";
 export {
   registerRoute,

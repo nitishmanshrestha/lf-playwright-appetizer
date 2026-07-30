@@ -1,40 +1,19 @@
-/**
- * @fileoverview API Config Factory
- *
- * Generates config-driven API entry objects from a compact module definition.
- * Eliminates hand-writing intercept aliases per endpoint.
- *
- * Usage:
- *   import { createModuleConfig } from '@core/api/api-config.factory';
- *
- *   export const ORDERS_API = createModuleConfig({
- *     basePath: '/api/orders',
- *     prefix: 'ord',
- *     resources: { orders: ['LIST', 'DETAILS', 'CREATE', 'UPDATE', 'DELETE'] },
- *   });
- */
-
 import { HTTP_STATUS } from "./status-codes";
 import type { HttpStatusCode } from "./status-codes";
 import type { ApiEntry, ApiConfig } from "./api.engine";
 
-type CrudOperation =
-  | "LIST"
-  | "LIST_ALL"
-  | "DETAILS"
-  | "CREATE"
-  | "UPDATE"
-  | "DELETE";
+type CrudOperation = "LIST" | "LIST_ALL" | "DETAILS" | "CREATE" | "UPDATE" | "DELETE";
 
-interface CrudTemplate {
-  method: string;
-  endpointSuffix: string;
-  aliasSuffix: string;
-  keySuffix: string;
-  expectedStatus: HttpStatusCode;
-}
-
-const CRUD_TEMPLATES: Record<CrudOperation, CrudTemplate> = Object.freeze({
+const CRUD_TEMPLATES: Record<
+  CrudOperation,
+  {
+    method: string;
+    endpointSuffix: string;
+    aliasSuffix: string;
+    keySuffix: string;
+    expectedStatus: HttpStatusCode;
+  }
+> = {
   LIST: {
     method: "GET",
     endpointSuffix: "?*",
@@ -77,45 +56,39 @@ const CRUD_TEMPLATES: Record<CrudOperation, CrudTemplate> = Object.freeze({
     keySuffix: "_DELETE",
     expectedStatus: HTTP_STATUS.OK,
   },
-}) as unknown as Record<CrudOperation, CrudTemplate>;
-
-interface CustomEntry {
-  alias: string;
-  method: string;
-  endpoint: string;
-  expectedStatus?: HttpStatusCode;
-}
+};
 
 interface ModuleConfigOptions {
   basePath: string;
   prefix: string;
   resources: Record<string, CrudOperation[]>;
-  custom?: Record<string, CustomEntry>;
+  custom?: Record<
+    string,
+    {
+      alias: string;
+      method: string;
+      endpoint: string;
+      expectedStatus?: HttpStatusCode;
+    }
+  >;
 }
 
 export function createModuleConfig(options: ModuleConfigOptions): ApiConfig {
-  const { basePath, prefix, resources, custom = {} } = options;
   const config: Record<string, ApiEntry> = {};
-
-  for (const [resource, operations] of Object.entries(resources)) {
-    for (const op of operations) {
-      const template = CRUD_TEMPLATES[op];
-      if (!template) continue;
-
+  for (const [resource, operations] of Object.entries(options.resources)) {
+    for (const operation of operations) {
+      const template = CRUD_TEMPLATES[operation];
       const key = `${resource.toUpperCase()}${template.keySuffix}`;
-      const alias = `${prefix}${capitalize(resource)}${template.aliasSuffix}`;
-      const endpoint = `**${basePath}/${resource}${template.endpointSuffix}`;
-
+      const alias = `${options.prefix}${capitalize(resource)}${template.aliasSuffix}`;
       config[key] = Object.freeze({
         method: template.method,
-        endpoint,
+        endpoint: `**${options.basePath}/${resource}${template.endpointSuffix}`,
         alias,
         expectedStatus: template.expectedStatus,
       });
     }
   }
-
-  for (const [key, entry] of Object.entries(custom)) {
+  for (const [key, entry] of Object.entries(options.custom ?? {})) {
     config[key] = Object.freeze({
       method: entry.method,
       endpoint: `**${entry.endpoint}`,
@@ -123,10 +96,9 @@ export function createModuleConfig(options: ModuleConfigOptions): ApiConfig {
       expectedStatus: entry.expectedStatus ?? HTTP_STATUS.OK,
     });
   }
-
-  return Object.freeze(config) as ApiConfig;
+  return Object.freeze(config);
 }
 
-function capitalize(str: string): string {
-  return str.charAt(0).toUpperCase() + str.slice(1);
+function capitalize(value: string): string {
+  return value.charAt(0).toUpperCase() + value.slice(1);
 }

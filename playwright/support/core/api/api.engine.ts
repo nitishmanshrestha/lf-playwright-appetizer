@@ -1,16 +1,5 @@
-/**
- * @fileoverview API Engine — core route interception and response waiting utilities.
- *
- * Playwright equivalent of the Cypress API engine. Uses page.route() for interception
- * and page.waitForResponse() for deterministic waiting.
- *
- * Consumed by helper functions — not used directly in tests.
- */
-
 import { Page, Response, Route } from "@playwright/test";
 import { HttpStatusCode } from "./status-codes";
-
-// ─── Types ───────────────────────────────────────────────────────────────────
 
 export interface ApiEntry {
   method: string;
@@ -36,20 +25,12 @@ export interface WaitOptions {
   expectedStatus?: number;
 }
 
-// ─── Constants ───────────────────────────────────────────────────────────────
-
 export const API_TIMEOUT = Object.freeze({
   DEFAULT: 15_000,
   LONG: 30_000,
   SHORT: 5_000,
 });
 
-// ─── Route Registration ──────────────────────────────────────────────────────
-
-/**
- * Register a route handler (intercept) for a single API entry.
- * Must be called BEFORE page.goto() — requests fire the moment the page loads.
- */
 export async function registerRoute(
   page: Page,
   apiEntry: ApiEntry,
@@ -58,34 +39,25 @@ export async function registerRoute(
   if (!apiEntry?.method || !apiEntry?.endpoint || !apiEntry?.alias) {
     throw new Error("API entry must have method, endpoint, and alias");
   }
+  if (!stubResponse) return;
 
-  const urlPattern = apiEntry.endpoint;
-
-  if (stubResponse) {
-    await page.route(urlPattern, async (route: Route) => {
-      if (route.request().method() === apiEntry.method) {
-        await route.fulfill({
-          status: stubResponse.status ?? apiEntry.expectedStatus,
-          contentType: stubResponse.contentType ?? "application/json",
-          body:
-            typeof stubResponse.body === "string"
-              ? stubResponse.body
-              : JSON.stringify(stubResponse.body ?? {}),
-          headers: stubResponse.headers,
-        });
-      } else {
-        await route.continue();
-      }
+  await page.route(apiEntry.endpoint, async (route: Route) => {
+    if (route.request().method() !== apiEntry.method) {
+      await route.continue();
+      return;
+    }
+    await route.fulfill({
+      status: stubResponse.status ?? apiEntry.expectedStatus,
+      contentType: stubResponse.contentType ?? "application/json",
+      body:
+        typeof stubResponse.body === "string"
+          ? stubResponse.body
+          : JSON.stringify(stubResponse.body ?? {}),
+      headers: stubResponse.headers,
     });
-  } else {
-    // Passthrough route — just let it proceed (used for waitForResponse tracking)
-    // No explicit route needed for passthrough; we rely on waitForResponse.
-  }
+  });
 }
 
-/**
- * Register stub routes for all entries in a config object.
- */
 export async function registerAllRoutes(
   page: Page,
   apiConfig: ApiConfig,
@@ -96,55 +68,38 @@ export async function registerAllRoutes(
   } = {},
 ): Promise<void> {
   const { stubs = {}, only = [], except = [] } = options;
-
-  for (const [, entry] of Object.entries(apiConfig)) {
+  for (const entry of Object.values(apiConfig)) {
     if (!entry?.method || !entry?.endpoint || !entry?.alias) continue;
     if (only.length && !only.includes(entry.alias)) continue;
     if (except.includes(entry.alias)) continue;
-
-    const stub = stubs[entry.alias] ?? undefined;
-    if (stub) {
-      await registerRoute(page, entry, stub);
-    }
+    const stub = stubs[entry.alias];
+    if (stub) await registerRoute(page, entry, stub);
   }
 }
 
-// ─── Response Waiting ────────────────────────────────────────────────────────
-
-/**
- * Wait for a specific API response matching the entry's method and endpoint pattern.
- * Returns the Response object for further assertion.
- */
 export async function waitForAPI(
   page: Page,
   apiEntry: ApiEntry,
   options: WaitOptions = {},
 ): Promise<Response> {
-  const timeout = options.timeout ?? API_TIMEOUT.DEFAULT;
-
   const response = await page.waitForResponse(
-    (resp) =>
-      matchesEndpoint(resp.url(), apiEntry.endpoint) &&
-      resp.request().method() === apiEntry.method,
-    { timeout },
+    (candidate) =>
+      matchesEndpoint(candidate.url(), apiEntry.endpoint) &&
+      candidate.request().method() === apiEntry.method,
+    { timeout: options.timeout ?? API_TIMEOUT.DEFAULT },
   );
 
-  if (options.assertStatus !== false && apiEntry.expectedStatus != null) {
+  if (options.assertStatus !== false) {
     const expectedStatus = options.expectedStatus ?? apiEntry.expectedStatus;
-    const actual = response.status();
-    if (actual !== expectedStatus) {
+    if (response.status() !== expectedStatus) {
       throw new Error(
-        `[${apiEntry.alias}] Expected status ${expectedStatus}, got ${actual}`,
+        `[${apiEntry.alias}] Expected status ${expectedStatus}, got ${response.status()}`,
       );
     }
   }
-
   return response;
 }
 
-/**
- * Wait for multiple API responses. Returns array of Response objects.
- */
 export async function waitForAPIs(
   page: Page,
   entries: ApiEntry[],
@@ -153,21 +108,12 @@ export async function waitForAPIs(
   return Promise.all(entries.map((entry) => waitForAPI(page, entry, options)));
 }
 
-// ─── URL Matching ────────────────────────────────────────────────────────────
-
-/**
- * Match a URL against a glob-style endpoint pattern.
- * Supports ** (any chars including /) and * (any chars except /).
- */
 function matchesEndpoint(url: string, pattern: string): boolean {
-  // Convert glob pattern to regex
-  const regexStr = pattern
-    .replace(/[.+^${}()|[\]\\]/g, "\\$&") // escape regex special chars (except * and ?)
+  const regex = pattern
+    .replace(/[.+^${}()|[\]\\]/g, "\\$&")
     .replace(/\*\*/g, "___DOUBLE_STAR___")
     .replace(/\*/g, "[^/]*")
     .replace(/___DOUBLE_STAR___/g, ".*")
     .replace(/\?/g, "\\?");
-
-  const regex = new RegExp(regexStr);
-  return regex.test(url);
+  return new RegExp(regex).test(url);
 }

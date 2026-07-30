@@ -1,14 +1,3 @@
-/**
- * @fileoverview API helper — wraps the core API engine for test-level convenience.
- *
- * Provides:
- *   api.intercept(entry)         — Register route for stubbing
- *   api.interceptAll(config)     — Register all routes from config
- *   api.waitFor(entry)           — Wait for API response + validate status
- *   api.waitForAll(entries)      — Wait for multiple responses
- *   api.stub(entry, response)    — Stub a response
- */
-
 import { Page, Response } from "@playwright/test";
 import {
   ApiEntry,
@@ -30,7 +19,11 @@ export class ApiHelpers {
 
   async interceptAll(
     apiConfig: ApiConfig,
-    options?: { stubs?: Record<string, StubResponse>; only?: string[]; except?: string[] },
+    options?: {
+      stubs?: Record<string, StubResponse>;
+      only?: string[];
+      except?: string[];
+    },
   ): Promise<void> {
     await registerAllRoutes(this.page, apiConfig, options);
   }

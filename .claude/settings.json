@@ -1,13 +1,24 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "_generated": "From harness.config.json by scripts/harness/sync.mjs. Do not edit.",
   "hooks": {
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node -e \"const p=require('node:path'),u=require('node:url');const r=process.env.CURSOR_PROJECT_DIR||process.env.CLAUDE_PROJECT_DIR||process.cwd();import(u.pathToFileURL(p.join(r,'.claude','hooks',process.argv[1])).href)\" \"prompt-duplication-guard.mjs\""
+          }
+        ]
+      }
+    ],
     "PreToolUse": [
       {
         "matcher": "Edit|Write",
         "hooks": [
           {
             "type": "command",
-            "command": "node .claude/hooks/pre-validate-playwright-rules.mjs"
+            "command": "node -e \"const p=require('node:path'),u=require('node:url');const r=process.env.CURSOR_PROJECT_DIR||process.env.CLAUDE_PROJECT_DIR||process.cwd();import(u.pathToFileURL(p.join(r,'.claude','hooks',process.argv[1])).href)\" \"pre-validate-playwright-rules.mjs\""
           }
         ]
       }
@@ -18,7 +29,17 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node .claude/hooks/validate-playwright-rules.mjs"
+            "command": "node -e \"const p=require('node:path'),u=require('node:url');const r=process.env.CURSOR_PROJECT_DIR||process.env.CLAUDE_PROJECT_DIR||process.cwd();import(u.pathToFileURL(p.join(r,'.claude','hooks',process.argv[1])).href)\" \"validate-playwright-rules.mjs\""
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node -e \"const p=require('node:path'),u=require('node:url');const r=process.env.CURSOR_PROJECT_DIR||process.env.CLAUDE_PROJECT_DIR||process.cwd();import(u.pathToFileURL(p.join(r,'.claude','hooks',process.argv[1])).href)\" \"session-end-reminder.mjs\""
           }
         ]
       }
@@ -27,10 +48,6 @@
   "effortLevel": "high",
   "alwaysThinkingEnabled": true,
   "autoMemoryEnabled": true,
-  "autoMemoryDirectory": "~/.claude/projects/playwright-boilerplate/memory",
-  "env": {
-    "PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD": "0"
-  },
   "permissions": {
     "defaultMode": "plan",
     "allow": [
@@ -40,12 +57,17 @@
       "Bash(npm run lint*)",
       "Bash(npm run format*)",
       "Bash(npm run check:*)",
-      "Bash(npm run scaffold:*)",
+      "Bash(npm run harness:*)",
       "Bash(npx playwright*)",
       "Bash(npx tsc --noEmit*)",
       "Bash(grep -r* playwright/*)",
       "Bash(find playwright/*)"
     ],
-    "deny": ["WebSearch"]
+    "deny": [
+      "WebSearch"
+    ]
+  },
+  "env": {
+    "PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD": "0"
   }
 }

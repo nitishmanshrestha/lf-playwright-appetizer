@@ -22,6 +22,46 @@ export function toPosix(p) {
   return p.replaceAll("\\", "/");
 }
 
+export function extractToolChange(toolData, repoRoot, { readCurrent = false } = {}) {
+  const toolName = toolData?.tool_name || toolData?.toolName || "";
+  let toolInput = toolData?.tool_input || toolData?.toolArgs || {};
+  if (typeof toolInput === "string") {
+    try {
+      toolInput = JSON.parse(toolInput);
+    } catch {
+      return { filePath: "", content: "" };
+    }
+  }
+
+  const filePath = toolInput.file_path || toolInput.filePath || toolInput.path || "";
+  if (!filePath || !["Write", "Edit"].includes(toolName)) return { filePath: "", content: "" };
+
+  const absolutePath = path.isAbsolute(filePath) ? filePath : path.resolve(repoRoot, filePath);
+  if (readCurrent && fs.existsSync(absolutePath)) {
+    return { filePath, content: fs.readFileSync(absolutePath, "utf8") };
+  }
+
+  if (toolName === "Write") {
+    return { filePath, content: toolInput.content || toolInput.text || "" };
+  }
+
+  const replacement =
+    toolInput.new_string ||
+    toolInput.newString ||
+    toolInput.new_str ||
+    toolInput.replacement ||
+    toolInput.content ||
+    "";
+  const original = toolInput.old_string || toolInput.oldString || toolInput.old_str || "";
+  if (replacement && original && fs.existsSync(absolutePath)) {
+    const current = fs.readFileSync(absolutePath, "utf8");
+    if (current.includes(original)) {
+      return { filePath, content: current.replace(original, replacement) };
+    }
+  }
+  return { filePath, content: replacement };
+}
+
 export function loadAllowlist(allowlistPath) {
   try {
     const raw = JSON.parse(fs.readFileSync(allowlistPath, "utf8"));
@@ -31,6 +71,18 @@ export function loadAllowlist(allowlistPath) {
     };
   } catch {
     return { selectors: new Set(["body", "html"]), routes: new Set(["/"]) };
+  }
+}
+
+export function loadRuleMessages(repoRoot) {
+  try {
+    return Object.fromEntries(
+      JSON.parse(fs.readFileSync(path.join(repoRoot, "harness.config.json"), "utf8")).rules.map(
+        (rule) => [rule.id, rule.message],
+      ),
+    );
+  } catch {
+    return {};
   }
 }
 
@@ -54,8 +106,7 @@ export function scanForRegex(violations, filePath, text, regex, messageBuilder) 
   let match;
   while ((match = regex.exec(text)) !== null) {
     const lineNumber = lineNumberForIndex(text, match.index);
-    const message =
-      typeof messageBuilder === "function" ? messageBuilder(match) : messageBuilder;
+    const message = typeof messageBuilder === "function" ? messageBuilder(match) : messageBuilder;
     if (!message) continue;
     violations.push({ filePath, lineNumber, message });
   }
@@ -63,79 +114,129 @@ export function scanForRegex(violations, filePath, text, regex, messageBuilder) 
 
 export function scanContent(filePath, content, allowlist, repoRoot) {
   const violations = [];
-  const normalized = toPosix(path.relative(repoRoot, filePath));
+  const messages = loadRuleMessages(repoRoot);
+  const message = (id, fallback) => messages[id] || fallback;
+  // The tool may hand us a repo-relative path. Node would resolve that against cwd, which is
+  // not necessarily the repo root — from a foreign cwd that yields a mangled path, and the
+  // file-type regex below can miss it, silently skipping every rule. Anchor to repoRoot.
+  const absolute = path.isAbsolute(filePath) ? filePath : path.resolve(repoRoot, filePath);
+  const normalized = toPosix(path.relative(repoRoot, absolute));
 
   if (!TARGET_FILE_RE.test(normalized)) return violations;
 
   // Rule 1: No hard waits.
   scanForRegex(
-    violations, normalized, content,
+    violations,
+    normalized,
+    content,
     /\bwaitForTimeout\(\s*\d+\s*\)/g,
-    "Hard wait detected. Replace with waitForResponse(...) or an expect() assertion.",
+    message(
+      "no-hard-wait",
+      "Hard wait detected. Replace with waitForResponse(...) or an expect() assertion.",
+    ),
   );
 
-  // Rule 2: No page-object imports — this framework is helper-first.
+  // Rule 2: No page-object or action-layer wrappers outside helpers.
+  if (
+    !/^playwright\/support\/helpers\//i.test(normalized) &&
+    (/(^|\/)(pages?|page-objects?|pageobjects?|actions?)(\/|$)/i.test(normalized) ||
+      /\.(?:page|actions)\.ts$/i.test(normalized) ||
+      /\bclass\s+\w*(?:Page|Actions)\b/.test(content))
+  ) {
+    violations.push({
+      filePath: normalized,
+      lineNumber: 1,
+      message: message(
+        "no-page-object",
+        "Page-object or action-layer wrapper detected. Use the helper-first architecture.",
+      ),
+    });
+  }
   scanForRegex(
-    violations, normalized, content,
+    violations,
+    normalized,
+    content,
     /from\s+['"][^'"]*(page-obj|pageobject|page-object|\/pages\/)[^'"]*['"]/gi,
-    "Page-object import detected. Helper-first architecture forbids page-object dependencies.",
+    message(
+      "no-page-object",
+      "Page-object import detected. Helper-first architecture forbids page-object dependencies.",
+    ),
   );
 
   // Rule 3: Specs must import test/expect from base.fixture, never @playwright/test
   // directly — the fixture is what injects every helper.
   if (SPEC_RE.test(normalized)) {
     scanForRegex(
-      violations, normalized, content,
+      violations,
+      normalized,
+      content,
       /import\s+[^;]*\bfrom\s+['"]@playwright\/test['"]/g,
-      "Spec imports from '@playwright/test'. Import test/expect from fixtures/base.fixture instead.",
+      message(
+        "base-fixture-import",
+        "Spec imports from '@playwright/test'. Import test/expect from fixtures/base.fixture instead.",
+      ),
     );
   }
 
   // Rule 4: No hardcoded selectors in spec/helper files.
   if (CODE_RE.test(normalized)) {
-    scanForRegex(
-      violations, normalized, content,
-      /\.locator\(\s*['"]([^'"]+)['"]\s*\)/g,
-      (m) => {
-        const selector = String(m[1] || "").trim();
-        if (isAllowedLiteral(selector, allowlist.selectors, true)) return null;
-        return `Hardcoded selector in .locator('${selector}'). Use constants from playwright/configs/ui/**, or add it to playwright-hook-allowlist.json if it is a structural tag.`;
-      },
-    );
+    scanForRegex(violations, normalized, content, /\.locator\(\s*['"]([^'"]+)['"]\s*\)/g, (m) => {
+      const selector = String(m[1] || "").trim();
+      if (isAllowedLiteral(selector, allowlist.selectors, true)) return null;
+      return message(
+        "no-hardcoded-selector",
+        `Hardcoded selector in .locator('${selector}'). Use constants from playwright/configs/ui/**, or add it to playwright-hook-allowlist.json if it is a structural tag.`,
+      );
+    });
   }
 
   // Rule 5: No hardcoded routes in goto() (except allowlisted root).
   if (CODE_RE.test(normalized)) {
-    scanForRegex(
-      violations, normalized, content,
-      /\.goto\(\s*['"]([^'"]+)['"]\s*\)/g,
-      (m) => {
-        const route = String(m[1] || "").trim();
-        const isLiteral = route.startsWith("/") || /^https?:\/\//i.test(route);
-        if (!isLiteral || isAllowedLiteral(route, allowlist.routes)) return null;
-        return `Hardcoded route '${route}' in .goto(...). Use route constants from playwright/configs/app/routes.ts.`;
-      },
-    );
+    scanForRegex(violations, normalized, content, /\.goto\(\s*['"]([^'"]+)['"]\s*\)/g, (m) => {
+      const route = String(m[1] || "").trim();
+      const isLiteral = route.startsWith("/") || /^https?:\/\//i.test(route);
+      if (!isLiteral || isAllowedLiteral(route, allowlist.routes)) return null;
+      return message(
+        "no-hardcoded-route",
+        `Hardcoded route '${route}' in .goto(...). Use route constants from playwright/configs/app/routes.ts.`,
+      );
+    });
   }
 
   // Rule 6: No credentials in source. Trust boundary — never relaxed.
   scanForRegex(
-    violations, normalized, content,
+    violations,
+    normalized,
+    content,
     /\b(password|passwd|secret|api[_-]?key|auth[_-]?token|access[_-]?token)\s*[:=]\s*["'`]([^"'`$][^"'`]{3,})["'`]/gi,
-    (m) => `Hardcoded credential assigned to '${m[1]}'. Read it from process.env instead; keep the value in .env (gitignored) or a CI secret.`,
+    (m) =>
+      message(
+        "no-credential-literal",
+        `Hardcoded credential assigned to '${m[1]}'. Read it from process.env instead; keep the value in .env (gitignored) or a CI secret.`,
+      ),
   );
 
   // Rule 7: Smoke tests must be read-only.
   if (/playwright[\\/]tests[\\/].*[\\/]smoke[\\/].*\.spec\.ts$/i.test(normalized)) {
     scanForRegex(
-      violations, normalized, content,
+      violations,
+      normalized,
+      content,
       /\b(?:request|api)\.(post|put|patch|delete)\s*\(/gi,
-      "Write request in smoke suite. Smoke tests must remain read-only.",
+      message(
+        "smoke-read-only",
+        "Write request in smoke suite. Smoke tests must remain read-only.",
+      ),
     );
     scanForRegex(
-      violations, normalized, content,
+      violations,
+      normalized,
+      content,
       /\bmethod\s*:\s*['"](POST|PUT|PATCH|DELETE)['"]/gi,
-      "Write HTTP method in smoke suite. Smoke tests must remain read-only.",
+      message(
+        "smoke-read-only",
+        "Write HTTP method in smoke suite. Smoke tests must remain read-only.",
+      ),
     );
   }
 

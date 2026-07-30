@@ -28,13 +28,9 @@ Use this guide for prompt flows that depend on Playwright MCP browser exploratio
 
 ## Recommended Safe Default
 
-After a capture artifact is produced, prefer the repo hook instead of manual scaffolding:
-
-```bash
-npm run capture:post -- --module <module> --feature <feature> --capture ./capture.json
-```
-
-This keeps DDT scaffolding centralized, respects `--no-ddt`, and avoids changing the MCP server itself.
+After a capture artifact is produced, the agent writes the fixture and spec directly, following the
+Config → Helpers → Tests layering. Respect `--no-ddt` when the user opts out, and do not change the
+MCP server itself.
 
 ## Enforcement
 

@@ -147,7 +147,9 @@ Before writing a single line of code, read ALL files listed in the "Files That M
 
 ### Pre-flight: Duplication Check
 
-Run the `detect-duplication` skill. Only proceed with `NEW_FILE_JUSTIFIED` or `EXTEND_EXISTING` verdicts.
+Apply the `search-before-create` rule from `harness.config.json`: search existing configs, helpers,
+and specs by literal value — not by filename. Reuse or extend a match; only create a new file when
+the search comes back empty.
 
 ### Step 1 — UI Config
 
@@ -217,17 +219,7 @@ File: `playwright/tests/{{moduleName}}/e2e/{{moduleName}}-{{featureName}}.spec.t
 - If `NOT_CANDIDATE`, create the single-scenario spec normally.
 - Allow user to opt out of DDT scaffolding during Tier 2 approval (ask `Enable DDT scaffolding? [Y/n]`).
 
-Example command (agent):
-
-```
-node scripts/scaffold-runner.js --module {{moduleName}} --feature {{featureName}} --capture ./capture.json
-```
-
-Automated post-capture hook (optional):
-
-```
-npm run capture:post -- --module {{moduleName}} --feature {{featureName}} --capture ./capture.json
-```
+Write the fixture and spec directly; there is no scaffold generator script.
 
 ---
 

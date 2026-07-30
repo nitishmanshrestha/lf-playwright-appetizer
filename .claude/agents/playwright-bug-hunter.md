@@ -1,6 +1,6 @@
 ---
 name: playwright-bug-hunter
-description: "Debug a failing Playwright test. Traces root cause, classifies the failure, and proposes an exact fix."
+description: "Debug a failing Playwright test, trace root cause, and propose an exact compliant fix."
 model: opus
 tools:
   - Read
@@ -9,6 +9,8 @@ tools:
   - Bash
   - Edit
 ---
+
+<!-- GENERATED FROM harness.config.json and harness/agents/. DO NOT EDIT. -->
 
 # Playwright Bug Hunter Agent
 

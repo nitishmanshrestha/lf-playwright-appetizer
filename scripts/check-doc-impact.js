@@ -1,10 +1,10 @@
 #!/usr/bin/env node
 
-const { execSync } = require("node:child_process");
+const { execFileSync } = require("node:child_process");
 const { rules: MAP } = require("../.github/doc-impact-map.json");
 
 function parseArgs(argv) {
-  const args = { base: "HEAD~1", head: "HEAD", files: [] };
+  const args = { base: null, head: null, files: [] };
 
   for (let i = 0; i < argv.length; i += 1) {
     if (argv[i] === "--base" && argv[i + 1]) {
@@ -41,11 +41,18 @@ function getChangedFiles(base, head) {
       .map((file) => file.replace(/\\/g, "/"));
 
   try {
-    const output = execSync(`git diff --name-only ${base} ${head}`, { encoding: "utf8" });
+    if (!base || !head) {
+      throw new Error("No explicit comparison range");
+    }
+    const output = execFileSync("git", ["diff", "--name-only", base, head], {
+      encoding: "utf8",
+    });
     return normalize(output);
   } catch {
     try {
-      const porcelain = execSync("git status --porcelain", { encoding: "utf8" });
+      const porcelain = execFileSync("git", ["status", "--porcelain", "-uall"], {
+        encoding: "utf8",
+      });
 
       return [
         ...new Set(

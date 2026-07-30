@@ -1,6 +1,10 @@
 ---
-description: "Use Playwright CLI for token-efficient browser automation, CLI-first debugging, codegen-first scaffolding, and no-MCP Playwright workflows in this repository."
+name: playwright-cli
+description: "Use Playwright CLI for token-efficient browser discovery, debugging, and codegen-first scaffolding."
+tools: ["read","search","execute"]
 ---
+
+<!-- GENERATED FROM harness.config.json and harness/agents/. DO NOT EDIT. -->
 
 # Playwright CLI Agent
 
@@ -17,7 +21,7 @@ Lightweight browser automation through `playwright-cli` for fast debugging and s
 
 - Use `playwright-test-automation` for implementing helpers/specs after discovery
 - Use `playwright-bug-hunter` for debugging specific failing tests
-- Use `playwright-reviewer` for PR review
+- Use `pre-merge-qa-gate` for the merge verdict, and `pr-creator` to open the PR
 - Use MCP when UI is unknown and needs interactive exploration
 
 ## Example: Codegen to Framework Code
@@ -53,14 +57,6 @@ npx playwright codegen https://example.com/products
 - Selectors: `getByRole('button')`, `getByTestId('product-submit')`
 - Route: `/products`
 - Actions: click, fill, waitFor
-
-**Step 2b: Run the safe scaffold hook**
-
-```bash
-npm run scaffold:ddt -- --module <module> --feature <feature> --capture ./capture.json
-```
-
-Use `--no-ddt` when the flow is clearly single-scenario.
 
 **Step 3: Create UI config**
 

@@ -1,170 +1,103 @@
-# Playwright Automation Boilerplate — Claude Code
+# Playwright Harness Instructions
 
-> A production-ready, helper-first Playwright framework any team can fork, adapt, and ship.
-> AI-powered from day one with Claude Code and GitHub Copilot built in.
+This repository is an empty, application-agnostic QA harness. Do not invent an application,
+requirement, selector, route, credential, or expected result.
 
----
+## Source precedence
 
-## Who is this for?
+1. `harness.config.json` — harness roles, tools, limits, and rules.
+2. `harness/qa-automation-foundations.md` — shared test-quality and grading contract.
+3. `evidence/requirements.json` — approved requirements.
+4. `docs/application-intelligence/**` — verified project and module behavior.
+5. `playwright/configs/**` — selectors, routes, APIs, and evidence paths.
+6. `playwright/support/helpers/**` — reusable implementation.
+7. `playwright/fixtures/base.fixture.ts` — helper injection.
+8. `playwright/tests/**` — thin executable orchestration.
 
-Any engineering team that:
-- Is starting a new web app and needs a maintainable test automation foundation
-- Is migrating from page-object patterns or scattered test files
-- Wants AI assistance (Claude Code + GitHub Copilot) wired into the framework from the start
+When sources disagree, stop and report the conflict. Tests do not redefine business behavior.
 
-This boilerplate is application-agnostic. Swap out the example modules for your app.
+## Lifecycle
 
----
+Use `project-bootstrapper` before `playwright-test-automation` for every new project or module.
 
-## Adapting This Boilerplate to a New App
-
-If you are pointing this framework at a real application for the first time, start here before writing any tests:
-
-- **[ADAPTING.md](./ADAPTING.md)** — Step-by-step human checklist: set credentials, remove sample modules, revamp config, scaffold first module.
-- **`.github/prompts/adapt-boilerplate.prompt.md`** — LLM workflow prompt. Invoke with `/adapt-boilerplate` in GitHub Copilot Chat or ask Claude to run it. The prompt interviews the user, strips samples, and scaffolds the first real module in strict Config → Helpers → Tests order.
-
-> If a user says "I want to use this for my app" or "replace saucedemo with my application", use the `adapt-boilerplate` prompt as the primary guide.
-
----
-
-## Before You Code: Discovery Workflow
-
-**IMPORTANT:** Never write tests without first exploring the application.
-
-### Three Guides to Get You Started
-
-1. **[DISCOVERY.md](./DISCOVERY.md)** — Complete discovery process (4 phases)
-   - Phase 1: Explore app with Playwright Codegen
-   - Phase 2: Document findings
-   - Phase 3: Get team approval
-   - Phase 4: Implement tests
-
-2. **[DISCOVERY_TEMPLATE.md](./DISCOVERY_TEMPLATE.md)** — Fillable template
-   - Use while exploring with codegen
-   - Document selectors, routes, flows
-   - Get sign-off before implementation
-
-3. **[CODEGEN_QUICKSTART.md](./CODEGEN_QUICKSTART.md)** — Quick reference
-   - How to use Playwright Codegen
-   - Recording interactions
-   - Extracting selectors
-   - Validating selectors work
-
-### The Process (Checklist)
-
-```
-BEFORE WRITING ANY CODE:
-
-☐ 1. Run: npx playwright codegen <your-app-url>
-☐ 2. Explore all pages in the app
-☐ 3. Record key user flows
-☐ 4. Copy generated code
-☐ 5. Fill in DISCOVERY_TEMPLATE.md
-☐ 6. Share with team/Claude Code for approval
-☐ 7. Get sign-off: "Approved for Implementation"
-☐ 8. NOW you can start coding tests
+```text
+GATHER → SPECIFY → DISCOVER → BUILD → GUARD → EVALUATE → EXECUTE → DIAGNOSE → MEASURE
 ```
 
-### Why This Matters
+- GATHER creates verified project/module context and draft requirements.
+- The owner approves requirements and promotes them to `active`.
+- DISCOVER validates selectors and browser behavior without defining business intent.
+- BUILD accepts exactly one active requirement id.
+- EVALUATE is read-only and supplies the merge verdict.
+- Repairs are bounded by `loops.gateRepairLimit`.
 
-- ✅ **Accurate Selectors** — Based on actual app, not guesses
-- ✅ **Meaningful Tests** — Cover real user flows, not implementation details
-- ✅ **Stable Tests** — Use data-testid, not fragile CSS selectors
-- ✅ **Clear Scope** — Team agrees what to test before coding
-- ✅ **Faster Implementation** — No re-discovering during development
+The complete procedure is [`docs/START-HERE.md`](docs/START-HERE.md).
 
----
+## Architecture
 
-## What is this?
-
-A three-layer Playwright framework with a single, non-negotiable architecture:
-
-| Layer          | Location                           | Rule                                              |
-| -------------- | ---------------------------------- | ------------------------------------------------- |
-| **Config**     | `playwright/configs/**`            | Selectors, endpoints, routes — all `as const`     |
-| **Helpers**    | `playwright/support/helpers/**`    | Async helper classes — one owner per module       |
-| **Tests**      | `playwright/tests/**/*.spec.ts`    | Thin orchestration of helper calls only           |
-
----
-
-## Non-Negotiable Rules
-
-```
-NEVER  →  page.waitForTimeout(number)    Use waitForResponse() or expect() assertions
-NEVER  →  hardcoded selectors            Use constants from playwright/configs/ui/**
-NEVER  →  hardcoded endpoints/routes     Use constants from playwright/configs/api/** and routes.ts
-NEVER  →  page-object wrappers           Helper-first only
-NEVER  →  real credentials in code       Use .env (local) or env vars (CI)
-NEVER  →  import from @playwright/test   In spec files — use base.fixture.ts
-
-ALWAYS →  storageState for auth          Via project dependency setup
-ALWAYS →  config constants               Check configs before adding any selector
-ALWAYS →  one helper = one owner         Verify class/method is unique
-ALWAYS →  data-testid / data-test attrs      For all new selectors
-ALWAYS →  locator order                  getByRole → getByLabel → getByText → getByTestId
-ALWAYS →  narrow with filters            Use filter({ hasText/has }) before first()/nth()
+```text
+playwright/configs/** → playwright/support/helpers/** → base.fixture.ts → playwright/tests/**
 ```
 
----
+- Config owns selectors, routes, endpoints, and immutable constants.
+- Helpers own navigation, waits, interactions, reusable assertions, and cleanup.
+- Fixtures inject helpers without hiding state.
+- Tests contain one behavior and read as orchestration.
+- Every test title begins `[REQUIREMENT-ID]` and carries matching requirement, Type, Priority, and
+  tier tags.
 
-## Where does everything live?
+## Non-negotiable rules
 
-```
-playwright/
-├── configs/                              ← All pure data — never logic here
-│   ├── app/
-│   │   └── routes.ts                     ← Central URL/path registry
-│   ├── api/
-│   │   └── modules/[module]/
-│   │       └── [module].api.ts           ← API intercept definitions
-│   └── ui/
-│       ├── modules/[module]/
-│       │   └── [module].ui.ts            ← Selector constants (data-testid / data-test)
-│       └── shared/
-│           └── navigation.ui.ts          ← Shared navigation selectors
-│
-├── support/
-│   ├── helpers/                          ← All helper classes live here
-│   │   ├── common/                       ← Framework-wide shared helpers
-│   │   │   ├── api.helpers.ts            ← API interception & waiting
-│   │   │   ├── navigation.helpers.ts     ← Navigation utilities
-│   │   │   └── ui.helpers.ts             ← Generic UI assertions
-│   │   └── modules/                      ← Feature-specific helpers
-│   │       └── [module].helpers.ts
-│   └── core/api/                         ← Framework engine — do not modify
-│       ├── api.engine.ts
-│       ├── api-config.factory.ts
-│       ├── status-codes.ts
-│       └── index.ts
-│
-├── fixtures/                             ← Playwright custom fixtures + test data
-│   ├── base.fixture.ts                   ← Extended test with all helpers
-│   └── [name].json                       ← Static test data
-│
-├── schemas/                              ← JSON schema definitions
-│   └── [name].schema.ts
-│
-└── tests/                                ← Specs — thin helper orchestration only
-    ├── global.setup.ts                   ← Main app auth setup
-    ├── saucedemo.setup.ts                ← Saucedemo auth setup
-    └── [module]/
-        ├── smoke/
-        │   └── [module]-smoke.spec.ts
-        └── e2e/
-            └── [module]-e2e.spec.ts
+<!-- HARNESS:RULES:START -->
+<!-- Generated from harness.config.json — run `npm run harness:sync`. Do not edit by hand. -->
+
+```text
+NEVER  →  page.waitForTimeout(<number>)                                      waitForResponse() or a deterministic expect() assertion
+NEVER  →  a selector literal in a spec or helper                             constants from playwright/configs/ui/**
+NEVER  →  a route or endpoint literal when config exists                     constants from playwright/configs/app/routes.ts or configs/api/**
+NEVER  →  page-object classes, action layers, or wrappers outside helpers/   helper-first code in playwright/support/helpers/**
+NEVER  →  a password, secret, API key, or token assigned a literal string    environment variables loaded from a gitignored .env or CI secret
+NEVER  →  login in beforeEach()                                              a storageState setup-project dependency
+NEVER  →  a spec importing test directly from @playwright/test               test and expect from playwright/fixtures/base.fixture.ts
+NEVER  →  POST, PUT, PATCH, or DELETE in a smoke spec                        read-only assertions; put mutations in e2e coverage
+NEVER  →  skip semantic locators without a reason                            getByRole(), getByLabel(), getByText(), then getByTestId()
+NEVER  →  use first() or nth() where a filter can identify the element       filter({ hasText }) or filter({ has })
+NEVER  →  a new config, helper, or spec without searching first              search literal selectors, routes, and endpoints by value
+NEVER  →  a test with no requirement tag, more than one, or an unknown id    exactly one known requirement id in the title and as a tag, plus Type, Priority, and tier tags
 ```
 
----
+| Rule | Why it exists | Enforcement |
+|---|---|---|
+| `no-hard-wait` | A fixed delay hides the real readiness condition and flakes in CI. | Hook + CI |
+| `no-hardcoded-selector` | A UI change should have one owner, not scattered copies. | Hook + CI |
+| `no-hardcoded-route` | Routes and API contracts need one maintained registry. | Hook + CI |
+| `no-page-object` | A second UI abstraction duplicates config and helper ownership. | Hook + CI |
+| `no-credential-literal` | A committed credential is a breach, not a style issue. | Hook + CI |
+| `storage-state-auth` | Authentication should be isolated and cached, not repeated in every test. | Hook + CI |
+| `base-fixture-import` | The fixture is the single injection point for helpers. | Hook + CI |
+| `smoke-read-only` | Smoke coverage must be safe against shared and production-like environments. | Hook + CI |
+| `locator-priority` | Semantic locators are more stable and accessible. | QA gate |
+| `narrow-before-index` | Index-based locators silently target the wrong element when the UI changes. | QA gate |
+| `search-before-create` | Duplicate owners cause the same app change to need multiple fixes. | QA gate |
+| `one-requirement-tag` | The title survives every reporter and the tag supports filtering; together they make coverage computable. | QA gate |
 
-## npm scripts
+<!-- HARNESS:RULES:END -->
 
-| What                      | Command                                          |
-| ------------------------- | ------------------------------------------------ |
-| All tests                 | `npm test`                                       |
-| Smoke tests only          | `npm run test:smoke`                             |
-| UI interactive mode       | `npm run test:ui`                                |
-| Debug mode                | `npm run test:debug`                             |
-| Headed browser            | `npm run test:headed`                            |
-| Against specific env      | `ENV=qa npx playwright test`                     |
-| By tag                    | `npx playwright test --grep @tagname`            |
-| HTML report               | `npm run report`                                 |
+## Empty state
+
+Zero tests is valid before project intake. `npm test -- --list` and `npm test` must pass, and
+`npm run evidence:build` must produce bootstrap metrics with explicit unavailable reasons.
+
+## Verification
+
+```bash
+npm run harness:check
+npm run harness:test
+npm run check:rules
+npm run lint
+npm test
+npm run evidence:build
+```
+
+Do not claim execution, coverage, or a metric without the corresponding command or source
+evidence. Optional paid services cannot be required for the baseline workflow.

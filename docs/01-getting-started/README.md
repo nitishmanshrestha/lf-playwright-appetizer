@@ -6,7 +6,7 @@ Onboarding guide for new team members and fresh projects.
 
 | Step | File                                             | Time    | What you do                                                                  |
 | ---- | ------------------------------------------------ | ------- | ---------------------------------------------------------------------------- |
-| 1    | [Setup & Environment](./setup.md)                | ~10 min | Install Node.js, Playwright, and run the sample tests                        |
+| 1    | [Setup & Environment](./setup.md)                | ~10 min | Install Node.js, Playwright, and verify the empty harness                    |
 | 2    | [Adapting to Your App](../../ADAPTING.md)        | ~30 min | Point the framework at your app, strip sample code, create your first module |
 | 3    | [Discovery Process](./discovery-process.md)      | ~10 min | Use Playwright Codegen to explore your app and find stable selectors         |
 | 4    | [Your First Test Module](./first-test-module.md) | ~10 min | Build Config → Helpers → Tests for a real feature                            |

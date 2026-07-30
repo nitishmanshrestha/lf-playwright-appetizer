@@ -17,7 +17,7 @@ All npm scripts for running tests in this framework:
 | `npm run test:ui`        | Open interactive UI mode (visual test runner) | `npm run test:ui`        |
 | `npm run test:debug`     | Debug mode with pause-on-start                | `npm run test:debug`     |
 | `npm run test:headed`    | Run tests with browser visible                | `npm run test:headed`    |
-| `npm run test:saucedemo` | Run Saucedemo example tests                   | `npm run test:saucedemo` |
+| `npm run evidence:build` | Normalize the run and compute metrics         | `npm run evidence:build` |
 | `npm run format`         | Format code with Prettier                     | `npm run format`         |
 | `npm run lint`           | Lint code with ESLint                         | `npm run lint`           |
 | `npm run lint:fix`       | Fix linting issues automatically              | `npm run lint:fix`       |
@@ -85,8 +85,8 @@ npx playwright test --trace=on
 # Create detailed trace for failed tests only
 npx playwright test --trace=retain-on-failure
 
-# View trace in UI
-npx playwright show-trace playwright-report/saucedemo-e2e-saucedemo-can-reach-checkout-saucedemo-trace.zip
+# View a retained trace in UI
+npx playwright show-trace <trace.zip>
 ```
 
 ---

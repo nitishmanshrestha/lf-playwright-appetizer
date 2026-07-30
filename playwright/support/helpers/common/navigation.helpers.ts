@@ -1,12 +1,3 @@
-/**
- * @fileoverview Navigation helpers.
- *
- * Provides:
- *   nav.goto(path)            — Navigate using route constant
- *   nav.assertUrl(path)       — Assert current URL contains path
- *   nav.waitForNavigation()   — Wait for navigation to complete
- */
-
 import { Page, expect } from "@playwright/test";
 
 export class NavigationHelpers {
@@ -17,7 +8,8 @@ export class NavigationHelpers {
   }
 
   async assertUrl(path: string): Promise<void> {
-    await expect(this.page).toHaveURL(new RegExp(path.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
+    const escaped = path.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    await expect(this.page).toHaveURL(new RegExp(escaped));
   }
 
   async waitForNavigation(): Promise<void> {
