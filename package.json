@@ -25,6 +25,7 @@
     "bootstrap": "node scripts/bootstrap.js",
     "check:doc-impact": "node scripts/check-doc-impact.js",
     "check:locator-strategy": "node scripts/check-locator-strategy.js",
+    "check:rules": "node .claude/hooks/validate-playwright-rules.mjs --all",
     "context:codegen": "npx playwright codegen",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",

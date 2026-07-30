@@ -13,10 +13,19 @@ module.exports = [
     ],
   },
   {
-    files: ["**/*.js", "**/*.cjs", "**/*.mjs"],
+    files: ["**/*.js", "**/*.cjs"],
     languageOptions: {
       ecmaVersion: "latest",
       sourceType: "commonjs",
+    },
+    rules: {},
+  },
+  {
+    // .mjs is ESM by definition — parsing it as commonjs fails on every import.
+    files: ["**/*.mjs"],
+    languageOptions: {
+      ecmaVersion: "latest",
+      sourceType: "module",
     },
     rules: {},
   },

@@ -31,7 +31,7 @@ test.describe("Saucedemo — Smoke Tests", {}, () => {
   test("loads the inventory page with products", { tag: ["@smoke"] }, async ({ page }) => {
     await expect(page.getByTestId(SAUCEDEMO_UI.INVENTORY.CONTAINER)).toBeVisible();
     await expect(page.getByTestId(SAUCEDEMO_UI.INVENTORY.ITEM)).toHaveCount(6);
-    await expect(page.locator(".app_logo")).toContainText("Swag Labs");
+    await expect(page.locator(SAUCEDEMO_UI.HEADER.APP_LOGO_CSS)).toContainText("Swag Labs");
   });
 
   test("displays product names and prices", { tag: ["@smoke"] }, async ({ page }) => {

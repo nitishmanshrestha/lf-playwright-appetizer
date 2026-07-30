@@ -13,6 +13,7 @@
  */
 
 import { test, expect } from "../../../fixtures/base.fixture";
+import { SAUCEDEMO_UI } from "@configs/ui/modules/saucedemo/saucedemo.ui";
 import validCheckoutUsers from "../../../testdata/saucedemo/checkout-valid-users.json";
 import invalidCheckoutUsers from "../../../testdata/saucedemo/checkout-invalid-users.json";
 
@@ -39,7 +40,9 @@ test.describe("Saucedemo — Checkout (Parameterized)", () => {
         await saucedemoHelpers.finishOrder();
 
         // Assert — using data from testdata
-        const confirmationText = await page.locator(".complete-header").textContent();
+        const confirmationText = await page
+          .getByTestId(SAUCEDEMO_UI.CHECKOUT.COMPLETE_HEADER)
+          .textContent();
         expect(confirmationText).toContain(user.expectedConfirmationText);
       },
     );

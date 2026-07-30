@@ -10,16 +10,17 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,
-    "ignoreDeprecations": "6.0",
-    "baseUrl": ".",
+    // No baseUrl: it is deprecated in TS 6 and removed in TS 7, and the only value that
+    // silences that warning ("ignoreDeprecations": "6.0") is itself rejected by TS 5.x.
+    // With moduleResolution "bundler", ./-prefixed paths resolve relative to this file.
     "paths": {
-      "@configs/*": ["playwright/configs/*"],
-      "@support/*": ["playwright/support/*"],
-      "@fixtures/*": ["playwright/fixtures/*"],
-      "@tests/*": ["playwright/tests/*"],
-      "@schemas/*": ["playwright/schemas/*"],
-      "@core/*": ["playwright/support/core/*"],
-      "@helpers/*": ["playwright/support/helpers/*"]
+      "@configs/*": ["./playwright/configs/*"],
+      "@support/*": ["./playwright/support/*"],
+      "@fixtures/*": ["./playwright/fixtures/*"],
+      "@tests/*": ["./playwright/tests/*"],
+      "@schemas/*": ["./playwright/schemas/*"],
+      "@core/*": ["./playwright/support/core/*"],
+      "@helpers/*": ["./playwright/support/helpers/*"]
     }
   },
   "include": [

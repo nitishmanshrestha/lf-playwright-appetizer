@@ -13,6 +13,7 @@
  */
 
 import { test, expect } from "../../../fixtures/base.fixture";
+import { ROUTES } from "@configs/app/routes";
 
 // TEMPLATE ONLY — copy this file to start a new module spec.
 // Skipped intentionally: no backing application exists at baseUrl for these commands.
@@ -60,7 +61,7 @@ test.describe("Example Module", { tag: ["@example"] }, () => {
   // ─── Create ────────────────────────────────────────────────────────────────
 
   test("creates a new example item", async ({ exampleHelpers, nav, ui }) => {
-    await nav.goto("/example/new");
+    await nav.goto(ROUTES.EXAMPLE.CREATE);
     await exampleHelpers.create({ name: "New Item", status: "active" });
     await ui.assertToast("created successfully");
   });

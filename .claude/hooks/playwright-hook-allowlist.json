@@ -1,0 +1,5 @@
+{
+  "_comment": "Escape hatches for the .locator() and .goto() rules in shared-rules.mjs. Structural HTML tags used to narrow an already-located element are legitimate; app-specific CSS selectors are not — put those in playwright/configs/ui/** instead.",
+  "selectors": ["body", "html", "img", "option", "tr", "td", "th", "li"],
+  "routes": ["/"]
+}
