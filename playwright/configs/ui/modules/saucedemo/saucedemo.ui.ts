@@ -1,6 +1,8 @@
 /**
  * @fileoverview Saucedemo UI selectors.
- * Values are bare data-test IDs used with page.getByTestId(id).
+ * Values are bare data-test IDs used with page.getByTestId(id), except keys
+ * suffixed `_CSS`, which are raw CSS selectors for elements the app ships
+ * without a data-test attribute — use those with page.locator().
  *
  * Target: https://www.saucedemo.com
  * This app uses [data-test="..."] attributes (configured in project testIdAttribute).
@@ -14,7 +16,10 @@ export const SAUCEDEMO_UI = {
     ERROR_MSG: "error",
   },
   HEADER: {
-    APP_LOGO: "app_logo",
+    // CSS-selector exception: saucedemo renders the logo as <div class="app_logo">
+    // with no data-test attribute, so this cannot be a getByTestId value.
+    // Use with page.locator(), not page.getByTestId(). Keys ending _CSS mark this case.
+    APP_LOGO_CSS: ".app_logo",
     MENU_BTN: "open-menu",
     LOGOUT_LINK: "logout-sidebar-link",
     CART_LINK: "shopping-cart-link",

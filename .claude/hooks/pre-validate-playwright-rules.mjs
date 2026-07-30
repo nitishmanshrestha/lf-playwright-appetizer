@@ -1,0 +1,49 @@
+#!/usr/bin/env node
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+import { toPosix, loadAllowlist, scanContent } from "./shared-rules.mjs";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const repoRoot = path.resolve(__dirname, "..", "..");
+const allowlistPath = path.resolve(__dirname, "playwright-hook-allowlist.json");
+
+let raw = "";
+for await (const chunk of process.stdin) raw += chunk;
+
+let toolData;
+try {
+  toolData = JSON.parse(raw);
+} catch {
+  process.exit(0);
+}
+
+const toolName = toolData?.tool_name || "";
+const toolInput = toolData?.tool_input || {};
+const filePath = toolInput.file_path || "";
+
+let content = "";
+if (toolName === "Write") {
+  content = toolInput.content || "";
+} else if (toolName === "Edit") {
+  content = toolInput.new_string || "";
+} else {
+  process.exit(0);
+}
+
+if (!filePath || !content) process.exit(0);
+
+const allowlist = loadAllowlist(allowlistPath);
+const violations = scanContent(filePath, content, allowlist, repoRoot);
+
+if (violations.length === 0) process.exit(0);
+
+console.error("");
+console.error("❌ [PRE-CHECK] Playwright rule violations in proposed change — edit BLOCKED.");
+for (const v of violations) {
+  console.error(`- ${toPosix(v.filePath)}:${v.lineNumber} -> ${v.message}`);
+}
+console.error("");
+console.error("Fix violations before Claude writes this file.");
+
+process.exit(2);

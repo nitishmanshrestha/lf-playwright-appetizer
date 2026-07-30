@@ -1,35 +1,51 @@
 {
-  "permissions": {
-    "allow": [
-      "Bash(npm *)",
-      "Bash(npx *)",
-      "Bash(git *)",
-      "Bash(ls *)",
-      "Bash(cat *)",
-      "Bash(head *)",
-      "Bash(tail *)",
-      "Bash(find *)",
-      "Bash(grep *)",
-      "Bash(node *)",
-      "Read",
-      "Edit",
-      "Write",
-      "Glob",
-      "Grep"
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/hooks/pre-validate-playwright-rules.mjs"
+          }
+        ]
+      }
     ],
-    "deny": [
-      "Bash(rm -rf *)",
-      "Bash(git push --force*)"
-    ],
-    "defaultMode": "auto"
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/hooks/validate-playwright-rules.mjs"
+          }
+        ]
+      }
+    ]
   },
-  "env": {
-    "PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD": "0",
-    "DEBUG": "pw:api"
-  },
-  "model": "claude-haiku-4-5-20251001",
-  "alwaysThinkingEnabled": true,
   "effortLevel": "high",
+  "alwaysThinkingEnabled": true,
   "autoMemoryEnabled": true,
-  "autoMemoryDirectory": "~/.claude/projects/playwright-boilerplate/memory"
+  "autoMemoryDirectory": "~/.claude/projects/playwright-boilerplate/memory",
+  "env": {
+    "PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD": "0"
+  },
+  "permissions": {
+    "defaultMode": "plan",
+    "allow": [
+      "Bash(npm test*)",
+      "Bash(npm run test*)",
+      "Bash(npm run report*)",
+      "Bash(npm run lint*)",
+      "Bash(npm run format*)",
+      "Bash(npm run check:*)",
+      "Bash(npm run scaffold:*)",
+      "Bash(npx playwright*)",
+      "Bash(npx tsc --noEmit*)",
+      "Bash(grep -r* playwright/*)",
+      "Bash(find playwright/*)"
+    ],
+    "deny": ["WebSearch"]
+  }
 }

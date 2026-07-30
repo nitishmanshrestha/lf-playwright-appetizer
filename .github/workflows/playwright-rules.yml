@@ -1,0 +1,46 @@
+name: Playwright Architecture Rules
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Runs the non-negotiable architecture validation hook on every PR that touches
+# Playwright code, hooks, or framework config.
+#
+# This is the CI equivalent of the .claude/hooks/validate-playwright-rules.mjs
+# hook that runs locally on every file write. Both run the same script —
+# CI catches anything that slipped through local enforcement.
+#
+# Blocks merge if:
+#   - page.waitForTimeout(number) is found
+#   - a spec imports test/expect from @playwright/test instead of base.fixture
+#   - hardcoded selectors are found in specs or helpers
+#   - hardcoded routes are found in specs or helpers
+#   - page-object wrapper imports are added
+#   - a credential is assigned a literal string
+#   - a smoke spec issues a write request
+# ─────────────────────────────────────────────────────────────────────────────
+
+on:
+  pull_request:
+    paths:
+      - "playwright/**"
+      - ".claude/hooks/**"
+      - ".claude/settings.json"
+      - "CLAUDE.md"
+
+jobs:
+  validate-architecture:
+    name: Architecture Rules Validation
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Validate non-negotiable rules
+        run: node .claude/hooks/validate-playwright-rules.mjs --base-ref "${{ github.base_ref }}"
