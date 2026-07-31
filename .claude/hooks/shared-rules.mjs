@@ -17,9 +17,28 @@
 import fs from "node:fs";
 import path from "node:path";
 
-const TARGET_FILE_RE = /playwright[\\/].*\.ts$/i;
-const SPEC_RE = /\.spec\.ts$/i;
-const CODE_RE = /\.(spec|helpers|fixture|setup)\.ts$/i;
+// Every rule matches on extension, so the extension list lives here once. Matching only .ts left a
+// real hole: playwright.config.ts sets no testMatch, so Playwright's default pattern executes
+// *.spec.js too — a JavaScript spec would run while every block-severity rule silently passed on it.
+// The mirror of the same defect found in the Cypress adapter, where only .js was matched.
+const SCRIPT_EXT = String.raw`(?:m|c)?[jt]s`; // ts, mts, cts, js, mjs, cjs
+const TARGET_FILE_RE = new RegExp(String.raw`playwright[\\/].*\.${SCRIPT_EXT}$`, "i");
+const SPEC_RE = new RegExp(String.raw`\.spec\.${SCRIPT_EXT}$`, "i");
+const CODE_RE = new RegExp(String.raw`\.(spec|helpers|fixture|setup)\.${SCRIPT_EXT}$`, "i");
+const PAGE_OBJECT_RE = new RegExp(String.raw`\.(?:page|actions)\.${SCRIPT_EXT}$`, "i");
+const SMOKE_SPEC_RE = new RegExp(
+  String.raw`playwright[\\/]tests[\\/].*[\\/]smoke[\\/].*\.spec\.${SCRIPT_EXT}$`,
+  "i",
+);
+
+export const EXTENSION_PATTERNS = {
+  SCRIPT_EXT,
+  TARGET_FILE_RE,
+  SPEC_RE,
+  CODE_RE,
+  PAGE_OBJECT_RE,
+  SMOKE_SPEC_RE,
+};
 
 export function toPosix(p) {
   return p.replaceAll("\\", "/");
@@ -143,7 +162,7 @@ export function scanContent(filePath, content, allowlist, repoRoot) {
   if (
     !/^playwright\/support\/helpers\//i.test(normalized) &&
     (/(^|\/)(pages?|page-objects?|pageobjects?|actions?)(\/|$)/i.test(normalized) ||
-      /\.(?:page|actions)\.ts$/i.test(normalized) ||
+      PAGE_OBJECT_RE.test(normalized) ||
       /\bclass\s+\w*(?:Page|Actions)\b/.test(content))
   ) {
     violations.push({
@@ -220,7 +239,7 @@ export function scanContent(filePath, content, allowlist, repoRoot) {
   );
 
   // Rule 7: Smoke tests must be read-only.
-  if (/playwright[\\/]tests[\\/].*[\\/]smoke[\\/].*\.spec\.ts$/i.test(normalized)) {
+  if (SMOKE_SPEC_RE.test(normalized)) {
     scanForRegex(
       violations,
       normalized,

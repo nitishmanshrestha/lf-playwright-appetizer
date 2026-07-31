@@ -20,7 +20,13 @@ import { execSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { extractToolChange, toPosix, loadAllowlist, scanContent } from "./shared-rules.mjs";
+import {
+  EXTENSION_PATTERNS,
+  extractToolChange,
+  toPosix,
+  loadAllowlist,
+  scanContent,
+} from "./shared-rules.mjs";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -33,7 +39,10 @@ function walk(dir) {
   for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
     const full = path.join(dir, entry.name);
     if (entry.isDirectory()) out.push(...walk(full));
-    else if (entry.isFile() && entry.name.endsWith(".ts")) out.push(full);
+    // Must accept JavaScript too. Walking only .ts meant a .spec.js was never opened, so every
+    // rule silently passed on it — and Playwright's default testMatch executes .spec.js.
+    else if (entry.isFile() && EXTENSION_PATTERNS.TARGET_FILE_RE.test(toPosix(full)))
+      out.push(full);
   }
   return out;
 }
