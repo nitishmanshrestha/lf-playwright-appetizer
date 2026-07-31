@@ -238,6 +238,35 @@ export function scanContent(filePath, content, allowlist, repoRoot) {
       ),
   );
 
+  // Rule 7: Authentication belongs in a storageState setup project, not in every spec.
+  // Config declares this `block` with "Hook + CI" enforcement, so it needs a pattern here — a rule
+  // that is declared blocking and never fires is worse than an absent rule, because the generated
+  // instruction tables advertise protection that does not exist.
+  if (SPEC_RE.test(normalized)) {
+    scanForRegex(
+      violations,
+      normalized,
+      content,
+      /(?:test\.)?before(?:Each|All)\s*\([\s\S]{0,400}?(?:log[iI]n|signIn|sign_in|authenticate)\s*\(/g,
+      message(
+        "storage-state-auth",
+        "Authentication inside before-hook detected. Use a storageState setup-project dependency so the session is cached once, not replayed per test.",
+      ),
+    );
+    scanForRegex(
+      violations,
+      normalized,
+      content,
+      // The password token usually precedes the fill — `getByLabel("Password").fill(pw)` — so look
+      // for either order rather than assuming the value is the literal.
+      /(?:test\.)?before(?:Each|All)\s*\([\s\S]{0,400}?(?:(?:password|passwd)[\s\S]{0,80}?\.fill\(|\.fill\(\s*[^)]{0,80}?(?:password|passwd))/gi,
+      message(
+        "storage-state-auth",
+        "Credential entry inside before-hook detected. Use a storageState setup-project dependency instead of logging in per test.",
+      ),
+    );
+  }
+
   // Rule 7: Smoke tests must be read-only.
   if (SMOKE_SPEC_RE.test(normalized)) {
     scanForRegex(

@@ -23,14 +23,6 @@
       "@helpers/*": ["./playwright/support/helpers/*"]
     }
   },
-  "include": [
-    "playwright/**/*.ts",
-    "playwright.config.ts"
-  ],
-  "exclude": [
-    "node_modules",
-    "test-results",
-    "playwright-report",
-    "blob-report"
-  ]
+  "include": ["playwright/**/*.ts", "playwright.config.ts"],
+  "exclude": ["node_modules", "test-results", "playwright-report", "blob-report"]
 }
