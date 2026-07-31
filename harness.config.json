@@ -1,12 +1,16 @@
 {
-  "$comment": "The source of truth for this repo's harness. Policy lives here once; generated tool projections are refreshed with npm run harness:sync and verified with npm run harness:check. Hook scripts remain executable engine code.",
+  "$comment": "GENERATED from docs/harness/profiles by compose-harness-config.mjs. Policy lives in the adapter baseline (playwright.json); project facts live in the profile (playwright-boilerplate). Re-compose after editing either, then run npm run harness:sync.",
   "version": 1,
   "framework": "playwright",
-  "adapters": {
-    "claude": { "enabled": true },
-    "copilot": { "enabled": true }
-  },
   "agentFileExtension": ".md",
+  "adapters": {
+    "claude": {
+      "enabled": true
+    },
+    "copilot": {
+      "enabled": true
+    }
+  },
   "project": {
     "name": "playwright-automation-boilerplate",
     "architecture": "Config → Helpers → Tests",
@@ -143,7 +147,14 @@
       "role": "GATHER",
       "description": "Derive an approved project and application contract from verified sources before any test generation.",
       "model": "sonnet",
-      "tools": ["Read", "Write", "Edit", "Grep", "Glob", "Bash"],
+      "tools": [
+        "Read",
+        "Write",
+        "Edit",
+        "Grep",
+        "Glob",
+        "Bash"
+      ],
       "when": "Start a new project or module from no existing automation context"
     },
     {
@@ -151,7 +162,14 @@
       "role": "BUILD",
       "description": "Implement Playwright tests and helpers using the helper-first Config → Helpers → Tests architecture.",
       "model": "sonnet",
-      "tools": ["Read", "Write", "Edit", "Grep", "Glob", "Bash"],
+      "tools": [
+        "Read",
+        "Write",
+        "Edit",
+        "Grep",
+        "Glob",
+        "Bash"
+      ],
       "when": "Build a requirement-backed helper-first Playwright module"
     },
     {
@@ -159,7 +177,13 @@
       "role": "DIAGNOSE",
       "description": "Debug a failing Playwright test, trace root cause, and propose an exact compliant fix.",
       "model": "opus",
-      "tools": ["Read", "Grep", "Glob", "Bash", "Edit"],
+      "tools": [
+        "Read",
+        "Grep",
+        "Glob",
+        "Bash",
+        "Edit"
+      ],
       "when": "Trace and repair a failing test"
     },
     {
@@ -168,7 +192,11 @@
       "description": "Evaluate supplied change and command evidence through the complete 6-phase pre-merge QA gate.",
       "model": "opus",
       "permissionMode": "plan",
-      "tools": ["Read", "Grep", "Glob"],
+      "tools": [
+        "Read",
+        "Grep",
+        "Glob"
+      ],
       "when": "Evaluate supplied diff and verification evidence and return the final QA verdict",
       "readOnlyRationale": "Read/search only by design: the gate cannot edit files or execute shell commands, so the builder never grades its own output."
     },
@@ -177,7 +205,12 @@
       "role": "DISCOVER",
       "description": "Use Playwright CLI for token-efficient browser discovery, debugging, and codegen-first scaffolding.",
       "model": "sonnet",
-      "tools": ["Read", "Grep", "Glob", "Bash"],
+      "tools": [
+        "Read",
+        "Grep",
+        "Glob",
+        "Bash"
+      ],
       "when": "Use CLI-first browser discovery or codegen"
     },
     {
@@ -185,7 +218,12 @@
       "role": "SHIP",
       "description": "Create a pull request with the repository's standard generated description.",
       "model": "sonnet",
-      "tools": ["Read", "Grep", "Glob", "Bash"],
+      "tools": [
+        "Read",
+        "Grep",
+        "Glob",
+        "Bash"
+      ],
       "when": "Opening a pull request with a generated description"
     },
     {
@@ -193,15 +231,29 @@
       "role": "MAINTAIN",
       "description": "Simplify repository workflow scripts, agents, skills, and docs without duplicating ownership.",
       "model": "sonnet",
-      "tools": ["Read", "Grep", "Glob", "Bash", "Edit"],
+      "tools": [
+        "Read",
+        "Grep",
+        "Glob",
+        "Bash",
+        "Edit"
+      ],
       "when": "Simplify workflow scripts, agents, skills, or docs"
     }
   ],
   "hooks": {
-    "prompt": ["prompt-duplication-guard.mjs"],
-    "preWrite": ["pre-validate-playwright-rules.mjs"],
-    "postWrite": ["validate-playwright-rules.mjs"],
-    "stop": ["session-end-reminder.mjs"]
+    "prompt": [
+      "prompt-duplication-guard.mjs"
+    ],
+    "preWrite": [
+      "pre-validate-playwright-rules.mjs"
+    ],
+    "postWrite": [
+      "validate-playwright-rules.mjs"
+    ],
+    "stop": [
+      "session-end-reminder.mjs"
+    ]
   },
   "permissions": {
     "defaultMode": "plan",
@@ -218,6 +270,8 @@
       "Bash(grep -r* playwright/*)",
       "Bash(find playwright/*)"
     ],
-    "deny": ["WebSearch"]
+    "deny": [
+      "WebSearch"
+    ]
   }
 }
