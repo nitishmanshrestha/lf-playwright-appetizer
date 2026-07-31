@@ -7,8 +7,11 @@
  *
  * Deliberately NOT enforced here: locator preference order (getByRole → getByLabel →
  * getByText → getByTestId) and "narrow with filter() before first()/nth()". Both need
- * real AST analysis to check without false positives — they stay in FRAMEWORK_RULES.md
- * and `npm run check:locator-strategy`.
+ * real AST analysis to check without false positives, and a regex here would produce false
+ * positives that teach people to ignore the hook. They live in the "Locator contract" section of
+ * harness/qa-automation-foundations.md, which is injected into the BUILD and EVALUATE agents, and
+ * the independent gate scores them. `npm run check:locator-strategy` covers a narrower, adjacent
+ * check: action locators with no `.or()` fallback.
  */
 
 import fs from "node:fs";
