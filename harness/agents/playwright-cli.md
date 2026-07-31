@@ -90,4 +90,3 @@ export class ProductsHelpers {
 
 - `docs/reference/playwright-cli-agents.md`
 - `.github/prompts/cli/README.md`
-- `.github/skills/playwright-cli-workflow/SKILL.md`

@@ -14,7 +14,7 @@ Keep the workflow layer small, clear, and focused.
 
 - User asks "do we need this script?"
 - User says "is this redundant?"
-- Deciding what to keep/remove from `scripts/`, `.github/agents/`, `.github/skills/`
+- Deciding what to keep/remove from `scripts/`, `.claude/agents/`, `.github/agents/`
 - Consolidating or simplifying workflow documentation
 
 ## Decision Rule

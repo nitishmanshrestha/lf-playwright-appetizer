@@ -6,5 +6,13 @@
   "adapter": "playwright",
   "language": "typescript",
   "projectName": "playwright-automation-boilerplate",
-  "repo": "lf-playwright-boilerplate"
+  "repo": "lf-playwright-boilerplate",
+  "adapters": {
+    "claude": {
+      "enabled": true
+    },
+    "copilot": {
+      "enabled": true
+    }
+  }
 }

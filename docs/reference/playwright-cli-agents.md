@@ -11,7 +11,6 @@ Complete guide to `playwright-cli` — token-efficient browser automation for co
 This repository now includes a workspace custom agent and skill for CLI-first Playwright work:
 
 - **Agent:** `.github/agents/playwright-cli.md`
-- **Skill:** `.github/skills/playwright-cli-workflow/SKILL.md`
 
 Use them for token-efficient browser automation, retained-context execution, codegen-first scaffolding, and no-MCP debugging.
 
