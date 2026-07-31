@@ -30,7 +30,7 @@ Use this first when adapting the boilerplate to your own application with minima
 - Purpose: Gather app URL, auth env variable names, routes, and desired test scope, then scaffold Config → Helper → Fixture
 - Best for: first-time users who want a guided setup without generating tests yet
 - Credentials safety: never asks for credential values; users fill `.env` directly
-- Follow-up: write tests using [docs/02-guides/writing-tests.md](../../docs/02-guides/writing-tests.md)
+- Follow-up: write tests using [docs/guides/writing-tests.md](../../docs/guides/writing-tests.md)
 
 ### MCP Prompts
 
@@ -86,11 +86,7 @@ Prompt files should not restate long rule blocks unless a flow-specific exceptio
 
 ## Related Docs
 
-| Topic              | File                                                                                     |
+| Topic              | File                                                                |
 | ------------------ | ---------------------------------------------------------------------------------------- |
-| Full workflow      | [docs/workflow.md](../../docs/workflow.md)                                               |
-| Workflow utilities | [docs/04-reference/workflow-utilities.md](../../docs/04-reference/workflow-utilities.md) |
-| Architecture rules | [docs/framework-standards.md](../../docs/framework-standards.md)                         |
-| Helper patterns    | [docs/support-helpers-guide.md](../../docs/support-helpers-guide.md)                     |
-| Add a new module   | [docs/framework-maintenance-guide.md](../../docs/framework-maintenance-guide.md)         |
+| Workflow utilities | [docs/reference/workflow-utilities.md](../../docs/reference/workflow-utilities.md) |
 | MCP server config  | [.vscode/mcp.json](../../.vscode/mcp.json)                                               |

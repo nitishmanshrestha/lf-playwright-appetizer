@@ -86,4 +86,4 @@ This skill complements `playwright-cli-workflow`:
 3. **If DDT** → Create JSON test data + `test.each()` spec
 4. **If Not DDT** → Single scenario test with helpers
 
-See: [Data-Driven Testing Guide](../../docs/02-guides/data-driven-testing.md)
+See: [Data-Driven Testing Guide](../../docs/guides/data-driven-testing.md)

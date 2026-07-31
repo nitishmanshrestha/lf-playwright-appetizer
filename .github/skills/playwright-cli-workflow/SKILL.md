@@ -36,7 +36,7 @@ Gather only what applies:
    - `playwright/tests/**`
 
 5. **DDT Identification** — Does this test repeat the same flow with different data?
-   - If YES → See [Data-Driven Testing Guide](../../docs/02-guides/data-driven-testing.md)
+   - If YES → See [Data-Driven Testing Guide](../../docs/guides/data-driven-testing.md)
    - If NO → Proceed with single-scenario test
 
 ## Routing Matrix

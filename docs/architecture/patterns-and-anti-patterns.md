@@ -5,12 +5,14 @@ Dos and donts for writing maintainable tests.
 ## DO: Use Helpers for All Actions
 
 ✅ Good:
+
 ```
 const authHelper = new AuthHelper(page);
 await authHelper.login("user@test.com", "pass123");
 ```
 
 ❌ Bad:
+
 ```
 await page.fill("[data-testid="email"]", "user@test.com");
 await page.fill("[data-testid="password"]", "pass123");
@@ -20,6 +22,7 @@ await page.click("button:has-text("Sign In")");
 ## DO: Keep Selectors in Config
 
 ✅ Use config constants:
+
 ```
 export const LOGIN_UI = {
   emailInput: "[data-testid="login-email"]",
@@ -36,6 +39,7 @@ export const LOGIN_UI = {
 ## DON'T: Chain Tests
 
 Tests must be independent. Each test should:
+
 - Set up its own state
 - Not depend on other tests
 - Run in any order
@@ -57,11 +61,11 @@ Logic belongs in helpers. Tests should be readable as requirements.
 test("should create item", async ({ page }) => {
   // Arrange - setup
   await page.goto("/items");
-  
+
   // Act - do the thing
   const itemHelper = new ItemHelper(page);
   await itemHelper.create("Buy Milk");
-  
+
   // Assert - verify
   await expect(page.locator("[role="list"]")).toContainText("Buy Milk");
 });

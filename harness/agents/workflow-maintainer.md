@@ -97,7 +97,7 @@ and `README.md` — is not independently editable or deletable. Change `harness.
 
 ## Required Reads
 
-- `docs/04-reference/workflow-utilities.md`
+- `docs/reference/workflow-utilities.md`
 - `.github/copilot-instructions.md`
 - `package.json` (check script usage)
 - `.github/doc-impact-map.json` (check impact triggers)

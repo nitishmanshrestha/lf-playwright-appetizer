@@ -145,7 +145,7 @@ export class UiHelpers {
    * Falls back to a CSS / data-testid selector if the semantic locator matches nothing.
    */
   async clickWithFallback(semantic: Locator, fallbackSelector: string): Promise<void> {
-    if (await semantic.count() > 0) {
+    if ((await semantic.count()) > 0) {
       await semantic.click();
     } else {
       await this.page.locator(fallbackSelector).click();
@@ -156,9 +156,7 @@ export class UiHelpers {
    * Resolve whichever locator matches — for fill, check, or assertion use.
    */
   async resolveLocator(semantic: Locator, fallbackSelector: string): Promise<Locator> {
-    return (await semantic.count() > 0)
-      ? semantic
-      : this.page.locator(fallbackSelector);
+    return (await semantic.count()) > 0 ? semantic : this.page.locator(fallbackSelector);
   }
 }
 ```
@@ -168,27 +166,30 @@ Usage inside a feature helper:
 ```typescript
 // playwright/support/helpers/modules/auth.helpers.ts
 export class AuthHelper {
-  constructor(private page: Page, private ui: UiHelpers) {}
+  constructor(
+    private page: Page,
+    private ui: UiHelpers,
+  ) {}
 
   async login(email: string, password: string): Promise<void> {
     // Email field — codegen gives getByLabel, fallback to data-testid
     const emailField = await this.ui.resolveLocator(
-      this.page.getByLabel('Email address'),
-      AUTH_UI.emailInput
+      this.page.getByLabel("Email address"),
+      AUTH_UI.emailInput,
     );
     await emailField.fill(email);
 
     // Password field
     const passwordField = await this.ui.resolveLocator(
-      this.page.getByLabel('Password'),
-      AUTH_UI.passwordInput
+      this.page.getByLabel("Password"),
+      AUTH_UI.passwordInput,
     );
     await passwordField.fill(password);
 
     // Submit — try semantic role, fall back to data-testid
     await this.ui.clickWithFallback(
-      this.page.getByRole('button', { name: 'Sign In' }),
-      AUTH_UI.submitButton
+      this.page.getByRole("button", { name: "Sign In" }),
+      AUTH_UI.submitButton,
     );
   }
 }
@@ -248,7 +249,7 @@ export class UiHelpers {
    * Falls back to a CSS / data-testid selector if the semantic locator matches nothing.
    */
   async clickWithFallback(semantic: Locator, fallbackSelector: string): Promise<void> {
-    if (await semantic.count() > 0) {
+    if ((await semantic.count()) > 0) {
       await semantic.click();
     } else {
       await this.page.locator(fallbackSelector).click();
@@ -259,9 +260,7 @@ export class UiHelpers {
    * Resolve whichever locator matches — for fill, check, or assertion use.
    */
   async resolveLocator(semantic: Locator, fallbackSelector: string): Promise<Locator> {
-    return (await semantic.count() > 0)
-      ? semantic
-      : this.page.locator(fallbackSelector);
+    return (await semantic.count()) > 0 ? semantic : this.page.locator(fallbackSelector);
   }
 }
 ```
@@ -271,27 +270,30 @@ Usage inside a feature helper:
 ```typescript
 // playwright/support/helpers/modules/auth.helpers.ts
 export class AuthHelper {
-  constructor(private page: Page, private ui: UiHelpers) {}
+  constructor(
+    private page: Page,
+    private ui: UiHelpers,
+  ) {}
 
   async login(email: string, password: string): Promise<void> {
     // Email field — codegen gives getByLabel, fallback to data-testid
     const emailField = await this.ui.resolveLocator(
-      this.page.getByLabel('Email address'),
-      AUTH_UI.emailInput
+      this.page.getByLabel("Email address"),
+      AUTH_UI.emailInput,
     );
     await emailField.fill(email);
 
     // Password field
     const passwordField = await this.ui.resolveLocator(
-      this.page.getByLabel('Password'),
-      AUTH_UI.passwordInput
+      this.page.getByLabel("Password"),
+      AUTH_UI.passwordInput,
     );
     await passwordField.fill(password);
 
     // Submit — try semantic role, fall back to data-testid
     await this.ui.clickWithFallback(
-      this.page.getByRole('button', { name: 'Sign In' }),
-      AUTH_UI.submitButton
+      this.page.getByRole("button", { name: "Sign In" }),
+      AUTH_UI.submitButton,
     );
   }
 }
@@ -346,6 +348,6 @@ All 30 tests pass — zero test file changes, one config line updated
 
 ## Related
 
-- [Selector Strategies](../02-guides/selector-strategies.md) — full selector priority guide
-- [Three-Layer Architecture](../05-architecture/three-layer-pattern.md) — why single-source config is non-negotiable
-- [Patterns & Anti-Patterns](../05-architecture/patterns-and-anti-patterns.md) — `waitForTimeout` and other patterns to avoid
+- [Selector Strategies](../guides/selector-strategies.md) — full selector priority guide
+- [Three-Layer Architecture](../architecture/three-layer-pattern.md) — why single-source config is non-negotiable
+- [Patterns & Anti-Patterns](../architecture/patterns-and-anti-patterns.md) — `waitForTimeout` and other patterns to avoid

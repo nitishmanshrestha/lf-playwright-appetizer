@@ -2,39 +2,39 @@
   "rules": [
     {
       "trigger": ["playwright.config.ts"],
-      "docs": ["README.md", "docs/04-reference/config-reference.md"]
+      "docs": ["README.md", "docs/reference/config-reference.md"]
     },
     {
       "triggerPrefix": ["playwright/configs/app/"],
-      "docs": ["README.md", "docs/04-reference/config-reference.md"]
+      "docs": ["README.md", "docs/reference/config-reference.md"]
     },
     {
       "triggerPrefix": ["playwright/configs/api/"],
-      "docs": ["docs/02-guides/api-mocking.md", "docs/02-guides/writing-tests.md"]
+      "docs": ["docs/guides/api-mocking.md", "docs/guides/writing-tests.md"]
     },
     {
       "triggerPrefix": ["playwright/configs/ui/"],
-      "docs": ["docs/02-guides/selector-strategies.md", "docs/02-guides/writing-tests.md"]
+      "docs": ["docs/guides/selector-strategies.md", "docs/guides/writing-tests.md"]
     },
     {
       "triggerPrefix": ["playwright/support/helpers/"],
-      "docs": ["docs/02-guides/writing-tests.md", "docs/05-architecture/three-layer-pattern.md"]
+      "docs": ["docs/guides/writing-tests.md", "docs/architecture/three-layer-pattern.md"]
     },
     {
       "triggerPrefix": ["playwright/tests/"],
-      "docs": ["docs/02-guides/writing-tests.md", "docs/01-getting-started/first-test-module.md"]
+      "docs": ["docs/guides/writing-tests.md", "docs/guides/first-test-module.md"]
     },
     {
       "triggerPrefix": ["playwright/fixtures/"],
-      "docs": ["docs/02-guides/writing-tests.md", "docs/03-features/session-and-auth.md"]
+      "docs": ["docs/guides/writing-tests.md", "docs/guides/session-and-auth.md"]
     },
     {
       "trigger": ["scripts/bootstrap.js"],
-      "docs": ["README.md", "docs/01-getting-started/setup.md"]
+      "docs": ["README.md", "docs/guides/setup.md"]
     },
     {
       "trigger": ["scripts/check-locator-strategy.js"],
-      "docs": ["docs/02-guides/selector-strategies.md", "docs/02-guides/writing-tests.md"]
+      "docs": ["docs/guides/selector-strategies.md", "docs/guides/writing-tests.md"]
     }
   ]
 }

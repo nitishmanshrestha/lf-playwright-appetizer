@@ -691,18 +691,21 @@ intended pattern, `playwright/tests/**/*.spec.ts`.
 ## 12. Further reading
 
 This guide is self-contained; the documents below are supporting detail, indexed in
-[docs/README.md](README.md).
+[docs/README.md](README.md). The taxonomy — `guides/`, `reference/`, `architecture/` — is identical in
+the Cypress adapter.
 
-| When you need                              | Document                                                               |
-| ------------------------------------------ | ---------------------------------------------------------------------- |
-| Setup, discovery, your first module        | [01 — Getting started](01-getting-started/README.md)                   |
-| Writing, debugging, recording, mocking     | [02 — Guides](02-guides/README.md)                                     |
-| Sessions and auth, traces, video, parallel | [03 — Features](03-features/README.md)                                 |
-| CLI commands, config, API cheatsheet       | [04 — Reference](04-reference/README.md)                               |
-| Three-layer pattern, module anatomy        | [05 — Architecture](05-architecture/README.md)                         |
-| The lifecycle contract as a spec           | [harness-lifecycle-spec.md](05-architecture/harness-lifecycle-spec.md) |
-| Project and module context templates       | [application-intelligence](application-intelligence/README.md)         |
-| Composing a config from a profile          | [harness/profiles/README.md](../harness/profiles/README.md)            |
+| When you need                                | Document                                                            |
+| -------------------------------------------- | ------------------------------------------------------------------- |
+| Local setup                                  | [setup.md](guides/setup.md)                                         |
+| Browser discovery before building            | [discovery-process.md](guides/discovery-process.md)                 |
+| Your first module, end to end                | [first-test-module.md](guides/first-test-module.md)                 |
+| Writing tests, debugging, recording, mocking | [docs/README.md → Guides](README.md#guides)                         |
+| Sessions and auth, traces, video, parallel   | [docs/README.md → Guides](README.md#guides)                         |
+| CLI commands, config, API cheatsheet         | [docs/README.md → Reference](README.md#reference)                   |
+| The lifecycle contract as a spec             | [harness-lifecycle-spec.md](architecture/harness-lifecycle-spec.md) |
+| Three-layer pattern, module anatomy          | [docs/README.md → Architecture](README.md#architecture)             |
+| Project and module context templates         | [application-intelligence](application-intelligence/README.md)      |
+| Composing a config from a profile            | [harness/profiles/README.md](../harness/profiles/README.md)         |
 
 ---
 

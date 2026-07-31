@@ -37,15 +37,15 @@ export const AUTH_UI = {
   // Form inputs
   emailInput: '[data-testid="login-email"]',
   passwordInput: '[data-testid="login-password"]',
-  
+
   // Buttons
   submitButton: 'button:has-text("Sign In")',
   forgotPasswordLink: 'a:has-text("Forgot password?")',
-  
+
   // Messages
   errorMessage: '[role="alert"]',
   successMessage: '[role="status"]',
-  
+
   // Headings
   loginHeading: 'h1:has-text("Sign In")',
   dashboardHeading: 'h1:has-text("Dashboard")',
@@ -53,6 +53,7 @@ export const AUTH_UI = {
 ```
 
 **Rules:**
+
 - Use `data-testid` when available
 - Use semantic selectors (`getByRole`, `getByLabel`)
 - Avoid CSS selectors when possible
@@ -64,9 +65,9 @@ export const AUTH_UI = {
 ```typescript
 // playwright/support/helpers/modules/auth/auth.helpers.ts
 
-import { Page, expect } from '@playwright/test';
-import { AUTH_UI } from '../../../configs/ui/modules/auth/auth.ui';
-import { ROUTES } from '../../../configs/app/routes';
+import { Page, expect } from "@playwright/test";
+import { AUTH_UI } from "../../../configs/ui/modules/auth/auth.ui";
+import { ROUTES } from "../../../configs/app/routes";
 
 export class AuthHelper {
   constructor(private page: Page) {}
@@ -105,6 +106,7 @@ export class AuthHelper {
 ```
 
 **Rules:**
+
 - One file per feature module
 - Class per helper (e.g., `AuthHelper`)
 - Methods return `void` or `boolean` (not Locators)
@@ -117,33 +119,34 @@ export class AuthHelper {
 ```typescript
 // playwright/tests/auth/smoke/login-success.spec.ts
 
-import { test, expect } from '../../../fixtures/base.fixture';
-import { AuthHelper } from '../../../support/helpers/modules/auth/auth.helpers';
+import { test, expect } from "../../../fixtures/base.fixture";
+import { AuthHelper } from "../../../support/helpers/modules/auth/auth.helpers";
 
-test.describe('Authentication', () => {
-  test('@smoke should login with valid credentials', async ({ page }) => {
+test.describe("Authentication", () => {
+  test("@smoke should login with valid credentials", async ({ page }) => {
     const authHelper = new AuthHelper(page);
 
     // Act
-    await authHelper.login('user@example.com', 'password123');
+    await authHelper.login("user@example.com", "password123");
 
     // Assert
     await authHelper.expectLoginSuccess();
   });
 
-  test('@smoke should show error with invalid password', async ({ page }) => {
+  test("@smoke should show error with invalid password", async ({ page }) => {
     const authHelper = new AuthHelper(page);
 
     // Act
-    await authHelper.login('user@example.com', 'wrongpassword');
+    await authHelper.login("user@example.com", "wrongpassword");
 
     // Assert
-    await authHelper.expectLoginError('Invalid credentials');
+    await authHelper.expectLoginError("Invalid credentials");
   });
 });
 ```
 
 **Rules:**
+
 - One test per file (or grouped in describe)
 - Use `@tag` for categorization
 - Clear test names (what should happen?)
@@ -153,14 +156,14 @@ test.describe('Authentication', () => {
 
 ## Naming Conventions
 
-| Item | Pattern | Example |
-|------|---------|---------|
-| **Selector constant** | `UPPER_SNAKE_CASE` | `AUTH_UI.emailInput` |
-| **Helper class** | `PascalCase + Helper` | `AuthHelper` |
-| **Helper method** | `camelCase` | `login()`, `expectSuccess()` |
-| **Test name** | `should + behavior` | `should login with valid credentials` |
-| **Folder** | `kebab-case` | `auth`, `user-profile` |
-| **File** | `kebab-case.type.ts` | `auth.ui.ts`, `auth.helpers.ts` |
+| Item                  | Pattern               | Example                               |
+| --------------------- | --------------------- | ------------------------------------- |
+| **Selector constant** | `UPPER_SNAKE_CASE`    | `AUTH_UI.emailInput`                  |
+| **Helper class**      | `PascalCase + Helper` | `AuthHelper`                          |
+| **Helper method**     | `camelCase`           | `login()`, `expectSuccess()`          |
+| **Test name**         | `should + behavior`   | `should login with valid credentials` |
+| **Folder**            | `kebab-case`          | `auth`, `user-profile`                |
+| **File**              | `kebab-case.type.ts`  | `auth.ui.ts`, `auth.helpers.ts`       |
 
 ## Dependencies
 
@@ -181,8 +184,8 @@ For API mocking, follow similar structure:
 ```typescript
 // playwright/configs/api/modules/auth/auth.api.ts
 export const AUTH_API = {
-  loginEndpoint: '/api/auth/login',
-  logoutEndpoint: '/api/auth/logout',
+  loginEndpoint: "/api/auth/login",
+  logoutEndpoint: "/api/auth/logout",
 } as const;
 
 // playwright/support/helpers/modules/auth/auth-api.helpers.ts
@@ -198,7 +201,7 @@ export class AuthAPIHelper {
 }
 ```
 
-See [API Mocking Guide](../02-guides/api-mocking.md) for details.
+See [API Mocking Guide](../guides/api-mocking.md) for details.
 
 ## Complete Example Structure
 
@@ -236,4 +239,4 @@ Each module is self-contained: config, helpers, and tests all work together with
 - [ ] Verify selectors work
 - [ ] Add to [DISCOVERY.md](../../DISCOVERY.md) for team reference
 
-See [Your First Test Module](../01-getting-started/first-test-module.md) for a complete walkthrough.
+See [Your First Test Module](../guides/first-test-module.md) for a complete walkthrough.

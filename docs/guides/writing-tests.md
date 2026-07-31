@@ -27,7 +27,7 @@ For adding tests to modules you already understand. No planning file needed.
 2. Add or extend a helper in [support/helpers/modules/](../../playwright/support/helpers/modules/)
 3. Write the spec in `playwright/tests/<module>/smoke/` or `e2e/`, importing from `base.fixture.ts`
 
-See [Your First Test Module](../01-getting-started/first-test-module.md) for a full walk-through.
+See [Your First Test Module](../guides/first-test-module.md) for a full walk-through.
 
 ### Product-specific locator exceptions
 
@@ -367,9 +367,9 @@ Only after the user answers, either update the spec (intentional change) or file
 
 ## Cross-references
 
-| For...                                         | See                                            |
-| ---------------------------------------------- | ---------------------------------------------- |
-| `--debug=cli` / attach mechanics               | [debugging-tests.md](debugging-tests.md)     |
-| How `playwright-cli` actions become TS         | [recording-tests.md](recording-tests.md)       |
-| Mocking requests during exploration/generation | [api-mocking.md](api-mocking.md)       |
-| Managing the CLI browser session               | [session-and-auth.md](../03-features/session-and-auth.md) |
+| For...                                         | See                                                  |
+| ---------------------------------------------- | ---------------------------------------------------- |
+| `--debug=cli` / attach mechanics               | [debugging-tests.md](debugging-tests.md)             |
+| How `playwright-cli` actions become TS         | [recording-tests.md](recording-tests.md)             |
+| Mocking requests during exploration/generation | [api-mocking.md](api-mocking.md)                     |
+| Managing the CLI browser session               | [session-and-auth.md](../guides/session-and-auth.md) |
