@@ -152,7 +152,7 @@ npm run test:ui
 - Create more tests using the same pattern
 - Add more helpers as you discover new flows
 - Update selectors in config as the app evolves
-- See [Writing Tests Guide](../../02-guides/writing-tests.md) for advanced patterns
+- See [Writing Tests Guide](../02-guides/writing-tests.md) for advanced patterns
 
 ## Common Pitfalls
 

@@ -198,7 +198,7 @@ export class AuthAPIHelper {
 }
 ```
 
-See [API Mocking Guide](../../02-guides/api-mocking.md) for details.
+See [API Mocking Guide](../02-guides/api-mocking.md) for details.
 
 ## Complete Example Structure
 
