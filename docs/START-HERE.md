@@ -688,7 +688,25 @@ intended pattern, `playwright/tests/**/*.spec.ts`.
 
 ---
 
-## 12. What not to change
+## 12. Further reading
+
+This guide is self-contained; the documents below are supporting detail, indexed in
+[docs/README.md](README.md).
+
+| When you need                              | Document                                                               |
+| ------------------------------------------ | ---------------------------------------------------------------------- |
+| Setup, discovery, your first module        | [01 — Getting started](01-getting-started/README.md)                   |
+| Writing, debugging, recording, mocking     | [02 — Guides](02-guides/README.md)                                     |
+| Sessions and auth, traces, video, parallel | [03 — Features](03-features/README.md)                                 |
+| CLI commands, config, API cheatsheet       | [04 — Reference](04-reference/README.md)                               |
+| Three-layer pattern, module anatomy        | [05 — Architecture](05-architecture/README.md)                         |
+| The lifecycle contract as a spec           | [harness-lifecycle-spec.md](05-architecture/harness-lifecycle-spec.md) |
+| Project and module context templates       | [application-intelligence](application-intelligence/README.md)         |
+| Composing a config from a profile          | [harness/profiles/README.md](../harness/profiles/README.md)            |
+
+---
+
+## 13. What not to change
 
 - **Framework-native architecture.** Helper-first here, command-first in Cypress. Both correctly
   reject page objects. Forcing one style across both produces worse tests in whichever loses.
