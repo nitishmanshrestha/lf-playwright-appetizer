@@ -36,11 +36,11 @@ MCP server itself.
 
 The prompt must still follow framework rules from:
 
-- [../../../docs/framework-standards.md](../../../docs/framework-standards.md)
+- `harness.config.json` — rules declared once
 - [../../copilot-instructions.md](../../copilot-instructions.md)
 
 ## Related
 
 - [Prompts Index](../README.md)
-- [../../../docs/workflow.md](../../../docs/workflow.md)
+- [../../../docs/START-HERE.md](../../../docs/START-HERE.md)
 - [../../../.vscode/mcp.json](../../../.vscode/mcp.json)
