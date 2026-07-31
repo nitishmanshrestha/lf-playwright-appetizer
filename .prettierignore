@@ -1,0 +1,22 @@
+# Sync-owned: harness:sync writes the HARNESS:RULES block in these files. Prettier realigns the
+# generated table, which makes harness:check report drift — the two are mutually exclusive, and the
+# generator wins. Never format these; edit harness.config.json and re-sync instead.
+CLAUDE.md
+README.md
+
+# Fully generated projections
+.claude/agents/
+.claude/settings.json
+.github/agents/
+.github/copilot-instructions.md
+.github/hooks/harness.json
+
+# Generated artifacts and run output
+evidence/runs/
+evidence/coverage-computed.json
+evidence/metrics.json
+playwright/evidence/
+playwright-report/
+blob-report/
+test-results/
+package-lock.json

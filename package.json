@@ -41,7 +41,8 @@
     "harness:test": "node scripts/harness/test-policy-messages.mjs && node scripts/harness/test-agent-adapters.mjs && npm run harness:profile:test && npm run harness:profile:verify && npm run evidence:test",
     "evidence:build": "node scripts/evidence.mjs --framework playwright --report playwright/evidence/tests/results.json",
     "evidence:record": "node scripts/record-evidence.mjs",
-    "evidence:test": "node scripts/test-evidence.mjs && node scripts/test-record-evidence.mjs",
+    "evidence:backfill": "node scripts/backfill-ci-evidence.mjs --workflow playwright.yml",
+    "evidence:test": "node scripts/test-evidence.mjs && node scripts/test-record-evidence.mjs && node scripts/test-backfill-ci-evidence.mjs",
     "check:ddt-fixtures": "node scripts/check-ddt-fixtures.js"
   },
   "devDependencies": {
