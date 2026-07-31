@@ -29,7 +29,7 @@ export default defineConfig({
   workers: process.env.CI ? 1 : undefined,
 
   // ── Retries ──
-  retries: process.env.CI ? 2 : 0,
+  retries: Number(process.env.PW_RETRIES ?? 0),
 
   // ── Reporter ──
   reporter: [
@@ -45,8 +45,8 @@ export default defineConfig({
 
   // ── Shared Settings ──
   use: {
-    baseURL: process.env.BASE_URL || "http://localhost:3000",
-    testIdAttribute: "data-testid",
+    baseURL: process.env.BASE_URL,
+    testIdAttribute: process.env.TEST_ID_ATTRIBUTE || "data-testid",
     trace: TRACE_MODE as any,
     screenshot: "only-on-failure",
     actionTimeout: 10_000,
@@ -54,43 +54,5 @@ export default defineConfig({
   },
 
   // ── Projects ──
-  projects: [
-    // Auth setup — runs before all dependent projects
-    // {
-    //   name: "auth-setup",
-    // },
-
-    // Main test project — real app only; ignored until BASE_URL points to a real app
-    {
-      name: "chromium",
-      testIgnore: /.*/,
-      use: {
-        ...devices["Desktop Chrome"],
-        storageState: "playwright/.auth/user.json",
-      },
-      grep: process.env.RUN_GLOBAL_AUTH ? undefined : /^$/,
-    },
-
-    // Saucedemo — standalone project (different baseURL, own auth)
-    {
-      name: "saucedemo",
-      use: {
-        ...devices["Desktop Chrome"],
-        baseURL: "https://www.saucedemo.com",
-        testIdAttribute: "data-test",
-        storageState: "playwright/.auth/saucedemo.json",
-      },
-      // testMatch: /.*saucedemo.*\.setup\.ts$/,
-      dependencies: ["saucedemo-setup"],
-    },
-    {
-      name: "saucedemo-setup",
-      use: {
-        baseURL: "https://www.saucedemo.com",
-        testIdAttribute: "data-test",
-      },
-      testMatch: /.*saucedemo.*\.setup\.ts$/,
-    },
-    // (no lightweight experiment projects configured)
-  ],
+  projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
 });

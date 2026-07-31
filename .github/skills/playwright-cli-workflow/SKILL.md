@@ -18,7 +18,7 @@ This skill keeps CLI tasks small, repeatable, and aligned with the framework's C
 ## Do Not Use This Skill When
 
 - A failing spec needs formal failure classification and minimal-fix triage. Use `playwright-bug-hunter`.
-- The task is merge review. Use `playwright-reviewer`.
+- The task is merge review. Use `pre-merge-qa-gate`.
 - The UI is mostly unknown and discovery is the main task. Prefer the MCP workflow.
 
 ## Required Inputs

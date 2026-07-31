@@ -1,282 +1,108 @@
 # Playwright Automation Boilerplate
 
-> Helper-first Playwright framework built around a strict **Config → Helpers → Tests** separation.
-> Fork it, wire in your module, and ship tests that stay stable.
+A clean, application-agnostic Playwright harness using:
 
----
+```text
+Verified context → Approved requirement → Config → Helpers → Tests → Gate → Run → Metrics
+```
 
-## Why This Framework
+The repository intentionally ships with zero application requirements and zero tests. AI agents
+derive project-specific automation from source evidence; they do not adapt a hidden demo project.
 
-Most Playwright setups start clean and get messy fast — selectors scattered across tests, auth re-running in every `beforeEach`, AI codegen with no guardrails. This boilerplate is built to prevent that from the start.
-
-| Area              | This Framework                                                   | Typical Alternatives                       |
-| ----------------- | ---------------------------------------------------------------- | ------------------------------------------ |
-| Architecture      | Config → Helpers → Tests (helper-first)                          | Page objects or mixed selectors in tests   |
-| Selector strategy | `getByRole()` → `getByLabel()` → `getByText()` → `getByTestId()` | Heavy reliance on CSS / XPath              |
-| Auth handling     | `storageState` + setup projects — auth runs once                 | Re-login in `beforeEach` (slower, flakier) |
-| Test generation   | CLI-assisted discovery + optional DDT scaffolding                | Manual test authoring from scratch         |
-| AI layer          | Agent + prompts + post-capture hooks (opt-in)                    | Ad-hoc codegen with no repository rules    |
-
----
-
-## Get Started
-
-> **Pointing this at your own app?** Follow [ADAPTING.md](ADAPTING.md) first — it walks you through removing sample modules, updating credentials, revamping the config, and scaffolding your first real module. Or ask an AI agent: `/adapt-boilerplate`.
-
-> **Want a simple AI onboarding wrapper (no credentials shared in chat)?** Use [.github/prompts/onboard-your-app.prompt.md](.github/prompts/onboard-your-app.prompt.md) from the Copilot prompt picker. It asks only for URL, auth env variable names, test scope, and routes, then scaffolds the foundation layer.
->
-> **Quick chat alias:** type **"onboard my app"** in Copilot Chat.
-
-### Option A — 5 minutes (just validate the setup)
+## Start
 
 ```bash
-npm run bootstrap        # installs dependencies + browsers
-cp .env.example .env     # copy environment config
-npm run test:saucedemo   # run included demo tests
-npm run report           # open HTML report
+npm ci
+npm run harness:check
+npm run harness:test
+npm run check:rules
+npm run lint
+npm test
+npm run evidence:build
 ```
 
-You should see tests pass and an HTML report open with results. That's the full loop working.
+An empty clone is healthy: Playwright passes with zero tests and metrics report the bootstrap state.
 
-### Option B — Full walkthrough (learn the workflow end to end)
-
-```mermaid
-flowchart LR
-    A[1 · Discover feature] --> B[2 · Scaffold from recording]
-    B --> C[3 · Place test in folder] --> D[4 · Run and inspect]
-```
-
-**Step 1: Discover the feature you want to test**
-
-Read [DISCOVERY.md](DISCOVERY.md), then record a flow with Playwright Codegen:
-
-```bash
-npm run context:codegen
-```
-
-This opens a browser where you interact with the app. Playwright records every action.
-
-**Step 2: Scaffold from the recording**
-
-```bash
-npm run capture:post -- --module <module> --feature <feature> --capture ./capture.json
-```
-
-This runs post-capture hooks that produce DDT-aware scaffolding based on what was recorded.
-
-**Step 3: Place the test in the right folder**
-
-Put it under `playwright/tests/<module>/` and follow the Config → Helpers → Tests pattern. See [docs/02-guides/writing-tests.md](docs/02-guides/writing-tests.md).
-
-**Step 4: Run and inspect**
-
-```bash
-npm run test:saucedemo
-npm run report
-```
-
----
-
-### Option C — AI-driven (let the agent test the app for you)
-
-<details><summary>Workflow overview</summary>
-
-```mermaid
-flowchart LR
-    A[1 · Set BASE_URL] --> B[2 · Run agent in discovery mode]
-    B --> C[3 · Review generated output] --> D[4 · Promote to real test]
-```
-
-</details>
-
-This is the most hands-off path. Instead of recording manually, you point a Playwright CLI or MCP agent at the app and it discovers, interacts, and generates tests on your behalf — guided by the prompts and rules already baked into this repo.
-
-> Best for: exploring an unfamiliar feature, generating a first-pass test suite quickly, or validating a new module before writing anything by hand.
-
-**Step 1: Point your environment at a running app**
-
-```bash
-cp .env.example .env
-# Set BASE_URL in .env to wherever the app is running
-```
-
-**Step 2: Run the agent in discovery mode**
-
-```bash
-npm run context:codegen
-```
-
-Or if you are using the MCP workflow with Claude or another agent:
-
-```bash
-npm run capture:post -- --module <module> --feature <feature> --capture ./capture.json
-```
-
-If using the MCP workflow, log in interactively in the MCP browser first — storageState is not applied to MCP sessions.
-The agent navigates the app, captures interactions, and produces a structured capture file. It follows the prompt rules in `.github/prompts/mcp/` — so it respects the framework's selector strategy, naming conventions, and folder structure without you having to prompt it manually.
-
-**Step 3: Review the generated output**
-
-The agent produces a scaffold, not a finished test suite. Your job at this point is to confirm the selectors match the strategy (`getByRole` first, `getByTestId` as fallback), verify the assertions reflect actual business intent rather than just DOM state, and move or rename files if they landed in the wrong folder.
-
-**Step 4: Promote to a real test**
-
-```bash
-npm run check:ddt-fixtures   # validate any generated JSON fixtures
-npm run test:ui              # step through in UI mode and verify
-npm run report               # inspect the full evidence output
-```
-
-For full agent usage, MCP configuration, and prompt details see [docs/04-reference/playwright-cli-agents.md](docs/04-reference/playwright-cli-agents.md) and `.github/prompts/mcp/`.
-
----
+Continue with [From No Project to Test Metrics](docs/START-HERE.md).
 
 ## Architecture
 
+| Layer | Location | Responsibility |
+| --- | --- | --- |
+| Harness | `harness.config.json`, `harness/**` | Roles, policy, permissions, quality contract |
+| Application intelligence | `docs/application-intelligence/**` | Verified project and module behavior |
+| Requirements | `evidence/requirements.json` | Canonical approved scenario registry |
+| Config | `playwright/configs/**` | Selectors, routes, APIs, and evidence paths |
+| Helpers | `playwright/support/helpers/**` | Reusable behavior and assertions |
+| Fixtures | `playwright/fixtures/base.fixture.ts` | Helper injection |
+| Tests | `playwright/tests/**` | Thin orchestration |
+| Evidence | `evidence/**` | Normalized runs, coverage, and metrics |
+
+## Agent lifecycle
+
+| Role | Agent | Purpose |
+| --- | --- | --- |
+| GATHER | `project-bootstrapper` | Derive verified project context and requirements |
+| DISCOVER | `playwright-cli` | Inspect a verified application surface |
+| BUILD | `playwright-test-automation` | Implement one active requirement |
+| EVALUATE | `pre-merge-qa-gate` | Independently grade and approve/block |
+| DIAGNOSE | `playwright-bug-hunter` | Trace failures to root cause |
+| MAINTAIN | `workflow-maintainer` | Keep workflow assets aligned |
+
+Claude and Copilot configurations are generated projections. Edit neutral sources, then run:
+
+```bash
+npm run harness:sync
+npm run harness:check
 ```
-Config → Helpers → Tests
+
+## Rules
+
+<!-- HARNESS:RULES:START -->
+<!-- Generated from harness.config.json — run `npm run harness:sync`. Do not edit by hand. -->
+
+```text
+NEVER  →  page.waitForTimeout(<number>)                                      waitForResponse() or a deterministic expect() assertion
+NEVER  →  a selector literal in a spec or helper                             constants from playwright/configs/ui/**
+NEVER  →  a route or endpoint literal when config exists                     constants from playwright/configs/app/routes.ts or configs/api/**
+NEVER  →  page-object classes, action layers, or wrappers outside helpers/   helper-first code in playwright/support/helpers/**
+NEVER  →  a password, secret, API key, or token assigned a literal string    environment variables loaded from a gitignored .env or CI secret
+NEVER  →  login in beforeEach()                                              a storageState setup-project dependency
+NEVER  →  a spec importing test directly from @playwright/test               test and expect from playwright/fixtures/base.fixture.ts
+NEVER  →  POST, PUT, PATCH, or DELETE in a smoke spec                        read-only assertions; put mutations in e2e coverage
+NEVER  →  skip semantic locators without a reason                            getByRole(), getByLabel(), getByText(), then getByTestId()
+NEVER  →  use first() or nth() where a filter can identify the element       filter({ hasText }) or filter({ has })
+NEVER  →  a new config, helper, or spec without searching first              search literal selectors, routes, and endpoints by value
+NEVER  →  a test with no requirement tag, more than one, or an unknown id    exactly one known requirement id in the title and as a tag, plus Type, Priority, and tier tags
 ```
 
-| Layer       | What it contains                  | Rule                                            |
-| ----------- | --------------------------------- | ----------------------------------------------- |
-| **Config**  | Selectors, API endpoints, routes  | Pure data — `as const`, no logic                |
-| **Helpers** | Reusable async methods per module | One class per module, injected via fixtures     |
-| **Tests**   | Thin `test()` calls               | Destructure helpers — no raw selectors in tests |
+| Rule | Why it exists | Enforcement |
+|---|---|---|
+| `no-hard-wait` | A fixed delay hides the real readiness condition and flakes in CI. | Hook + CI |
+| `no-hardcoded-selector` | A UI change should have one owner, not scattered copies. | Hook + CI |
+| `no-hardcoded-route` | Routes and API contracts need one maintained registry. | Hook + CI |
+| `no-page-object` | A second UI abstraction duplicates config and helper ownership. | Hook + CI |
+| `no-credential-literal` | A committed credential is a breach, not a style issue. | Hook + CI |
+| `storage-state-auth` | Authentication should be isolated and cached, not repeated in every test. | Hook + CI |
+| `base-fixture-import` | The fixture is the single injection point for helpers. | Hook + CI |
+| `smoke-read-only` | Smoke coverage must be safe against shared and production-like environments. | Hook + CI |
+| `locator-priority` | Semantic locators are more stable and accessible. | QA gate |
+| `narrow-before-index` | Index-based locators silently target the wrong element when the UI changes. | QA gate |
+| `search-before-create` | Duplicate owners cause the same app change to need multiple fixes. | QA gate |
+| `one-requirement-tag` | The title survives every reporter and the tag supports filtering; together they make coverage computable. | QA gate |
 
-### Where to look first
+<!-- HARNESS:RULES:END -->
 
-| What you need              | Where it lives                                                   |
-| -------------------------- | ---------------------------------------------------------------- |
-| Selectors and UI constants | `playwright/configs/ui/`                                         |
-| Routes and API endpoints   | `playwright/configs/app/routes.ts` and `playwright/configs/api/` |
-| Helpers                    | `playwright/support/helpers/`                                    |
-| Fixtures                   | `playwright/fixtures/base.fixture.ts`                            |
-| Test data (DDT)            | `playwright/testdata/`                                           |
+## Execution and evidence
 
----
+```bash
+npm run test:smoke
+npm run test:e2e
+npm run evidence:build
+```
 
-## What's Included
+Playwright produces HTML, JSON, and JUnit. The evidence script produces a runner-neutral summary,
+requirement coverage, and five outcome metrics. Missing upstream evidence is reported as
+unavailable, never as a misleading zero.
 
-### Auth
-
-- `storageState` auth — session cached via project dependencies, not re-run per test
-- Multi-project setup with `dependencies` — setup runs once, tests run after
-
-### Selectors
-
-- `page.getByRole()` — preferred first choice, accessible and user-facing
-- `page.getByTestId()` — stable fallback when semantic selectors aren't enough
-- Locator strategy documented and enforced via `npm run check:locator-strategy`
-
-### Test Infrastructure
-
-- Multi-environment support via `.env.qa`, `.env.staging`, `.env.prod`
-- Tag-based filtering with `--grep` (`@smoke`, `@regression`, etc.)
-- Data-driven testing (DDT) via JSON fixtures in `playwright/testdata/`
-- API engine — config-driven route interception with `waitForResponse()`
-- TypeScript with path aliases (`@configs`, `@support`, `@core`)
-
-### Reporting and Evidence
-
-- HTML report — built-in Playwright reporter, opens with `npm run report`
-- JSON and JUnit outputs for CI integration
-- Trace viewer — auto-captured on first retry
-- Screenshots on failure
-
-### AI and Agents
-
-- Claude Code integration — see [CLAUDE.md](CLAUDE.md)
-- GitHub Copilot configured out of the box
-- CLI-first discovery workflow — see [CODEGEN_QUICKSTART.md](CODEGEN_QUICKSTART.md)
-- MCP agent hooks — see `.github/prompts/mcp/` and [docs/04-reference/playwright-cli-agents.md](docs/04-reference/playwright-cli-agents.md)
-
-### Reference Modules
-
-- `example/` — full reference implementation (UI config + API config + helpers + spec)
-- `saucedemo/` — working tests against a real demo app, runnable immediately
-
----
-
-## Scripts
-
-### Everyday use
-
-| Command                  | What it does                   |
-| ------------------------ | ------------------------------ |
-| `npm test`               | Run all tests                  |
-| `npm run test:smoke`     | Run `@smoke` tagged tests only |
-| `npm run test:saucedemo` | Run the saucedemo project      |
-| `npm run test:ui`        | Open Playwright UI mode        |
-| `npm run test:debug`     | Run with debugger attached     |
-| `npm run report`         | Open the HTML report           |
-
-### Discovery and generation
-
-| Command                                                                       | What it does                                                   |
-| ----------------------------------------------------------------------------- | -------------------------------------------------------------- |
-| `npm run bootstrap`                                                           | Install dependencies and browsers — run this on a fresh clone  |
-| `npm run context:codegen`                                                     | Open Playwright Codegen for manual browser recording           |
-| `npm run scaffold:ddt -- --module <m> --feature <f> --capture ./capture.json` | Generate DDT scaffolding from a captured flow                  |
-| `npm run capture:post -- --module <m> --feature <f> --capture ./capture.json` | Run the recommended post-capture hook for MCP-driven discovery |
-
-### Maintenance and validation
-
-| Command                          | What it does                                                     |
-| -------------------------------- | ---------------------------------------------------------------- |
-| `npm run check:locator-strategy` | Confirm locator usage stays within strategy after helper changes |
-| `npm run check:ddt-fixtures`     | Validate JSON fixtures contain required assertion structure      |
-| `npm run check:doc-impact`       | Confirm docs were updated after framework-level changes          |
-
-> **Note:** Bootstrap and check scripts are setup and maintenance tools — not required before every test run.
-
----
-
-## Documentation
-
-| Goal                            | Where to go                                                                              |
-| ------------------------------- | ---------------------------------------------------------------------------------------- |
-| Discover and record a flow      | [DISCOVERY.md](DISCOVERY.md), [CODEGEN_QUICKSTART.md](CODEGEN_QUICKSTART.md)             |
-| Write a test                    | [docs/02-guides/writing-tests.md](docs/02-guides/writing-tests.md)                       |
-| Understand selector strategy    | [docs/02-guides/selector-strategies.md](docs/02-guides/selector-strategies.md)           |
-| Understand helpers and fixtures | [docs/support-helpers-guide.md](docs/support-helpers-guide.md)                           |
-| Config reference                | [docs/04-reference/config-reference.md](docs/04-reference/config-reference.md)           |
-| Workflow utilities              | [docs/04-reference/workflow-utilities.md](docs/04-reference/workflow-utilities.md)       |
-| AI agents and MCP               | [docs/04-reference/playwright-cli-agents.md](docs/04-reference/playwright-cli-agents.md) |
-| Framework standards             | [docs/framework-standards.md](docs/framework-standards.md)                               |
-| Framework maintenance           | [docs/framework-maintenance-guide.md](docs/framework-maintenance-guide.md)               |
-
-Full documentation index: [docs/README.md](docs/README.md)
-
----
-
-## Roadmap
-
-### Short term
-
-- **Better onboarding** — "First 5 minutes" checklist and a single-page quickstart card
-- **DDT scaffolding stability** — stabilize generator heuristics and document an opt-out flag
-- **DDT validator in CI** — run `check:ddt-fixtures` as a blocking CI step to catch malformed fixtures before merge
-
-### Medium term
-
-- **Unit tests for generator flows** — mock capture artifacts and assert scaffold outputs
-- **Expanded module coverage** — additional reference modules beyond `example/` and `saucedemo/`
-
-### Long term
-
-- **Agent and skill consolidation** — audit `.github/agents` and `.github/skills`, prune duplicates, document the kept set
-- **Reporting and retention** — optional nightly CI job producing HTML reports with traces and archived artifacts
-
----
-
-## Contributing
-
-- Open an issue with your change request
-- Send a PR that updates both the relevant docs and adds tests or CI snippets for the change
-- Run `npm run check:doc-impact` before submitting to confirm docs coverage
-
----
-
-## License
-
-MIT
+Paid reporting, browser, or device services are optional.

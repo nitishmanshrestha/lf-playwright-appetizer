@@ -29,6 +29,13 @@ For adding tests to modules you already understand. No planning file needed.
 
 See [Your First Test Module](../01-getting-started/first-test-module.md) for a full walk-through.
 
+### Product-specific locator exceptions
+
+Prefer accessible, user-facing locators. When a product-specific test ID is the
+only selector that preserves the requested item identity, it may be used with a
+nearby `locator-strategy: allow-single` comment that explains the exception.
+Do not replace an identity-dependent action with a generic button locator.
+
 ---
 
 ## Approach B — Spec-driven testing (plan → generate → heal)
@@ -186,15 +193,11 @@ Save under `specs/<feature>.plan.md`. Use this structure:
 **Steps:**
 
 1. <Concrete user step>
-
-
-    - expect: <observable outcome>
-    - expect: <another observable outcome>
+   - expect: <observable outcome>
+   - expect: <another observable outcome>
 
 2. <Next step>
-
-
-    - expect: <outcome>
+   - expect: <outcome>
 
 #### 1.2. <next-scenario>
 

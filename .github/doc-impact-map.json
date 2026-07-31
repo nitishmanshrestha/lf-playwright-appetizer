@@ -2,47 +2,39 @@
   "rules": [
     {
       "trigger": ["playwright.config.ts"],
-      "docs": [
-        "docs/framework-standards.md",
-        "docs/getting-started.md",
-        "docs/bootstrap-evidence-guide.md"
-      ]
+      "docs": ["README.md", "docs/04-reference/config-reference.md"]
     },
     {
       "triggerPrefix": ["playwright/configs/app/"],
-      "docs": [
-        "docs/framework-standards.md",
-        "docs/framework-maintenance-guide.md",
-        "docs/bootstrap-evidence-guide.md"
-      ]
+      "docs": ["README.md", "docs/04-reference/config-reference.md"]
     },
     {
       "triggerPrefix": ["playwright/configs/api/"],
-      "docs": ["docs/api-layer-guide.md", "docs/framework-maintenance-guide.md"]
+      "docs": ["docs/02-guides/api-mocking.md", "docs/02-guides/writing-tests.md"]
     },
     {
       "triggerPrefix": ["playwright/configs/ui/"],
-      "docs": ["docs/framework-standards.md", "docs/framework-maintenance-guide.md"]
+      "docs": ["docs/02-guides/selector-strategies.md", "docs/02-guides/writing-tests.md"]
     },
     {
       "triggerPrefix": ["playwright/support/helpers/"],
-      "docs": ["docs/support-helpers-guide.md", "docs/framework-maintenance-guide.md"]
+      "docs": ["docs/02-guides/writing-tests.md", "docs/05-architecture/three-layer-pattern.md"]
     },
     {
       "triggerPrefix": ["playwright/tests/"],
-      "docs": ["docs/workflow.md", "docs/framework-maintenance-guide.md"]
+      "docs": ["docs/02-guides/writing-tests.md", "docs/01-getting-started/first-test-module.md"]
     },
     {
       "triggerPrefix": ["playwright/fixtures/"],
-      "docs": ["docs/workflow.md", "docs/framework-maintenance-guide.md"]
+      "docs": ["docs/02-guides/writing-tests.md", "docs/03-features/session-and-auth.md"]
     },
     {
       "trigger": ["scripts/bootstrap.js"],
-      "docs": ["docs/getting-started.md", "docs/bootstrap-evidence-guide.md"]
+      "docs": ["README.md", "docs/01-getting-started/setup.md"]
     },
     {
       "trigger": ["scripts/check-locator-strategy.js"],
-      "docs": ["docs/support-helpers-guide.md", "docs/framework-standards.md"]
+      "docs": ["docs/02-guides/selector-strategies.md", "docs/02-guides/writing-tests.md"]
     }
   ]
 }

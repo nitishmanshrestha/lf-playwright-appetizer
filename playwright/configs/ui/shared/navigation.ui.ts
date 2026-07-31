@@ -1,14 +1,4 @@
 /**
- * @fileoverview Shared navigation selectors.
+ * Add verified shared navigation selectors after application discovery.
  */
-
-export const NAVIGATION_UI = {
-  SIDEBAR: {
-    CONTAINER: "sidebar",
-    MENU_TOGGLE: "menu-toggle",
-  },
-  BREADCRUMB: {
-    CONTAINER: "breadcrumb",
-    ITEM: "breadcrumb-item",
-  },
-} as const;
+export const NAVIGATION_UI = {} as const;

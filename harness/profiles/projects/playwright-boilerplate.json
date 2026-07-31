@@ -1,0 +1,10 @@
+{
+  "$comment": "Profile for the Playwright boilerplate itself — the reference instantiation of the playwright adapter. Every field below is a project fact; all policy comes from adapters/playwright.json.",
+  "key": "playwright-boilerplate",
+  "displayName": "Playwright Automation Boilerplate",
+  "owner": "<accountable QA owner>",
+  "adapter": "playwright",
+  "language": "typescript",
+  "projectName": "playwright-automation-boilerplate",
+  "repo": "lf-playwright-boilerplate"
+}

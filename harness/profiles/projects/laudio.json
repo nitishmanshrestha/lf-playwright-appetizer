@@ -1,0 +1,10 @@
+{
+  "$comment": "Worked example from real survey data. Laudio is T1 Adopt (8/9), Playwright, TypeScript, GitHub Actions nightly + per-commit, 5 respondents, migrated off Cypress. It is the first real exercise of the Playwright adapter — see harness-rollout-architecture.md section 6, T1.",
+  "key": "laudio",
+  "displayName": "Laudio",
+  "owner": "<confirm with Sushma Puri>",
+  "adapter": "playwright",
+  "language": "typescript",
+  "projectName": "laudio-automation",
+  "repo": "<repo path — confirm before first sync>"
+}

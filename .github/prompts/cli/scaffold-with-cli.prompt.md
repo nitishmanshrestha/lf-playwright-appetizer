@@ -105,11 +105,7 @@ File: `playwright/tests/{{moduleName}}/e2e/{{moduleName}}-{{featureName}}.spec.t
 - If the skill returns `NOT_CANDIDATE`, generate a single-scenario spec as usual.
 - Respect an opt-out flag to skip DDT scaffolding when the user requests `--no-ddt`.
 
-Example command (agent):
-
-```
-node scripts/scaffold-runner.js --module {{moduleName}} --feature {{featureName}} --capture ./capture.json
-```
+Write the fixture and spec directly; there is no scaffold generator script.
 
 ---
 

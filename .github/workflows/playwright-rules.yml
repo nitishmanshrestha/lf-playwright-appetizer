@@ -4,9 +4,8 @@ name: Playwright Architecture Rules
 # Runs the non-negotiable architecture validation hook on every PR that touches
 # Playwright code, hooks, or framework config.
 #
-# This is the CI equivalent of the .claude/hooks/validate-playwright-rules.mjs
-# hook that runs locally on every file write. Both run the same script —
-# CI catches anything that slipped through local enforcement.
+# This is the CI equivalent of the local Edit/Write hook. Both use the same
+# scanner; CI covers changes made outside an AI tool and scans the full tree.
 #
 # Blocks merge if:
 #   - page.waitForTimeout(number) is found
@@ -24,7 +23,16 @@ on:
       - "playwright/**"
       - ".claude/hooks/**"
       - ".claude/settings.json"
+      - ".claude/agents/**"
+      - ".github/agents/**"
+      - ".github/hooks/**"
+      - ".github/copilot-instructions.md"
+      - "harness/**"
+      - "harness.config.json"
+      - "package.json"
+      - "scripts/harness/**"
       - "CLAUDE.md"
+      - "README.md"
 
 jobs:
   validate-architecture:
@@ -42,5 +50,8 @@ jobs:
         with:
           node-version: "20"
 
+      - name: Verify harness projections
+        run: npm run harness:check && npm run harness:test
+
       - name: Validate non-negotiable rules
-        run: node .claude/hooks/validate-playwright-rules.mjs --base-ref "${{ github.base_ref }}"
+        run: npm run check:rules

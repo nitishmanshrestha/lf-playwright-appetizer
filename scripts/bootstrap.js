@@ -7,7 +7,6 @@ const path = require("node:path");
 const rootDir = path.resolve(__dirname, "..");
 const envTemplate = path.join(rootDir, "playwright", "environments", ".env.qa.example");
 const envFile = path.join(rootDir, ".env");
-const mcpConfig = path.join(rootDir, ".vscode", "mcp.json");
 const bootstrapEvidenceDir = path.join(rootDir, "playwright", "evidence", "bootstrap");
 
 const evidence = {
@@ -18,12 +17,10 @@ const evidence = {
     npmInstall: "pending",
     playwrightInstall: "pending",
     envFile: "pending",
-    mcpConfig: "pending",
   },
   details: {
     envTemplatePath: "playwright/environments/.env.qa.example",
     envFilePath: ".env",
-    mcpConfigPath: ".vscode/mcp.json",
   },
 };
 
@@ -57,9 +54,9 @@ function runStep(command, args) {
 }
 
 console.log("[bootstrap] Starting setup...");
-runStep("npm", ["install"]);
+runStep("npm", ["ci"]);
 evidence.steps.npmInstall = "ok";
-runStep("npx", ["playwright", "install"]);
+runStep("npx", ["playwright", "install", "chromium"]);
 evidence.steps.playwrightInstall = "ok";
 
 if (!existsSync(envFile)) {
@@ -78,14 +75,6 @@ if (!existsSync(envFile)) {
   evidence.steps.envFile = "existing";
 }
 
-if (existsSync(mcpConfig)) {
-  console.log("[bootstrap] MCP config found at .vscode/mcp.json");
-  evidence.steps.mcpConfig = "found";
-} else {
-  console.warn("[bootstrap] Warning: .vscode/mcp.json not found.");
-  evidence.steps.mcpConfig = "missing";
-}
-
 evidence.finishedAt = new Date().toISOString();
 evidence.status = "passed";
 persistEvidence();
@@ -93,6 +82,6 @@ persistEvidence();
 console.log("\n[bootstrap] Setup complete.");
 console.log("[bootstrap] Next steps:");
 console.log("  1) Review .env values");
-console.log("  2) Run npm run test:saucedemo");
-console.log("  3) Start MCP from VS Code command palette: MCP: List Servers");
+console.log("  2) Run npm run harness:check && npm run harness:test");
+console.log("  3) Follow docs/START-HERE.md and invoke project-bootstrapper");
 console.log("  4) Review evidence: playwright/evidence/bootstrap/latest.json");

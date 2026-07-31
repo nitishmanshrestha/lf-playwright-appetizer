@@ -15,6 +15,11 @@ blob-report/
 playwright/evidence/bootstrap/
 playwright/evidence/tests/
 
+# Generated normalized evidence; keep evidence/requirements.json tracked.
+evidence/runs/
+evidence/coverage-computed.json
+evidence/metrics.json
+
 # Auth and captured runtime artifacts
 playwright/.auth/
 playwright/.context-capture/

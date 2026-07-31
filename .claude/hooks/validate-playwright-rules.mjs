@@ -20,7 +20,7 @@ import { execSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { toPosix, loadAllowlist, scanContent } from "./shared-rules.mjs";
+import { extractToolChange, toPosix, loadAllowlist, scanContent } from "./shared-rules.mjs";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -71,10 +71,10 @@ if (process.argv.includes("--all")) {
 
   let changedFiles;
   try {
-    const diffOutput = execSync(
-      `git diff --name-only --diff-filter=ACM origin/${baseRef}...HEAD`,
-      { cwd: repoRoot, encoding: "utf8" },
-    );
+    const diffOutput = execSync(`git diff --name-only --diff-filter=ACM origin/${baseRef}...HEAD`, {
+      cwd: repoRoot,
+      encoding: "utf8",
+    });
     changedFiles = diffOutput.split(/\r?\n/).filter(Boolean);
   } catch (err) {
     console.error(`[CI] git diff failed: ${err.message}`);
@@ -110,19 +110,7 @@ if (process.argv.includes("--all")) {
     process.exit(0);
   }
 
-  const toolName = toolData?.tool_name || "";
-  const toolInput = toolData?.tool_input || {};
-  const filePath = toolInput.file_path || "";
-
-  let content = "";
-  if (toolName === "Write") {
-    content = toolInput.content || "";
-  } else if (toolName === "Edit") {
-    content = toolInput.new_string || "";
-  } else {
-    process.exit(0);
-  }
-
+  const { filePath, content } = extractToolChange(toolData, repoRoot, { readCurrent: true });
   if (!filePath || !content) process.exit(0);
 
   const violations = scanContent(filePath, content, allowlist, repoRoot);

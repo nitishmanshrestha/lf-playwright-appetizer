@@ -1,0 +1,278 @@
+{
+  "$comment": "Adapter baseline for playwright. Policy that is identical for every playwright project. Composed with a project profile to produce that project's harness.config.json. Edit policy here once; every project on this adapter inherits it.",
+  "version": 1,
+  "framework": "playwright",
+  "agentFileExtension": ".md",
+  "architecture": "Config → Helpers → Tests",
+  "paths": {
+    "testRoot": "playwright",
+    "configRoot": "playwright/configs",
+    "commandRoot": "playwright/support/helpers",
+    "specGlob": "playwright/tests/**/*.spec.ts"
+  },
+  "defaults": {
+    "adapters": {
+      "claude": {
+        "enabled": true
+      },
+      "copilot": {
+        "enabled": true
+      }
+    },
+    "context": {
+      "effortLevel": "high",
+      "alwaysThinkingEnabled": true,
+      "autoMemoryEnabled": true
+    },
+    "loops": {
+      "gateRepairLimit": 3
+    },
+    "env": {
+      "PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD": "0"
+    }
+  },
+  "qaFoundations": "harness/qa-automation-foundations.md",
+  "rules": [
+    {
+      "id": "no-hard-wait",
+      "severity": "block",
+      "enforcement": "Hook + CI",
+      "never": "page.waitForTimeout(<number>)",
+      "instead": "waitForResponse() or a deterministic expect() assertion",
+      "why": "A fixed delay hides the real readiness condition and flakes in CI.",
+      "message": "Hard wait detected. Use a response wait or state-based assertion."
+    },
+    {
+      "id": "no-hardcoded-selector",
+      "severity": "block",
+      "enforcement": "Hook + CI",
+      "never": "a selector literal in a spec or helper",
+      "instead": "constants from playwright/configs/ui/**",
+      "why": "A UI change should have one owner, not scattered copies.",
+      "message": "Hardcoded selector. Use a UI config constant."
+    },
+    {
+      "id": "no-hardcoded-route",
+      "severity": "block",
+      "enforcement": "Hook + CI",
+      "never": "a route or endpoint literal when config exists",
+      "instead": "constants from playwright/configs/app/routes.ts or configs/api/**",
+      "why": "Routes and API contracts need one maintained registry.",
+      "message": "Hardcoded route or endpoint. Use the config registry."
+    },
+    {
+      "id": "no-page-object",
+      "severity": "block",
+      "enforcement": "Hook + CI",
+      "never": "page-object classes, action layers, or wrappers outside helpers/",
+      "instead": "helper-first code in playwright/support/helpers/**",
+      "why": "A second UI abstraction duplicates config and helper ownership.",
+      "message": "Page-object or action-layer dependency. Use the helper-first architecture."
+    },
+    {
+      "id": "no-credential-literal",
+      "severity": "block",
+      "enforcement": "Hook + CI",
+      "never": "a password, secret, API key, or token assigned a literal string",
+      "instead": "environment variables loaded from a gitignored .env or CI secret",
+      "why": "A committed credential is a breach, not a style issue.",
+      "message": "Hardcoded credential. Read it from the environment instead."
+    },
+    {
+      "id": "storage-state-auth",
+      "severity": "block",
+      "enforcement": "Hook + CI",
+      "never": "login in beforeEach()",
+      "instead": "a storageState setup-project dependency",
+      "why": "Authentication should be isolated and cached, not repeated in every test.",
+      "message": "Per-test login detected. Use storageState setup instead."
+    },
+    {
+      "id": "base-fixture-import",
+      "severity": "block",
+      "enforcement": "Hook + CI",
+      "never": "a spec importing test directly from @playwright/test",
+      "instead": "test and expect from playwright/fixtures/base.fixture.ts",
+      "why": "The fixture is the single injection point for helpers.",
+      "message": "Spec bypasses base.fixture.ts."
+    },
+    {
+      "id": "smoke-read-only",
+      "severity": "block",
+      "enforcement": "Hook + CI",
+      "never": "POST, PUT, PATCH, or DELETE in a smoke spec",
+      "instead": "read-only assertions; put mutations in e2e coverage",
+      "why": "Smoke coverage must be safe against shared and production-like environments.",
+      "message": "Write request in smoke suite. Smoke tests must remain read-only."
+    },
+    {
+      "id": "locator-priority",
+      "severity": "review",
+      "enforcement": "QA gate",
+      "never": "skip semantic locators without a reason",
+      "instead": "getByRole(), getByLabel(), getByText(), then getByTestId()",
+      "why": "Semantic locators are more stable and accessible.",
+      "message": "Follow the configured locator priority."
+    },
+    {
+      "id": "narrow-before-index",
+      "severity": "review",
+      "enforcement": "QA gate",
+      "never": "use first() or nth() where a filter can identify the element",
+      "instead": "filter({ hasText }) or filter({ has })",
+      "why": "Index-based locators silently target the wrong element when the UI changes.",
+      "message": "Narrow the locator with a filter before using an index."
+    },
+    {
+      "id": "search-before-create",
+      "severity": "review",
+      "enforcement": "QA gate",
+      "never": "a new config, helper, or spec without searching first",
+      "instead": "search literal selectors, routes, and endpoints by value",
+      "why": "Duplicate owners cause the same app change to need multiple fixes.",
+      "message": "Search the configs and helpers by value before creating a new asset."
+    },
+    {
+      "id": "one-requirement-tag",
+      "severity": "review",
+      "enforcement": "QA gate",
+      "never": "a test with no requirement tag, more than one, or an unknown id",
+      "instead": "exactly one known requirement id in the title and as a tag, plus Type, Priority, and tier tags",
+      "why": "The title survives every reporter and the tag supports filtering; together they make coverage computable.",
+      "message": "Test must carry exactly one known requirement id in its title and tags."
+    }
+  ],
+  "agents": [
+    {
+      "name": "project-bootstrapper",
+      "role": "GATHER",
+      "description": "Derive an approved project and application contract from verified sources before any test generation.",
+      "model": "sonnet",
+      "tools": [
+        "Read",
+        "Write",
+        "Edit",
+        "Grep",
+        "Glob",
+        "Bash"
+      ],
+      "when": "Start a new project or module from no existing automation context"
+    },
+    {
+      "name": "playwright-test-automation",
+      "role": "BUILD",
+      "description": "Implement Playwright tests and helpers using the helper-first Config → Helpers → Tests architecture.",
+      "model": "sonnet",
+      "tools": [
+        "Read",
+        "Write",
+        "Edit",
+        "Grep",
+        "Glob",
+        "Bash"
+      ],
+      "when": "Build a requirement-backed helper-first Playwright module"
+    },
+    {
+      "name": "playwright-bug-hunter",
+      "role": "DIAGNOSE",
+      "description": "Debug a failing Playwright test, trace root cause, and propose an exact compliant fix.",
+      "model": "opus",
+      "tools": [
+        "Read",
+        "Grep",
+        "Glob",
+        "Bash",
+        "Edit"
+      ],
+      "when": "Trace and repair a failing test"
+    },
+    {
+      "name": "pre-merge-qa-gate",
+      "role": "EVALUATE",
+      "description": "Evaluate supplied change and command evidence through the complete 6-phase pre-merge QA gate.",
+      "model": "opus",
+      "permissionMode": "plan",
+      "tools": [
+        "Read",
+        "Grep",
+        "Glob"
+      ],
+      "when": "Evaluate supplied diff and verification evidence and return the final QA verdict",
+      "readOnlyRationale": "Read/search only by design: the gate cannot edit files or execute shell commands, so the builder never grades its own output."
+    },
+    {
+      "name": "playwright-cli",
+      "role": "DISCOVER",
+      "description": "Use Playwright CLI for token-efficient browser discovery, debugging, and codegen-first scaffolding.",
+      "model": "sonnet",
+      "tools": [
+        "Read",
+        "Grep",
+        "Glob",
+        "Bash"
+      ],
+      "when": "Use CLI-first browser discovery or codegen"
+    },
+    {
+      "name": "pr-creator",
+      "role": "SHIP",
+      "description": "Create a pull request with the repository's standard generated description.",
+      "model": "sonnet",
+      "tools": [
+        "Read",
+        "Grep",
+        "Glob",
+        "Bash"
+      ],
+      "when": "Opening a pull request with a generated description"
+    },
+    {
+      "name": "workflow-maintainer",
+      "role": "MAINTAIN",
+      "description": "Simplify repository workflow scripts, agents, skills, and docs without duplicating ownership.",
+      "model": "sonnet",
+      "tools": [
+        "Read",
+        "Grep",
+        "Glob",
+        "Bash",
+        "Edit"
+      ],
+      "when": "Simplify workflow scripts, agents, skills, or docs"
+    }
+  ],
+  "hooks": {
+    "prompt": [
+      "prompt-duplication-guard.mjs"
+    ],
+    "preWrite": [
+      "pre-validate-playwright-rules.mjs"
+    ],
+    "postWrite": [
+      "validate-playwright-rules.mjs"
+    ],
+    "stop": [
+      "session-end-reminder.mjs"
+    ]
+  },
+  "permissions": {
+    "defaultMode": "plan",
+    "allow": [
+      "Bash(npm test*)",
+      "Bash(npm run test*)",
+      "Bash(npm run report*)",
+      "Bash(npm run lint*)",
+      "Bash(npm run format*)",
+      "Bash(npm run check:*)",
+      "Bash(npm run harness:*)",
+      "Bash(npx playwright*)",
+      "Bash(npx tsc --noEmit*)",
+      "Bash(grep -r* playwright/*)",
+      "Bash(find playwright/*)"
+    ],
+    "deny": [
+      "WebSearch"
+    ]
+  }
+}
