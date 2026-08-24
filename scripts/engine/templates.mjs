@@ -142,7 +142,7 @@ export function claudeSettings(config) {
 
   return {
     $schema: "https://json.schemastore.org/claude-code-settings.json",
-    _generated: "From harness.config.json by scripts/harness/sync.mjs. Do not edit.",
+    _generated: "From harness.config.json by scripts/engine/sync.mjs. Do not edit.",
     hooks,
     ...config.context,
     permissions: config.permissions,
