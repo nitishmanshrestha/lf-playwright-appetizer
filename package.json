@@ -34,6 +34,8 @@
     "verify": "npm run harness:check && npm run harness:test && npm run harness:format:check && npm run check:rules && npx tsc --noEmit && npm test && npm run evidence:build",
     "harness:sync": "node scripts/engine/sync.mjs",
     "harness:check": "node scripts/engine/check-drift.mjs",
+    "harness:ready": "node scripts/engine/config-ready.mjs",
+    "harness:lock": "node scripts/engine/lock-profile.mjs",
     "harness:compose": "node harness/profiles/bin/compose-harness-config.mjs --profile harness/profiles/projects/playwright-boilerplate.json --out harness.config.json",
     "harness:profile:verify": "node harness/profiles/bin/compose-harness-config.mjs --profile harness/profiles/projects/playwright-boilerplate.json --verify harness.config.json",
     "harness:profile:test": "node harness/profiles/bin/test-compose.mjs",
