@@ -1,18 +1,51 @@
 {
-  "$comment": "Worked example from real survey data. Laudio is T1 Adopt (8/9), Playwright, TypeScript, GitHub Actions nightly + per-commit, 5 respondents, migrated off Cypress. It is the first real exercise of the Playwright adapter — see harness-rollout-architecture.md section 6, T1.",
+  "$comment": "Worked example from real survey data, and the paper test for the P2 dimension work. Laudio is T1 Adopt (9/9), Playwright, TypeScript, GitHub Actions nightly + per-commit, 6 respondents, migrated off Cypress. Every field below is declared data — none of it required an engine change. Paths and wiring are marked <> where Phase 0 discovery has not happened yet; the profile gate refuses to lock a profile with placeholders, which is the correct answer until someone confirms them.",
+
   "key": "laudio",
   "displayName": "Laudio",
   "owner": "<confirm with Sushma Puri>",
+  "repo": "<repo path — confirm before first sync>",
+
+  "$d1": "Framework. Playwright, TypeScript — they migrated off Cypress.",
   "adapter": "playwright",
   "language": "typescript",
   "projectName": "laudio-automation",
-  "repo": "<repo path — confirm before first sync>",
+
+  "$d2": "Pattern. This one line is why the harness was unadoptable and now is not. bdd-pom does not select ARCH-BOUNDARY, so no-page-object and base-fixture-import are not in their composed rule set — not waived, not excepted, just not describing an architecture they use. Every Tier 0 and Tier 1 concern still applies, CACHED-AUTH included.",
+  "pattern": "bdd-pom",
+
+  "$d3": "Topology. Their tree, not the adapter's. Rule scope derives from these, so they must exist on disk before the hooks will build a scanner — which is what makes a typo loud instead of silent.",
+  "paths": {
+    "testRoot": "<their Playwright root — e.g. e2e or tests>",
+    "configRoot": "<their config root>",
+    "commandRoot": "<their page-object / step-helper root>",
+    "specGlob": "<their spec glob — e.g. e2e/**/*.spec.ts>",
+    "stepRoot": "<their Cucumber step-definition root>"
+  },
+  "wiring": {
+    "packageManager": "yarn",
+    "workspacePackage": true,
+    "verifyScript": "<their existing pre-commit entry point>"
+  },
+
+  "$d4": "Strategy. Their cached login was objection #4, which was a misreading — CACHED-AUTH is the harness's own mandated pattern, so this declaration agrees with the harness rather than deviating from it.",
+  "strategy": {
+    "auth": "cached-session",
+    "testData": "seeded",
+    "credentialSource": "vault"
+  },
+
   "adapters": {
-    "claude": {
-      "enabled": true
-    },
-    "copilot": {
-      "enabled": true
+    "claude": { "enabled": true },
+    "copilot": { "enabled": true }
+  },
+
+  "$ruleOverrides": "TRACE is Tier 1 with a ratchet: an existing suite cannot be fully tagged on day one, so it onboards at review and ratchets to block. The reason and the date are required — an unrecorded exception is indistinguishable from a mistake.",
+  "ruleOverrides": {
+    "TRACE": {
+      "severity": "review",
+      "reason": "existing suite predates requirement tagging; tagging as modules are touched",
+      "ratchetBy": "<first clean sprint after onboarding>"
     }
   }
 }
