@@ -14,17 +14,23 @@
  * covers a narrower, adjacent check: action locators with no `.or()` fallback.
  */
 
-import { SCRIPT_EXT, isAllowedLiteral } from "./rule-engine.mjs";
+import { SCRIPT_EXT, escapeRegex, isAllowedLiteral, readProjectPaths } from "./rule-engine.mjs";
+
+// Roots come from the composed config, so a project can declare its own tree. See
+// readProjectPaths for why this derivation is safe and what asserts it.
+const { testRoot, commandRoot } = readProjectPaths(import.meta.url);
+const ROOT = escapeRegex(testRoot);
+const COMMAND_ROOT = escapeRegex(commandRoot.replaceAll("\\", "/"));
 
 const SPEC_RE = new RegExp(String.raw`\.spec\.${SCRIPT_EXT}$`, "i");
 const CODE_RE = new RegExp(String.raw`\.(spec|helpers|fixture|setup)\.${SCRIPT_EXT}$`, "i");
 const PAGE_OBJECT_RE = new RegExp(String.raw`\.(?:page|actions)\.${SCRIPT_EXT}$`, "i");
 const SMOKE_SPEC_RE = new RegExp(
-  String.raw`playwright[\\/]tests[\\/].*[\\/]smoke[\\/].*\.spec\.${SCRIPT_EXT}$`,
+  String.raw`${ROOT}[\\/]tests[\\/].*[\\/]smoke[\\/].*\.spec\.${SCRIPT_EXT}$`,
   "i",
 );
-const TARGET_FILE_RE = new RegExp(String.raw`playwright[\\/].*\.${SCRIPT_EXT}$`, "i");
-const HELPERS_ROOT_RE = /^playwright\/support\/helpers\//i;
+const TARGET_FILE_RE = new RegExp(String.raw`${ROOT}[\\/].*\.${SCRIPT_EXT}$`, "i");
+const HELPERS_ROOT_RE = new RegExp(String.raw`^${COMMAND_ROOT}/`, "i");
 
 export const EXTENSION_PATTERNS = {
   SCRIPT_EXT,
@@ -45,12 +51,12 @@ export const testTitleRe = /\btest(?:\.\w+)?\s*\(\s*(['"`])\s*\[([^\]]+)\][\s\S]
 
 export const rules = [
   {
-    concern: "no-hard-wait",
+    ruleId: "no-hard-wait",
     fallback: "Hard wait detected. Replace with waitForResponse(...) or an expect() assertion.",
     pattern: /\bwaitForTimeout\(\s*\d+\s*\)/g,
   },
   {
-    concern: "no-page-object",
+    ruleId: "no-page-object",
     fallback: "Page-object or action-layer wrapper detected. Use the helper-first architecture.",
     appliesTo: (p) => !HELPERS_ROOT_RE.test(p),
     check: ({ filePath, content, push }) => {
@@ -64,7 +70,7 @@ export const rules = [
     },
   },
   {
-    concern: "no-page-object",
+    ruleId: "no-page-object",
     fallback:
       "Page-object import detected. Helper-first architecture forbids page-object dependencies.",
     pattern: /from\s+['"][^'"]*(page-obj|pageobject|page-object|\/pages\/)[^'"]*['"]/gi,
@@ -72,14 +78,14 @@ export const rules = [
   {
     // The fixture is the single injection point for helpers, so a spec that imports test
     // directly from @playwright/test silently loses every one of them.
-    concern: "base-fixture-import",
+    ruleId: "base-fixture-import",
     fallback:
       "Spec imports from '@playwright/test'. Import test/expect from fixtures/base.fixture instead.",
     appliesTo: (p) => SPEC_RE.test(p),
     pattern: /import\s+[^;]*\bfrom\s+['"]@playwright\/test['"]/g,
   },
   {
-    concern: "no-hardcoded-selector",
+    ruleId: "no-hardcoded-selector",
     fallback: null,
     appliesTo: (p) => CODE_RE.test(p),
     pattern: /\.locator\(\s*['"]([^'"]+)['"]\s*\)/g,
@@ -93,7 +99,7 @@ export const rules = [
     },
   },
   {
-    concern: "no-hardcoded-route",
+    ruleId: "no-hardcoded-route",
     fallback: null,
     appliesTo: (p) => CODE_RE.test(p),
     pattern: /\.goto\(\s*['"]([^'"]+)['"]\s*\)/g,
@@ -110,7 +116,7 @@ export const rules = [
   {
     // Trust boundary — never relaxed. Values starting with $ are skipped so
     // environment-variable interpolation passes.
-    concern: "no-credential-literal",
+    ruleId: "no-credential-literal",
     fallback: null,
     pattern:
       /\b(password|passwd|secret|api[_-]?key|auth[_-]?token|access[_-]?token)\s*[:=]\s*["'`]([^"'`$][^"'`]{3,})["'`]/gi,
@@ -122,7 +128,7 @@ export const rules = [
     // Config declares this `block` with "Hook + CI" enforcement, so it needs a pattern — a rule
     // that is declared blocking and never fires is worse than an absent rule, because the
     // generated instruction tables advertise protection that does not exist.
-    concern: "storage-state-auth",
+    ruleId: "storage-state-auth",
     fallback:
       "Authentication inside before-hook detected. Use a storageState setup-project dependency so the session is cached once, not replayed per test.",
     appliesTo: (p) => SPEC_RE.test(p),
@@ -130,7 +136,7 @@ export const rules = [
       /(?:test\.)?before(?:Each|All)\s*\([\s\S]{0,400}?(?:log[iI]n|signIn|sign_in|authenticate)\s*\(/g,
   },
   {
-    concern: "storage-state-auth",
+    ruleId: "storage-state-auth",
     fallback:
       "Credential entry inside before-hook detected. Use a storageState setup-project dependency instead of logging in per test.",
     appliesTo: (p) => SPEC_RE.test(p),
@@ -140,13 +146,13 @@ export const rules = [
       /(?:test\.)?before(?:Each|All)\s*\([\s\S]{0,400}?(?:(?:password|passwd)[\s\S]{0,80}?\.fill\(|\.fill\(\s*[^)]{0,80}?(?:password|passwd))/gi,
   },
   {
-    concern: "smoke-read-only",
+    ruleId: "smoke-read-only",
     fallback: "Write request in smoke suite. Smoke tests must remain read-only.",
     appliesTo: (p) => SMOKE_SPEC_RE.test(p),
     pattern: /\b(?:request|api)\.(post|put|patch|delete)\s*\(/gi,
   },
   {
-    concern: "smoke-read-only",
+    ruleId: "smoke-read-only",
     fallback: "Write HTTP method in smoke suite. Smoke tests must remain read-only.",
     appliesTo: (p) => SMOKE_SPEC_RE.test(p),
     pattern: /\bmethod\s*:\s*['"](POST|PUT|PATCH|DELETE)['"]/gi,
