@@ -35,11 +35,6 @@ export const EXTENSION_PATTERNS = {
   SMOKE_SPEC_RE,
 };
 
-// Claude/Copilot: Write|Edit. Cursor's StrReplace is deliberately absent — see the note in
-// makeExtractToolChange. Widening this set is a behaviour change, so it is P1b, not a
-// drive-by fix during an extract-at-parity phase.
-export const WRITE_TOOLS = ["Write", "Edit"];
-
 export const targetFileRe = TARGET_FILE_RE;
 
 export const rules = [

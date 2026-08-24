@@ -17,9 +17,9 @@ import {
   scanForRegex,
   toPosix,
 } from "./rule-engine.mjs";
-import { EXTENSION_PATTERNS, WRITE_TOOLS, rules, targetFileRe } from "./playwright.patterns.mjs";
+import { EXTENSION_PATTERNS, rules, targetFileRe } from "./playwright.patterns.mjs";
 
-export const extractToolChange = makeExtractToolChange(WRITE_TOOLS);
+export const extractToolChange = makeExtractToolChange();
 export const scanContent = makeScanner({ targetFileRe, rules });
 
 export {
