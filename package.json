@@ -36,6 +36,7 @@
     "harness:sync": "node scripts/engine/sync.mjs",
     "harness:check": "node scripts/engine/check-drift.mjs",
     "harness:ready": "node scripts/engine/config-ready.mjs",
+    "harness:conformance": "node scripts/engine/conformance.mjs",
     "harness:lock": "node scripts/engine/lock-profile.mjs",
     "harness:compose": "node harness/profiles/bin/compose-harness-config.mjs --profile harness/profiles/projects/playwright-boilerplate.json --out harness.config.json",
     "harness:profile:verify": "node harness/profiles/bin/compose-harness-config.mjs --profile harness/profiles/projects/playwright-boilerplate.json --verify harness.config.json",
