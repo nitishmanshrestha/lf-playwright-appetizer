@@ -2,7 +2,7 @@
   "$comment": "Profile for the Playwright boilerplate itself — the reference instantiation of the playwright adapter. Every field below is a project fact; all policy comes from adapters/playwright.json.",
   "key": "playwright-boilerplate",
   "displayName": "Playwright Automation Boilerplate",
-  "owner": "<accountable QA owner>",
+  "owner": "Nitish Shrestha",
   "adapter": "playwright",
   "language": "typescript",
   "projectName": "playwright-automation-boilerplate",
@@ -14,5 +14,6 @@
     "copilot": {
       "enabled": true
     }
-  }
+  },
+  "locked": true
 }

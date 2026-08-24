@@ -3,7 +3,7 @@
   "version": 1,
   "framework": "playwright",
   "agentFileExtension": ".md",
-  "architecture": "Config → Helpers → Tests",
+  "architecture": "Config \u2192 Helpers \u2192 Tests",
   "paths": {
     "testRoot": "playwright",
     "configRoot": "playwright/configs",
@@ -154,7 +154,7 @@
     {
       "name": "playwright-test-automation",
       "role": "BUILD",
-      "description": "Implement Playwright tests and helpers using the helper-first Config → Helpers → Tests architecture.",
+      "description": "Implement Playwright tests and helpers using the helper-first Config \u2192 Helpers \u2192 Tests architecture.",
       "model": "sonnet",
       "tools": ["Read", "Write", "Edit", "Grep", "Glob", "Bash"],
       "when": "Build a requirement-backed helper-first Playwright module"
@@ -203,7 +203,7 @@
     }
   ],
   "hooks": {
-    "prompt": ["prompt-duplication-guard.mjs"],
+    "prompt": ["harness-config-gate.mjs", "prompt-duplication-guard.mjs"],
     "preWrite": ["pre-validate-playwright-rules.mjs"],
     "postWrite": ["validate-playwright-rules.mjs"],
     "stop": ["session-end-reminder.mjs"]
