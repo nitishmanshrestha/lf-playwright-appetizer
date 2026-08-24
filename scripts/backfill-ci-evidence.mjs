@@ -27,7 +27,10 @@ const TRIGGER_BY_EVENT = {
 };
 
 function gh(args) {
-  return execFileSync("gh", args, { encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] });
+  return execFileSync("gh", args, {
+    encoding: "utf8",
+    stdio: ["ignore", "pipe", "pipe"],
+  });
 }
 
 export function classify(run) {
@@ -35,7 +38,9 @@ export function classify(run) {
   if (!trigger) return null; // an event M2 does not model — skip rather than guess
 
   // A run whose jobs executed no steps never really ran: infrastructure, not a test signal.
-  const ranSomething = (run.jobs ?? []).some((job) => (job.steps ?? []).length > 0);
+  const ranSomething = (run.jobs ?? []).some(
+    (job) => (job.steps ?? []).length > 0,
+  );
   const outcome = run.conclusion === "success" ? "passed" : "failed";
   const infrastructure = outcome === "failed" && !ranSomething;
 
@@ -59,7 +64,9 @@ function fetchRuns(workflow, limit) {
     "databaseId,event,conclusion,status,createdAt",
   ];
   if (workflow) listArgs.push("--workflow", workflow);
-  const runs = JSON.parse(gh(listArgs)).filter((run) => run.status === "completed");
+  const runs = JSON.parse(gh(listArgs)).filter(
+    (run) => run.status === "completed",
+  );
 
   // run list omits per-job steps, and steps are how we tell "never started" from "tests failed".
   return runs.map((run) => {
@@ -67,21 +74,29 @@ function fetchRuns(workflow, limit) {
       const detail = JSON.parse(
         gh(["run", "view", String(run.databaseId), "--json", "jobs,attempt"]),
       );
-      return { ...run, jobs: detail.jobs ?? [], runAttempt: detail.attempt ?? 1 };
+      return {
+        ...run,
+        jobs: detail.jobs ?? [],
+        runAttempt: detail.attempt ?? 1,
+      };
     } catch {
       return { ...run, jobs: [], runAttempt: 1 };
     }
   });
 }
 
-const isMain = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
+const isMain =
+  process.argv[1] &&
+  path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
 if (isMain) {
   try {
     const args = parseArgs(process.argv.slice(2));
     try {
       gh(["auth", "status"]);
     } catch {
-      throw new Error("gh CLI is unavailable or not authenticated. Run: gh auth login");
+      throw new Error(
+        "gh CLI is unavailable or not authenticated. Run: gh auth login",
+      );
     }
 
     const runs = fetchRuns(args.workflow, Number(args.limit ?? 50));
