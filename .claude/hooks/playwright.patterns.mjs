@@ -37,6 +37,12 @@ export const EXTENSION_PATTERNS = {
 
 export const targetFileRe = TARGET_FILE_RE;
 
+// Framework idiom, exported for engine scripts that need to find test titles without knowing
+// which framework they are in. Group 2 is the [REQUIREMENT-ID] prefix.
+// Playwright's test call is `test(...)`, where Cypress uses `it`/`specify` -- the reason this
+// belongs to the adapter and not to the engine.
+export const testTitleRe = /\btest(?:\.\w+)?\s*\(\s*(['"`])\s*\[([^\]]+)\][\s\S]*?\1/g;
+
 export const rules = [
   {
     concern: "no-hard-wait",

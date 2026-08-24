@@ -27,6 +27,7 @@ package-lock.json
 .claude/hooks/rule-engine.mjs
 harness/profiles/bin/compose-harness-config.mjs
 scripts/backfill-ci-evidence.mjs
+scripts/check-requirement-consistency.mjs
 scripts/engine/check-drift.mjs
 scripts/engine/config-ready.mjs
 scripts/engine/lock-profile.mjs
@@ -34,6 +35,7 @@ scripts/engine/sync.mjs
 scripts/engine/templates.mjs
 scripts/engine/test-config-paths-honest.mjs
 scripts/engine/test-config-ready.mjs
+scripts/engine/test-requirement-consistency.mjs
 scripts/evidence.mjs
 scripts/lib/cli.mjs
 scripts/record-evidence.mjs
