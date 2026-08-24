@@ -15,21 +15,47 @@
  */
 
 import { SCRIPT_EXT, escapeRegex, isAllowedLiteral, readProjectPaths } from "./rule-engine.mjs";
+import { codeSuffixesFor, scanRootsFor } from "../../harness/patterns.mjs";
 
 // Roots come from the composed config, so a project can declare its own tree. See
 // readProjectPaths for why this derivation is safe and what asserts it.
-const { testRoot, commandRoot } = readProjectPaths(import.meta.url);
+const project = readProjectPaths(import.meta.url);
+const { testRoot, commandRoot, pattern } = project;
 const ROOT = escapeRegex(testRoot);
 const COMMAND_ROOT = escapeRegex(commandRoot.replaceAll("\\", "/"));
 
+// This adapter's name for each pattern-level file kind (L3). A kind this framework has no
+// convention for is simply absent from the map and drops out — which is how a pattern can name
+// `steps` or `page` without every adapter having to invent a suffix for it.
+const KIND_SUFFIX = {
+  spec: "spec",
+  helpers: "helpers",
+  fixture: "fixture",
+  setup: "setup",
+  page: "page",
+  steps: "steps",
+  data: "data",
+};
+
+// Which files the implementation rules scan is an architecture question, not a framework one. A POM
+// project keeps its selectors in page objects, so `page` must count as code there or the selector
+// rule is declared and never fires where it matters.
+const codeSuffixes = codeSuffixesFor(pattern, KIND_SUFFIX);
+
+// Scope covers the test root plus any architecture-specific roots the project declared, such as a
+// BDD project's step definitions sitting outside testRoot.
+const SCAN_ROOTS = scanRootsFor(pattern, project)
+  .map((root) => escapeRegex(root))
+  .join("|");
+
 const SPEC_RE = new RegExp(String.raw`\.spec\.${SCRIPT_EXT}$`, "i");
-const CODE_RE = new RegExp(String.raw`\.(spec|helpers|fixture|setup)\.${SCRIPT_EXT}$`, "i");
+const CODE_RE = new RegExp(String.raw`\.(${codeSuffixes.join("|")})\.${SCRIPT_EXT}$`, "i");
 const PAGE_OBJECT_RE = new RegExp(String.raw`\.(?:page|actions)\.${SCRIPT_EXT}$`, "i");
 const SMOKE_SPEC_RE = new RegExp(
   String.raw`${ROOT}[\\/]tests[\\/].*[\\/]smoke[\\/].*\.spec\.${SCRIPT_EXT}$`,
   "i",
 );
-const TARGET_FILE_RE = new RegExp(String.raw`${ROOT}[\\/].*\.${SCRIPT_EXT}$`, "i");
+const TARGET_FILE_RE = new RegExp(String.raw`(?:${SCAN_ROOTS})[\\/].*\.${SCRIPT_EXT}$`, "i");
 const HELPERS_ROOT_RE = new RegExp(String.raw`^${COMMAND_ROOT}/`, "i");
 
 export const EXTENSION_PATTERNS = {
