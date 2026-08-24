@@ -31,7 +31,9 @@ function walkFiles(directory, predicate) {
 
 function validateRequirements(registry) {
   if (registry?.version !== 1 || !Array.isArray(registry.requirements)) {
-    throw new Error("evidence/requirements.json must contain version 1 and requirements[]");
+    throw new Error(
+      "evidence/requirements.json must contain version 1 and requirements[]",
+    );
   }
   const ids = new Set();
   for (const requirement of registry.requirements) {
@@ -43,13 +45,23 @@ function validateRequirements(registry) {
     ids.add(requirement.id);
     if (ACTIVE.has(requirement.status)) {
       for (const field of ["module", "title", "expectedOutcome", "source"]) {
-        if (typeof requirement[field] !== "string" || !requirement[field].trim()) {
-          throw new Error(`Active requirement ${requirement.id} is missing ${field}`);
+        if (
+          typeof requirement[field] !== "string" ||
+          !requirement[field].trim()
+        ) {
+          throw new Error(
+            `Active requirement ${requirement.id} is missing ${field}`,
+          );
         }
       }
       for (const field of ["acceptanceCriteria", "preconditions"]) {
-        if (!Array.isArray(requirement[field]) || requirement[field].length === 0) {
-          throw new Error(`Active requirement ${requirement.id} needs at least one ${field} entry`);
+        if (
+          !Array.isArray(requirement[field]) ||
+          requirement[field].length === 0
+        ) {
+          throw new Error(
+            `Active requirement ${requirement.id} needs at least one ${field} entry`,
+          );
         }
       }
       for (const [field, allowed] of Object.entries(REQUIREMENT_VALUES)) {
@@ -77,8 +89,14 @@ function normalizeCypress(report, activeRequirements) {
     const file = suite.file || suite.fullFile || inheritedFile;
     for (const test of suite.tests ?? []) {
       const attempts = Array.isArray(test.attempts) ? test.attempts : [];
-      const state = test.pending || test.skipped ? "skipped" : test.fail ? "failed" : "passed";
-      const status = state === "passed" && attempts.length > 1 ? "flaky" : state;
+      const state =
+        test.pending || test.skipped
+          ? "skipped"
+          : test.fail
+            ? "failed"
+            : "passed";
+      const status =
+        state === "passed" && attempts.length > 1 ? "flaky" : state;
       tests.push({
         requirement: requirementForTitle(test.title, activeRequirements),
         title: test.title,
@@ -103,8 +121,10 @@ function normalizePlaywright(report, activeRequirements) {
         const results = test.results ?? [];
         const statuses = results.map((result) => result.status);
         let status = "passed";
-        if (test.status === "skipped" || results.length === 0) status = "skipped";
-        else if (test.status === "unexpected" || statuses.at(-1) === "failed") status = "failed";
+        if (test.status === "skipped" || results.length === 0)
+          status = "skipped";
+        else if (test.status === "unexpected" || statuses.at(-1) === "failed")
+          status = "failed";
         else if (
           test.status === "flaky" ||
           statuses.slice(0, -1).some((value) => value !== "passed")
@@ -116,7 +136,10 @@ function normalizePlaywright(report, activeRequirements) {
           title: spec.title,
           file: spec.file || suite.file || "",
           status,
-          durationMs: results.reduce((total, result) => total + (result.duration ?? 0), 0),
+          durationMs: results.reduce(
+            (total, result) => total + (result.duration ?? 0),
+            0,
+          ),
           retries: Math.max(0, results.length - 1),
           failureClass: null,
         });
@@ -130,12 +153,25 @@ function normalizePlaywright(report, activeRequirements) {
 
 function ratio(numerator, denominator, unavailableReason) {
   return denominator === 0
-    ? { value: null, numerator, denominator, status: "unavailable", reason: unavailableReason }
-    : { value: numerator / denominator, numerator, denominator, status: "available" };
+    ? {
+        value: null,
+        numerator,
+        denominator,
+        status: "unavailable",
+        reason: unavailableReason,
+      }
+    : {
+        value: numerator / denominator,
+        numerator,
+        denominator,
+        status: "available",
+      };
 }
 
 function loadRunSummaries(evidenceRoot) {
-  return walkFiles(path.join(evidenceRoot, "runs"), (file) => file.endsWith("run-summary.json"))
+  return walkFiles(path.join(evidenceRoot, "runs"), (file) =>
+    file.endsWith("run-summary.json"),
+  )
     .map(readJson)
     .sort((a, b) => String(a.startedAt).localeCompare(String(b.startedAt)));
 }
@@ -148,7 +184,11 @@ function flakeMetric(runSummaries, now) {
     for (const test of run.tests ?? []) {
       const key = `${test.file}::${test.title}`;
       const entries = history.get(key) ?? [];
-      entries.push({ status: test.status, commit: run.commit, startedAt: run.startedAt });
+      entries.push({
+        status: test.status,
+        commit: run.commit,
+        startedAt: run.startedAt,
+      });
       history.set(key, entries);
     }
   }
@@ -204,9 +244,16 @@ export function buildEvidence({
   }
 
   const evidenceRoot = path.join(root, "evidence");
-  const requirements = validateRequirements(readJson(path.join(evidenceRoot, "requirements.json")));
-  const activeRequirements = requirements.filter((requirement) => ACTIVE.has(requirement.status));
-  const testRoot = path.join(root, framework === "cypress" ? "cypress/tests" : "playwright/tests");
+  const requirements = validateRequirements(
+    readJson(path.join(evidenceRoot, "requirements.json")),
+  );
+  const activeRequirements = requirements.filter((requirement) =>
+    ACTIVE.has(requirement.status),
+  );
+  const testRoot = path.join(
+    root,
+    framework === "cypress" ? "cypress/tests" : "playwright/tests",
+  );
   const testSuffix = framework === "cypress" ? ".cy.js" : ".spec.ts";
   const testFiles = walkFiles(testRoot, (file) => file.endsWith(testSuffix));
   const absoluteReport = path.resolve(root, reportPath);
@@ -256,7 +303,11 @@ export function buildEvidence({
       requirement: requirement.id,
       module: requirement.module,
       priority: requirement.priority,
-      tests: mapped.map((test) => ({ title: test.title, file: test.file, status: test.status })),
+      tests: mapped.map((test) => ({
+        title: test.title,
+        file: test.file,
+        status: test.status,
+      })),
       passing: mapped.some((test) => test.status === "passed"),
     };
   });
@@ -265,17 +316,52 @@ export function buildEvidence({
     requirements: coverage,
   });
 
-  const gateEntries = readJsonLines(path.join(evidenceRoot, "gate-log.jsonl")).filter(
-    (entry) => entry.attempt === 1,
-  );
-  const ciEntries = readJsonLines(path.join(evidenceRoot, "ci-history.jsonl")).filter(
-    (entry) => entry.trigger === "pr" && entry.attempt === 1 && entry.failureClass !== "ENV",
-  );
-  const effortEntries = readJsonLines(path.join(evidenceRoot, "effort-log.jsonl")).filter(
+  const gateEntries = readJsonLines(
+    path.join(evidenceRoot, "gate-log.jsonl"),
+  ).filter((entry) => entry.attempt === 1);
+  // Accepted-scenario effort feeds M4. Only accepted rows with a finite duration count, so a
+  // dropped or malformed entry lowers the denominator rather than skewing the mean.
+  const effortEntries = readJsonLines(
+    path.join(evidenceRoot, "effort-log.jsonl"),
+  ).filter(
     (entry) => entry.accepted === true && Number.isFinite(entry.minutes),
+  );
+  const ciEntries = readJsonLines(
+    path.join(evidenceRoot, "ci-history.jsonl"),
+  ).filter(
+    (entry) =>
+      entry.trigger === "pr" &&
+      entry.attempt === 1 &&
+      entry.failureClass !== "ENV",
   );
   const covered = coverage.filter((entry) => entry.passing).length;
   const runSummaries = loadRunSummaries(evidenceRoot);
+
+  // Named follow-ups from PASS_WITH_ACTIONS rows. Preserved for audit; they do not affect M1
+  // (PASS_WITH_ACTIONS already counts as accepted). resolution is an optional human note.
+  const gateFollowUps = gateEntries
+    .filter(
+      (entry) =>
+        entry.verdict === "PASS_WITH_ACTIONS" &&
+        Array.isArray(entry.actions) &&
+        entry.actions.length > 0,
+    )
+    .map((entry) => ({
+      requirementId: entry.requirementId,
+      attempt: entry.attempt,
+      actions: entry.actions,
+      resolution:
+        typeof entry.resolution === "string" && entry.resolution.trim()
+          ? entry.resolution
+          : null,
+    }));
+  const incompleteGateFollowUps = gateEntries
+    .filter(
+      (entry) =>
+        entry.verdict === "PASS_WITH_ACTIONS" &&
+        (!Array.isArray(entry.actions) || entry.actions.length === 0),
+    )
+    .map((entry) => entry.requirementId);
 
   const metrics = {
     generatedAt: now,
@@ -314,19 +400,34 @@ export function buildEvidence({
         unit: "person-minutes",
         denominator: effortEntries.length,
         status: effortEntries.length === 0 ? "unavailable" : "available",
-        ...(effortEntries.length === 0 ? { reason: "No accepted-scenario effort evidence" } : {}),
+        ...(effortEntries.length === 0
+          ? { reason: "No accepted-scenario effort evidence" }
+          : {}),
       },
       M5: {
         name: "requirement-to-test coverage",
         ...ratio(covered, activeRequirements.length, "No active requirements"),
       },
     },
+    gateFollowUps,
     gaps: [
       ...(summary.traceabilityGaps.length > 0
-        ? [`${summary.traceabilityGaps.length} executed test(s) lack a requirement id prefix`]
+        ? [
+            `${summary.traceabilityGaps.length} executed test(s) lack a requirement id prefix`,
+          ]
         : []),
       ...(executionStatus === "not-run"
         ? ["No test files exist yet; execution was not started"]
+        : []),
+      ...(gateFollowUps.length > 0
+        ? [
+            `${gateFollowUps.length} accepted gate verdict(s) carry named follow-up actions`,
+          ]
+        : []),
+      ...(incompleteGateFollowUps.length > 0
+        ? [
+            `${incompleteGateFollowUps.length} legacy PASS_WITH_ACTIONS verdict(s) lack named actions: ${incompleteGateFollowUps.join(", ")}`,
+          ]
         : []),
     ],
   };
@@ -334,7 +435,9 @@ export function buildEvidence({
   return { summary, coverage, metrics };
 }
 
-const isMain = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
+const isMain =
+  process.argv[1] &&
+  path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
 if (isMain) {
   try {
     const args = parseArgs(process.argv.slice(2));
