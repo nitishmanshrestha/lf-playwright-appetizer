@@ -4,6 +4,7 @@
   "framework": "playwright",
   "agentFileExtension": ".md",
   "architecture": "Config \u2192 Helpers \u2192 Tests",
+  "pattern": "helper-first",
   "paths": {
     "testRoot": "playwright",
     "configRoot": "playwright/configs",
