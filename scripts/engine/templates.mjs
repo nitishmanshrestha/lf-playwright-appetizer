@@ -13,10 +13,15 @@ export const RULES_END = "<!-- HARNESS:RULES:END -->";
 export const GENERATED_AGENT_MARKER =
   "<!-- GENERATED FROM harness.config.json and harness/agents/. DO NOT EDIT. -->";
 export const GENERATED_HOOK_MARKER = "HARNESS_GENERATED_FROM";
+export const GENERATED_SKILL_MARKER = "HARNESS_GENERATED_SKILL_PROJECTION";
+export const KNOWN_ROLES = ["INTAKE", "BUILD", "DIAGNOSE", "EVALUATE"];
 
 const SUPPORTED_FRAMEWORKS = new Set(["cypress", "playwright"]);
 const SUPPORTED_AGENT_EXTENSIONS = new Set([".md", ".agent.md"]);
 const SUPPORTED_ENFORCEMENT = new Set(["Hook + CI", "CI", "QA gate"]);
+// Every AI tool the harness knows how to project into. A profile enables a subset; sync generates
+// files for the enabled ones and removes the rest. Adding a tool here is the only place the set grows.
+const KNOWN_ADAPTERS = ["claude", "copilot", "cursor", "codex"];
 const COPILOT_TOOL_ALIASES = {
   Agent: "agent",
   Bash: "execute",
@@ -46,9 +51,15 @@ function validateConfig(config) {
     config.adapters && typeof config.adapters === "object",
     "adapters must be an object",
   );
-  for (const adapter of ["claude", "copilot"]) {
+  const adapterKeys = Object.keys(config.adapters);
+  requireValue(adapterKeys.length > 0, "adapters must declare at least one tool");
+  for (const adapter of adapterKeys) {
     requireValue(
-      typeof config.adapters?.[adapter]?.enabled === "boolean",
+      KNOWN_ADAPTERS.includes(adapter),
+      `unknown adapter "${adapter}" — known: ${KNOWN_ADAPTERS.join(", ")}`,
+    );
+    requireValue(
+      typeof config.adapters[adapter]?.enabled === "boolean",
       `adapters.${adapter}.enabled must be boolean`,
     );
   }
@@ -97,6 +108,46 @@ function validateConfig(config) {
       `${agent.name}.tools must be a non-empty array`,
     );
     agentNames.add(agent.name);
+  }
+
+  // skills[] is optional. When present, each entry points at a pinned tree under harness/skills/
+  // and declares which lifecycle roles must load it. Sync projects those trees to .claude/skills
+  // and .agents/skills only.
+  if (config.skills !== undefined) {
+    requireValue(Array.isArray(config.skills), "skills must be an array when present");
+    const skillNames = new Set();
+    const agentRoles = new Set(config.agents.map((agent) => agent.role));
+    for (const skill of config.skills) {
+      requireValue(
+        /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(skill.name),
+        `invalid skill name: ${skill.name}`,
+      );
+      requireValue(!skillNames.has(skill.name), `duplicate skill name: ${skill.name}`);
+      requireValue(
+        typeof skill.description === "string" && skill.description.length > 0,
+        `${skill.name}.description must be a non-empty string`,
+      );
+      requireValue(
+        typeof skill.source === "string" && skill.source.startsWith("harness/skills/"),
+        `${skill.name}.source must be a path under harness/skills/`,
+      );
+      requireValue(
+        typeof skill.version === "string" && skill.version.length > 0,
+        `${skill.name}.version must be a non-empty string`,
+      );
+      requireValue(
+        Array.isArray(skill.roles) && skill.roles.length > 0,
+        `${skill.name}.roles must be a non-empty array`,
+      );
+      for (const role of skill.roles) {
+        requireValue(KNOWN_ROLES.includes(role), `${skill.name}.roles has unknown role: ${role}`);
+        requireValue(
+          agentRoles.has(role),
+          `${skill.name}.roles includes ${role} but no agent has that role`,
+        );
+      }
+      skillNames.add(skill.name);
+    }
   }
 
   return config;
@@ -166,6 +217,11 @@ function copilotHook(script) {
 export function copilotHooks(config) {
   const h = config.hooks ?? {};
   const hooks = {};
+  // Copilot event names: userPromptSubmitted / PreToolUse / PostToolUse / agentStop.
+  // PascalCase PreToolUse uses Claude matcher semantics; exit code 2 denies the tool call.
+  if (h.prompt?.length) {
+    hooks.userPromptSubmitted = h.prompt.map((script) => copilotHook(script));
+  }
   if (h.preWrite?.length) {
     hooks.PreToolUse = h.preWrite.map((script) => ({
       matcher: "Edit|Write",
@@ -177,6 +233,9 @@ export function copilotHooks(config) {
       matcher: "Edit|Write",
       ...copilotHook(script),
     }));
+  }
+  if (h.stop?.length) {
+    hooks.agentStop = h.stop.map((script) => copilotHook(script));
   }
   return { version: 1, hooks };
 }
@@ -204,6 +263,37 @@ export function rulesBlock(config) {
   ].join("\n");
 }
 
+// Shared building blocks so every text projection (Copilot, Cursor, Codex) renders the same rule and
+// roster lines from the one config. Kept byte-identical to the original Copilot strings.
+function ruleBullets(config) {
+  return config.rules
+    .map(
+      (rule) =>
+        `- **${rule.id}** (${rule.enforcement}) — never ${rule.never}; use ${rule.instead}. ${rule.why}`,
+    )
+    .join("\n");
+}
+
+function agentBullets(config) {
+  return config.agents.map((agent) => `- \`${agent.name}\` (${agent.role}) — ${agent.when}`).join("\n");
+}
+
+function readOnlyRationale(config) {
+  return config.agents.find((agent) => agent.readOnlyRationale)?.readOnlyRationale ?? "";
+}
+
+function whereThingsLive(config) {
+  const project = config.project;
+  const commandLabel = config.framework === "cypress" ? "Commands" : "Helpers";
+  return [
+    "| Layer | Path |",
+    "|---|---|",
+    `| Config | \`${project.configRoot}\` |`,
+    `| ${commandLabel} | \`${project.commandRoot}\` |`,
+    `| Tests | \`${project.specGlob}\` |`,
+  ].join("\n");
+}
+
 export function copilotInstructions(config) {
   const project = config.project;
   return `${generatedBanner()}
@@ -215,29 +305,115 @@ Architecture: **${project.architecture}**. Read \`CLAUDE.md\` for the full frame
 
 ## Non-negotiable rules
 
-${config.rules
-  .map(
-    (rule) =>
-      `- **${rule.id}** (${rule.enforcement}) — never ${rule.never}; use ${rule.instead}. ${rule.why}`,
-  )
-  .join("\n")}
+${ruleBullets(config)}
 
 Edit and Write tool calls are checked by the generated repository hooks. CI rescans repository
 changes as the final backstop; shell commands are not represented as Edit or Write tool calls.
 
 ## Agents
 
-${config.agents.map((agent) => `- \`${agent.name}\` (${agent.role}) — ${agent.when}`).join("\n")}
+${agentBullets(config)}
 
-${config.agents.find((agent) => agent.readOnlyRationale)?.readOnlyRationale ?? ""}
+${readOnlyRationale(config)}
 
 ## Where things live
 
-| Layer | Path |
-|---|---|
-| Config | \`${project.configRoot}\` |
-| ${config.framework === "cypress" ? "Commands" : "Helpers"} | \`${project.commandRoot}\` |
-| Tests | \`${project.specGlob}\` |
+${whereThingsLive(config)}
+`;
+}
+
+// Cursor reads project rules from .cursor/rules/*.mdc. `alwaysApply: true` puts the harness contract
+// in every chat. Write-time refusal is `.cursor/hooks.json` → preToolUse (same scripts as Claude).
+export function cursorRules(config) {
+  const project = config.project;
+  const frontmatter = [
+    "---",
+    `description: ${project.name} — Cypress harness contract: non-negotiable rules, architecture, and agent roster`,
+    "alwaysApply: true",
+    "---",
+  ].join("\n");
+  const body = `${generatedBanner()}
+
+# ${project.name} — Cypress Harness (Cursor rules)
+
+Architecture: **${project.architecture}**. Read \`CLAUDE.md\` for the full framework contract and
+\`docs/application-intelligence/<module>/module-context.md\` for what the application does.
+
+## Non-negotiable rules
+
+${ruleBullets(config)}
+
+\`preToolUse\` in \`.cursor/hooks.json\` refuses violating Write/StrReplace calls (exit code 2).
+Human edits and any miss still hit \`npm run verify\` / pre-push / CI — see
+\`docs/architecture/cross-tool-configuration.md\`.
+
+## Agent roster
+
+${agentBullets(config)}
+
+${readOnlyRationale(config)}
+
+## Where things live
+
+${whereThingsLive(config)}
+`;
+  return `${frontmatter}\n\n${body}`;
+}
+
+export const cursorRulesText = (config) => cursorRules(config);
+
+// Codex reads AGENTS.md from the repo root before starting work. Codex has no hook system, so its
+// enforcement is the universal floor (verify + pre-push + CI), not a write-time block.
+export function codexInstructions(config) {
+  const project = config.project;
+  return `${generatedBanner()}
+
+# AGENTS.md — ${project.name}
+
+Codex reads this file before starting work. Architecture: **${project.architecture}**. The full
+framework contract is \`CLAUDE.md\`; application behavior is
+\`docs/application-intelligence/<module>/module-context.md\`.
+
+## Non-negotiable rules
+
+${ruleBullets(config)}
+
+Codex has no write-time hook, so these rules are guidance. The enforcing gate is \`npm run verify\`
+(local + pre-push) and CI — see \`docs/architecture/cross-tool-configuration.md\`.
+
+## Agent roster
+
+${agentBullets(config)}
+
+${readOnlyRationale(config)}
+
+## Where things live
+
+${whereThingsLive(config)}
+`;
+}
+
+export const codexInstructionsText = (config) => codexInstructions(config);
+
+export function skillsForRole(config, role) {
+  return (config.skills ?? []).filter((skill) => skill.roles.includes(role));
+}
+
+function skillsSection(config, agent) {
+  const skills = skillsForRole(config, agent.role);
+  if (skills.length === 0) return "";
+  const lines = skills.map(
+    (skill) =>
+      `- \`${skill.name}\` (${skill.source}) — ${skill.description} Invoke with \`/${skill.name}\` or let the tool auto-load it.`,
+  );
+  return `
+
+## Required Cypress skills for this role
+
+The skill knows *how* to work with Cypress. This agent still owns *when*, *why*, and harness
+constraints (requirements, config → commands → tests, gate). Load and follow:
+
+${lines.join("\n")}
 `;
 }
 
@@ -259,12 +435,13 @@ export function agentInstructions(repoRoot, config, agent) {
     "qaFoundations must resolve inside harness/",
   );
   const foundations = fs.readFileSync(foundationsPath, "utf8").replace(/\r\n/g, "\n").trim();
-  return fs
+  const body = fs
     .readFileSync(resolved, "utf8")
     .replace(/\r\n/g, "\n")
     .trim()
     .replaceAll("{{gateRepairLimit}}", String(config.loops.gateRepairLimit))
     .replaceAll("{{qaFoundations}}", foundations);
+  return `${body}${skillsSection(config, agent)}`;
 }
 
 export function claudeAgent(agent, instructions) {
@@ -276,6 +453,24 @@ export function claudeAgent(agent, instructions) {
     ...(agent.permissionMode ? [`permissionMode: ${agent.permissionMode}`] : []),
     "tools:",
     ...agent.tools.map((tool) => `  - ${tool}`),
+    "---",
+  ];
+  return `${frontmatter.join("\n")}\n\n${GENERATED_AGENT_MARKER}\n\n${instructions}\n`;
+}
+
+// Cursor subagents: .cursor/agents/*.md with name/description/model/readonly frontmatter.
+// EVALUATE is readonly so the gate cannot edit. Write refusal is project preToolUse, not agent YAML.
+export function cursorAgent(agent, instructions) {
+  const readOnly =
+    agent.permissionMode === "plan" ||
+    agent.role === "EVALUATE" ||
+    !agent.tools.some((tool) => ["Write", "Edit", "Bash"].includes(tool));
+  const frontmatter = [
+    "---",
+    `name: ${agent.name}`,
+    `description: ${JSON.stringify(agent.description)}`,
+    "model: inherit",
+    ...(readOnly ? ["readonly: true"] : []),
     "---",
   ];
   return `${frontmatter.join("\n")}\n\n${GENERATED_AGENT_MARKER}\n\n${instructions}\n`;
@@ -295,6 +490,74 @@ export function copilotAgent(agent, instructions) {
     "---",
   ];
   return `${frontmatter.join("\n")}\n\n${GENERATED_AGENT_MARKER}\n\n${instructions}\n`;
+}
+
+// Cursor: preToolUse exit 2 denies Write/StrReplace; afterFileEdit still runs post-write scan.
+export function cursorHooks(config) {
+  const h = config.hooks ?? {};
+  const hooks = {};
+  if (h.prompt?.length) {
+    hooks.beforeSubmitPrompt = h.prompt.map((script) => ({
+      command: `node .claude/hooks/${script}`,
+    }));
+  }
+  if (h.preWrite?.length) {
+    hooks.preToolUse = h.preWrite.map((script) => ({
+      command: `node .claude/hooks/${script}`,
+      matcher: "Write|StrReplace",
+    }));
+  }
+  if (h.postWrite?.length) {
+    hooks.afterFileEdit = h.postWrite.map((script) => ({
+      command: `node .claude/hooks/${script}`,
+    }));
+  }
+  if (h.stop?.length) {
+    hooks.stop = h.stop.map((script) => ({
+      command: `node .claude/hooks/${script}`,
+    }));
+  }
+  return {
+    version: 1,
+    _generated:
+      "From harness.config.json by scripts/engine/sync.mjs. preToolUse exit 2 refuses a violating write.",
+    hooks,
+  };
+}
+
+export const cursorHooksText = (config) => `${JSON.stringify(cursorHooks(config), null, 2)}\n`;
+
+/** Whether the portable .agents/skills tree should be projected. */
+export function portableSkillsEnabled(config) {
+  return ["copilot", "cursor", "codex"].some((adapter) => adapterEnabled(config, adapter));
+}
+
+export function skillMarkerText() {
+  return `${GENERATED_SKILL_MARKER}=harness.config.json\n`;
+}
+
+export function listSkillFiles(repoRoot, skillSource) {
+  const root = path.resolve(repoRoot, skillSource);
+  requireValue(
+    fs.existsSync(root) && fs.statSync(root).isDirectory(),
+    `skill source missing: ${skillSource}`,
+  );
+  const skillRoot = path.resolve(repoRoot, "harness", "skills");
+  const relative = path.relative(skillRoot, root);
+  requireValue(
+    relative && !relative.startsWith("..") && !path.isAbsolute(relative),
+    `skill source must resolve inside harness/skills: ${skillSource}`,
+  );
+  const files = [];
+  const walk = (dir, prefix = "") => {
+    for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+      const rel = prefix ? `${prefix}/${entry.name}` : entry.name;
+      if (entry.isDirectory()) walk(path.join(dir, entry.name), rel);
+      else files.push(rel.replaceAll("\\", "/"));
+    }
+  };
+  walk(root);
+  return files.sort();
 }
 
 export function injectRules(existingText, config) {
