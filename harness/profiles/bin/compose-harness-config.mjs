@@ -19,7 +19,8 @@ const ADAPTERS = path.join(HERE, "..", "adapters");
 // `owner` and `language` — not buried in `overrides`, which reads as "an exception to policy".
 // `overrides.adapters` is still honoured so existing profiles keep working.
 function resolveAdapters(profile, base) {
-  const resolved = profile.adapters ?? profile.overrides?.adapters ?? base.defaults.adapters;
+  const resolved =
+    profile.adapters ?? profile.overrides?.adapters ?? base.defaults.adapters;
   const enabled = Object.entries(resolved).filter(([, v]) => v?.enabled);
   if (enabled.length === 0) {
     throw new Error(
@@ -36,7 +37,9 @@ export function compose(profile, adaptersDir = ADAPTERS) {
   if (!profile.adapter) throw new Error("profile.adapter is required");
   const baselineFile = path.join(adaptersDir, `${profile.adapter}.json`);
   if (!fs.existsSync(baselineFile)) {
-    throw new Error(`Unknown adapter "${profile.adapter}" — no ${baselineFile}`);
+    throw new Error(
+      `Unknown adapter "${profile.adapter}" — no ${baselineFile}`,
+    );
   }
   const base = readJson(baselineFile);
   const over = profile.overrides ?? {};
@@ -50,7 +53,9 @@ export function compose(profile, adaptersDir = ADAPTERS) {
       `the profile (${profile.key}). Re-compose after editing either, then run npm run harness:sync.`,
     version: base.version,
     framework: base.framework,
-    ...(base.agentFileExtension ? { agentFileExtension: base.agentFileExtension } : {}),
+    ...(base.agentFileExtension
+      ? { agentFileExtension: base.agentFileExtension }
+      : {}),
     adapters: resolveAdapters(profile, base),
     project: {
       name: profile.projectName,
@@ -69,6 +74,7 @@ export function compose(profile, adaptersDir = ADAPTERS) {
     rules: base.rules,
     agents: base.agents,
     hooks: base.hooks,
+    ...(base.skills ? { skills: base.skills } : {}),
     permissions: over.permissions ?? base.permissions,
   };
   return config;
@@ -93,7 +99,9 @@ function diff(a, b, at = "", out = []) {
   return out;
 }
 
-const isMain = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
+const isMain =
+  process.argv[1] &&
+  path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
 if (isMain) {
   try {
     const args = parseArgs(process.argv.slice(2));
@@ -103,19 +111,30 @@ if (isMain) {
     if (args.verify) {
       const live = readJson(args.verify);
       // $comment is provenance text, not policy — never a real difference.
-      const differences = diff({ ...composed, $comment: 0 }, { ...live, $comment: 0 });
+      const differences = diff(
+        { ...composed, $comment: 0 },
+        { ...live, $comment: 0 },
+      );
       if (differences.length > 0) {
         console.error(`[profile] MISMATCH vs ${args.verify}:`);
         for (const d of differences) console.error(`  ${d}`);
         process.exit(1);
       }
-      console.log(`[profile] ${path.basename(args.profile)} reproduces ${args.verify} exactly.`);
+      console.log(
+        `[profile] ${path.basename(args.profile)} reproduces ${args.verify} exactly.`,
+      );
       process.exit(0);
     }
 
     if (!args.out) throw new Error("--out or --verify is required");
-    fs.writeFileSync(args.out, `${JSON.stringify(composed, null, 2)}\n`, "utf8");
-    console.log(`[profile] wrote ${args.out} from ${path.basename(args.profile)}`);
+    fs.writeFileSync(
+      args.out,
+      `${JSON.stringify(composed, null, 2)}\n`,
+      "utf8",
+    );
+    console.log(
+      `[profile] wrote ${args.out} from ${path.basename(args.profile)}`,
+    );
   } catch (error) {
     console.error(`[profile] ${error.message}`);
     process.exit(1);
