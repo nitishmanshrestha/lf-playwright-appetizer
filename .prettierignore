@@ -25,6 +25,7 @@ package-lock.json
 # BEGIN lf-qa-harness-os (generated — do not edit)
 .claude/hooks/harness-config-gate.mjs
 .claude/hooks/rule-engine.mjs
+.claude/hooks/session-end-reminder.mjs
 docs/harness-conformance-spec.md
 docs/harness-onboarding-runbook.md
 harness/concerns.mjs
