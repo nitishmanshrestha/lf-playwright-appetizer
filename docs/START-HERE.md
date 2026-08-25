@@ -263,7 +263,7 @@ git config core.hooksPath .githooks
 `SKIP_VERIFY=1 git push` bypasses it deliberately.
 
 Every rule is enforced identically in `.ts`, `.mts`, `.cts`, `.js`, `.mjs`, and `.cjs`.
-`scripts/harness/test-rule-extensions.mjs` asserts the same violating spec yields the **same count**
+`scripts/engine/test-rule-extensions.mjs` asserts the same violating spec yields the **same count**
 in all six. That test exists because it was once false: patterns matched only `.ts`, and
 `playwright.config.ts` sets no `testMatch`, so Playwright's default pattern would execute a
 `.spec.js` while every rule silently passed on it.

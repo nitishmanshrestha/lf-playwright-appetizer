@@ -59,9 +59,108 @@ try {
     runId: "cypress-run",
     now: "2026-01-01T00:00:00.000Z",
   });
-  assert.deepEqual(cypress.summary.totals, { passed: 1, failed: 0, flaky: 0, skipped: 0 });
+  assert.deepEqual(cypress.summary.totals, {
+    passed: 1,
+    failed: 0,
+    flaky: 0,
+    skipped: 0,
+  });
   assert.equal(cypress.summary.tests[0].requirement, requirement.id);
   assert.equal(cypress.metrics.metrics.M5.value, 1);
+  assert.deepEqual(cypress.metrics.gateFollowUps, []);
+
+  // PASS_WITH_ACTIONS follow-ups survive into metrics without changing M1 acceptance.
+  fs.writeFileSync(
+    path.join(cypressRoot, "evidence", "gate-log.jsonl"),
+    `${JSON.stringify({
+      requirementId: requirement.id,
+      attempt: 1,
+      verdict: "PASS_WITH_ACTIONS",
+      actions: ["tighten selector comment"],
+      resolution: "owner backlog",
+      timestamp: "2026-01-01T00:00:00.000Z",
+    })}\n`,
+  );
+  const withFollowUps = buildEvidence({
+    root: cypressRoot,
+    framework: "cypress",
+    reportPath: cypressReport,
+    runId: "cypress-follow-ups",
+    now: "2026-01-01T00:00:00.000Z",
+  });
+  assert.equal(withFollowUps.metrics.metrics.M1.value, 1);
+  assert.deepEqual(withFollowUps.metrics.gateFollowUps, [
+    {
+      requirementId: requirement.id,
+      attempt: 1,
+      actions: ["tighten selector comment"],
+      resolution: "owner backlog",
+    },
+  ]);
+  assert.match(
+    withFollowUps.metrics.gaps.join("\n"),
+    /named follow-up actions/,
+  );
+
+  // Historical PASS_WITH_ACTIONS rows remain accepted for M1, but missing action details are visible.
+  fs.writeFileSync(
+    path.join(cypressRoot, "evidence", "gate-log.jsonl"),
+    `${JSON.stringify({
+      requirementId: requirement.id,
+      attempt: 1,
+      verdict: "PASS_WITH_ACTIONS",
+      timestamp: "2025-12-31T00:00:00.000Z",
+    })}\n`,
+  );
+  const legacyFollowUps = buildEvidence({
+    root: cypressRoot,
+    framework: "cypress",
+    reportPath: cypressReport,
+    runId: "cypress-legacy-follow-ups",
+    now: "2026-01-01T00:00:00.000Z",
+  });
+  assert.equal(legacyFollowUps.metrics.metrics.M1.value, 1);
+  assert.match(
+    legacyFollowUps.metrics.gaps.join("\n"),
+    /legacy PASS_WITH_ACTIONS verdict\(s\) lack named actions/,
+  );
+
+  // M4 — QA effort per accepted scenario. This ledger had no coverage at all before the engine
+  // merged the two adapters' evidence pipelines, which is precisely how it could have been dropped
+  // during that merge without a single test going red. Rejected and malformed rows must lower the
+  // denominator rather than skew the mean.
+  assert.equal(cypress.metrics.metrics.M4.status, "unavailable");
+  assert.equal(cypress.metrics.metrics.M4.value, null);
+  assert.match(
+    cypress.metrics.metrics.M4.reason,
+    /No accepted-scenario effort/,
+  );
+
+  fs.writeFileSync(
+    path.join(cypressRoot, "evidence", "effort-log.jsonl"),
+    [
+      { requirementId: requirement.id, minutes: 30, accepted: true },
+      { requirementId: requirement.id, minutes: 50, accepted: true },
+      { requirementId: requirement.id, minutes: 999, accepted: false },
+      { requirementId: requirement.id, minutes: "nope", accepted: true },
+    ]
+      .map((entry) =>
+        JSON.stringify({ ...entry, timestamp: "2026-01-01T00:00:00.000Z" }),
+      )
+      .map((line) => `${line}\n`)
+      .join(""),
+  );
+  const withEffort = buildEvidence({
+    root: cypressRoot,
+    framework: "cypress",
+    reportPath: cypressReport,
+    runId: "cypress-effort",
+    now: "2026-01-01T00:00:00.000Z",
+  });
+  assert.equal(withEffort.metrics.metrics.M4.status, "available");
+  assert.equal(withEffort.metrics.metrics.M4.value, 40);
+  assert.equal(withEffort.metrics.metrics.M4.denominator, 2);
+  assert.equal(withEffort.metrics.metrics.M4.unit, "person-minutes");
 
   const playwrightRoot = fixtureRoot();
   roots.push(playwrightRoot);
@@ -76,7 +175,12 @@ try {
             {
               title: "[PAY-CHECKOUT-001] creates order when cart is valid",
               file: "checkout/smoke/checkout-smoke.spec.ts",
-              tests: [{ status: "expected", results: [{ status: "passed", duration: 120 }] }],
+              tests: [
+                {
+                  status: "expected",
+                  results: [{ status: "passed", duration: 120 }],
+                },
+              ],
             },
           ],
         },
@@ -94,7 +198,9 @@ try {
   assert.equal(playwright.summary.tests[0].requirement, requirement.id);
   assert.equal(playwright.metrics.metrics.M5.value, 1);
 
-  const emptyRoot = fs.mkdtempSync(path.join(os.tmpdir(), "harness-evidence-empty-"));
+  const emptyRoot = fs.mkdtempSync(
+    path.join(os.tmpdir(), "harness-evidence-empty-"),
+  );
   roots.push(emptyRoot);
   fs.mkdirSync(path.join(emptyRoot, "evidence"), { recursive: true });
   fs.writeFileSync(
@@ -134,4 +240,6 @@ try {
   for (const root of roots) fs.rmSync(root, { recursive: true, force: true });
 }
 
-console.log("[evidence:test] Cypress, Playwright, and empty-state evidence passed.");
+console.log(
+  "[evidence:test] Cypress, Playwright, and empty-state evidence passed.",
+);

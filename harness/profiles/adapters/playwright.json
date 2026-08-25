@@ -3,7 +3,8 @@
   "version": 1,
   "framework": "playwright",
   "agentFileExtension": ".md",
-  "architecture": "Config → Helpers → Tests",
+  "architecture": "Config \u2192 Helpers \u2192 Tests",
+  "pattern": "helper-first",
   "paths": {
     "testRoot": "playwright",
     "configRoot": "playwright/configs",
@@ -35,6 +36,7 @@
   "rules": [
     {
       "id": "no-hard-wait",
+      "concern": "WAIT",
       "severity": "block",
       "enforcement": "Hook + CI",
       "never": "page.waitForTimeout(<number>)",
@@ -44,6 +46,7 @@
     },
     {
       "id": "no-hardcoded-selector",
+      "concern": "SELECTOR",
       "severity": "block",
       "enforcement": "Hook + CI",
       "never": "a selector literal in a spec or helper",
@@ -53,6 +56,7 @@
     },
     {
       "id": "no-hardcoded-route",
+      "concern": "ROUTE",
       "severity": "block",
       "enforcement": "Hook + CI",
       "never": "a route or endpoint literal when config exists",
@@ -62,6 +66,7 @@
     },
     {
       "id": "no-page-object",
+      "concern": "ARCH-BOUNDARY",
       "severity": "block",
       "enforcement": "Hook + CI",
       "never": "page-object classes, action layers, or wrappers outside helpers/",
@@ -71,6 +76,7 @@
     },
     {
       "id": "no-credential-literal",
+      "concern": "CRED",
       "severity": "block",
       "enforcement": "Hook + CI",
       "never": "a password, secret, API key, or token assigned a literal string",
@@ -80,6 +86,7 @@
     },
     {
       "id": "storage-state-auth",
+      "concern": "CACHED-AUTH",
       "severity": "block",
       "enforcement": "Hook + CI",
       "never": "login in beforeEach()",
@@ -89,6 +96,7 @@
     },
     {
       "id": "base-fixture-import",
+      "concern": "ARCH-BOUNDARY",
       "severity": "block",
       "enforcement": "Hook + CI",
       "never": "a spec importing test directly from @playwright/test",
@@ -98,6 +106,7 @@
     },
     {
       "id": "smoke-read-only",
+      "concern": "SMOKE-RO",
       "severity": "block",
       "enforcement": "Hook + CI",
       "never": "POST, PUT, PATCH, or DELETE in a smoke spec",
@@ -107,6 +116,7 @@
     },
     {
       "id": "locator-priority",
+      "concern": "LOCATOR-PRIORITY",
       "severity": "review",
       "enforcement": "QA gate",
       "never": "skip semantic locators without a reason",
@@ -116,6 +126,7 @@
     },
     {
       "id": "narrow-before-index",
+      "concern": "LOCATOR-NARROW",
       "severity": "review",
       "enforcement": "QA gate",
       "never": "use first() or nth() where a filter can identify the element",
@@ -125,6 +136,7 @@
     },
     {
       "id": "search-before-create",
+      "concern": "SEARCH-FIRST",
       "severity": "review",
       "enforcement": "QA gate",
       "never": "a new config, helper, or spec without searching first",
@@ -134,8 +146,9 @@
     },
     {
       "id": "one-requirement-tag",
-      "severity": "review",
-      "enforcement": "QA gate",
+      "concern": "TRACE",
+      "severity": "block",
+      "enforcement": "Hook + CI",
       "never": "a test with no requirement tag, more than one, or an unknown id",
       "instead": "exactly one known requirement id in the title and as a tag, plus Type, Priority, and tier tags",
       "why": "The title survives every reporter and the tag supports filtering; together they make coverage computable.",
@@ -154,7 +167,7 @@
     {
       "name": "playwright-test-automation",
       "role": "BUILD",
-      "description": "Implement Playwright tests and helpers using the helper-first Config → Helpers → Tests architecture.",
+      "description": "Implement Playwright tests and helpers using the helper-first Config \u2192 Helpers \u2192 Tests architecture.",
       "model": "sonnet",
       "tools": ["Read", "Write", "Edit", "Grep", "Glob", "Bash"],
       "when": "Build a requirement-backed helper-first Playwright module"
@@ -203,7 +216,7 @@
     }
   ],
   "hooks": {
-    "prompt": ["prompt-duplication-guard.mjs"],
+    "prompt": ["harness-config-gate.mjs", "prompt-duplication-guard.mjs"],
     "preWrite": ["pre-validate-playwright-rules.mjs"],
     "postWrite": ["validate-playwright-rules.mjs"],
     "stop": ["session-end-reminder.mjs"]

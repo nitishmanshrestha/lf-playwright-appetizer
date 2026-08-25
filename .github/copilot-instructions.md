@@ -18,7 +18,7 @@ Architecture: **Config → Helpers → Tests**. Read `CLAUDE.md` for the full fr
 - **locator-priority** (QA gate) — never skip semantic locators without a reason; use getByRole(), getByLabel(), getByText(), then getByTestId(). Semantic locators are more stable and accessible.
 - **narrow-before-index** (QA gate) — never use first() or nth() where a filter can identify the element; use filter({ hasText }) or filter({ has }). Index-based locators silently target the wrong element when the UI changes.
 - **search-before-create** (QA gate) — never a new config, helper, or spec without searching first; use search literal selectors, routes, and endpoints by value. Duplicate owners cause the same app change to need multiple fixes.
-- **one-requirement-tag** (QA gate) — never a test with no requirement tag, more than one, or an unknown id; use exactly one known requirement id in the title and as a tag, plus Type, Priority, and tier tags. The title survives every reporter and the tag supports filtering; together they make coverage computable.
+- **one-requirement-tag** (Hook + CI) — never a test with no requirement tag, more than one, or an unknown id; use exactly one known requirement id in the title and as a tag, plus Type, Priority, and tier tags. The title survives every reporter and the tag supports filtering; together they make coverage computable.
 
 Edit and Write tool calls are checked by the generated repository hooks. CI rescans repository
 changes as the final backstop; shell commands are not represented as Edit or Write tool calls.

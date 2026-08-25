@@ -33,6 +33,8 @@ const SAMPLES = {
   "storage-state-auth": [SPEC, "test.beforeEach(async ({ page }) => { await login(page, u); });"],
   "base-fixture-import": [SPEC, 'import { test } from "@playwright/test";'],
   "smoke-read-only": [SPEC, 'await request.post("/api/orders", {});'],
+  // Untagged test: no [REQUIREMENT-ID] title prefix and no tag option at all.
+  "one-requirement-tag": [SPEC, 'test("cart totals", async () => {});'],
 };
 
 const blockRules = config.rules.filter((r) => r.severity === "block").map((r) => r.id);
@@ -70,8 +72,11 @@ assert.deepEqual(
 assert.equal(
   scanContent(
     SPEC,
+    // Carries the full tag contract, not just the title prefix. It did not before
+    // one-requirement-tag became a block rule here, which made this "compliant" sample
+    // non-compliant — worth stating, because the reference example is also documentation.
     'import { test, expect } from "../../../fixtures/base.fixture";\n' +
-      'test("[REQ-1] shows cart", async ({ page, nav }) => {\n' +
+      'test("[REQ-1] shows cart", { tag: ["@REQ-1", "@smoke", "@P0"] }, async ({ page, nav }) => {\n' +
       "  await nav.goto(ROUTES.CART);\n" +
       "  await expect(page.getByRole('heading', { name: 'Cart' })).toBeVisible();\n" +
       "});\n",
