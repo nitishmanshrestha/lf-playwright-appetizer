@@ -79,7 +79,7 @@ NEVER  →  a test with no requirement tag, more than one, or an unknown id    e
 | `locator-priority` | Semantic locators are more stable and accessible. | QA gate |
 | `narrow-before-index` | Index-based locators silently target the wrong element when the UI changes. | QA gate |
 | `search-before-create` | Duplicate owners cause the same app change to need multiple fixes. | QA gate |
-| `one-requirement-tag` | The title survives every reporter and the tag supports filtering; together they make coverage computable. | QA gate |
+| `one-requirement-tag` | The title survives every reporter and the tag supports filtering; together they make coverage computable. | Hook + CI |
 
 <!-- HARNESS:RULES:END -->
 

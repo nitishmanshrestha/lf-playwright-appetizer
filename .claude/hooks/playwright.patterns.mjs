@@ -14,7 +14,14 @@
  * covers a narrower, adjacent check: action locators with no `.or()` fallback.
  */
 
-import { SCRIPT_EXT, escapeRegex, isAllowedLiteral, readProjectPaths } from "./rule-engine.mjs";
+import {
+  SCRIPT_EXT,
+  escapeRegex,
+  extractBalancedObject,
+  isAllowedLiteral,
+  lineNumberForIndex,
+  readProjectPaths,
+} from "./rule-engine.mjs";
 import { codeSuffixesFor, scanRootsFor } from "../../harness/patterns.mjs";
 
 // Roots come from the composed config, so a project can declare its own tree. See
@@ -57,6 +64,13 @@ const SMOKE_SPEC_RE = new RegExp(
 );
 const TARGET_FILE_RE = new RegExp(String.raw`(?:${SCAN_ROOTS})[\\/].*\.${SCRIPT_EXT}$`, "i");
 const HELPERS_ROOT_RE = new RegExp(String.raw`^${COMMAND_ROOT}/`, "i");
+const TESTS_SPEC_RE = new RegExp(String.raw`${ROOT}[\\/]tests[\\/].*\.spec\.${SCRIPT_EXT}$`, "i");
+
+// Requirement id shape, e.g. PAY-CHECKOUT-001 or REQ-1: uppercase segments joined by hyphens.
+const REQUIREMENT_ID = /^[A-Z][A-Z0-9]*(?:-[A-Z0-9]+)+$/;
+const TYPE_TAGS = new Set(["smoke", "regression"]);
+const PRIORITY_TAGS = new Set(["P0", "P1", "P2"]);
+const TIERS = ["smoke", "e2e", "ddt"];
 
 export const EXTENSION_PATTERNS = {
   SCRIPT_EXT,
@@ -170,6 +184,88 @@ export const rules = [
     // for either order rather than assuming the value is the literal.
     pattern:
       /(?:test\.)?before(?:Each|All)\s*\([\s\S]{0,400}?(?:(?:password|passwd)[\s\S]{0,80}?\.fill\(|\.fill\(\s*[^)]{0,80}?(?:password|passwd))/gi,
+  },
+  {
+    // Exactly one requirement tag per test, plus one Type and one Priority tag, with the title
+    // requirement id matching the requirement tag. Structural and single-file: whether the id is
+    // *active* and unique across the repository is graded by evidence:build and check:requirements,
+    // which see cross-file state a write-time hook cannot.
+    //
+    // This adapter used to declare the rule `review` at the QA gate with no pattern behind it and no
+    // ratchet date — an open-ended ramp, which the spec does not allow, and the reason coverage was
+    // computable by enforcement in Cypress and not here. Implemented rather than excused because
+    // this boilerplate ships zero specs: enforcing costs nothing today and gets expensive later.
+    ruleId: "one-requirement-tag",
+    fallback: "Test must carry exactly one known requirement id in its title and tags.",
+    appliesTo: (p) => TESTS_SPEC_RE.test(p),
+    check: ({ filePath, content, message, push }) => {
+      const testCallRe = /\btest(?:\.\w+)?\s*\(\s*(['"`])([\s\S]*?)\1/g;
+      let match;
+      while ((match = testCallRe.exec(content)) !== null) {
+        const lineNumber = lineNumberForIndex(content, match.index);
+        const title = String(match[2] || "");
+        let cursor = testCallRe.lastIndex;
+        while (/\s/.test(content[cursor] || "")) cursor += 1;
+        if (content[cursor] === ",") cursor += 1;
+        while (/\s/.test(content[cursor] || "")) cursor += 1;
+        const options = extractBalancedObject(content, cursor);
+
+        // Playwright's own option is `tag`, and it takes a string or an array. A single string is
+        // valid syntax and always insufficient here, so both forms are parsed rather than only the
+        // one the convention uses.
+        const arrayMatch = options.match(/\btag\s*:\s*\[([^\]]*)\]/);
+        const singleMatch = options.match(/\btag\s*:\s*(['"`])([^'"`]+)\1/);
+        const tags = arrayMatch
+          ? [...arrayMatch[1].matchAll(/['"`]([^'"`]+)['"`]/g)].map((m) => m[1].trim())
+          : singleMatch
+            ? [singleMatch[2].trim()]
+            : [];
+
+        const bare = (tag) => tag.replace(/^@/, "");
+        const titleId = title.match(/^\s*\[([^\]]+)\]/)?.[1]?.trim() ?? null;
+        const typeTags = tags.filter((t) => TYPE_TAGS.has(bare(t).toLowerCase()));
+        const priorityTags = tags.filter((t) => PRIORITY_TAGS.has(bare(t).toUpperCase()));
+        const requirementTags = tags.filter(
+          (t) =>
+            !TYPE_TAGS.has(bare(t).toLowerCase()) &&
+            !PRIORITY_TAGS.has(bare(t).toUpperCase()) &&
+            REQUIREMENT_ID.test(bare(t)),
+        );
+        const pathTier = TIERS.find((tier) => filePath.split("/").includes(tier));
+        const tierTags = pathTier ? tags.filter((t) => bare(t).toLowerCase() === pathTier) : [];
+
+        const problems = [];
+        if (!titleId || !REQUIREMENT_ID.test(titleId)) {
+          problems.push("title must begin with a [REQUIREMENT-ID] prefix");
+        }
+        if (requirementTags.length !== 1) {
+          problems.push(`expected exactly one requirement id tag, found ${requirementTags.length}`);
+        }
+        if (typeTags.length !== 1) {
+          problems.push(
+            `expected exactly one Type tag (@smoke or @regression), found ${typeTags.length}`,
+          );
+        }
+        if (priorityTags.length !== 1) {
+          problems.push(
+            `expected exactly one Priority tag (@P0/@P1/@P2), found ${priorityTags.length}`,
+          );
+        }
+        if (pathTier && tierTags.length !== 1) {
+          problems.push(
+            `expected exactly one tier tag (@${pathTier}) for the ${pathTier} path, found ${tierTags.length}`,
+          );
+        }
+        if (titleId && requirementTags.length === 1 && bare(requirementTags[0]) !== titleId) {
+          problems.push(
+            `title id [${titleId}] does not match requirement tag ${requirementTags[0]}`,
+          );
+        }
+        if (problems.length > 0) {
+          push(lineNumber, `${message} (${problems.join("; ")})`);
+        }
+      }
+    },
   },
   {
     ruleId: "smoke-read-only",
