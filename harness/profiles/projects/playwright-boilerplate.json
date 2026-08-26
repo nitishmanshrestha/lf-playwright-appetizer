@@ -7,6 +7,23 @@
   "language": "typescript",
   "projectName": "playwright-automation-boilerplate",
   "repo": "lf-playwright-boilerplate",
+  "pattern": "helper-first",
+  "paths": {
+    "testRoot": "playwright",
+    "configRoot": "playwright/configs",
+    "commandRoot": "playwright/support/helpers",
+    "specGlob": "playwright/tests/**/*.spec.ts"
+  },
+  "wiring": {
+    "packageManager": "npm",
+    "workspacePackage": false,
+    "verifyScript": "npm run verify"
+  },
+  "strategy": {
+    "auth": "storage-state",
+    "testData": "fresh",
+    "credentialSource": "ci-secret"
+  },
   "adapters": {
     "claude": {
       "enabled": true
