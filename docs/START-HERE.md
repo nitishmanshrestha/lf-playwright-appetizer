@@ -623,7 +623,7 @@ npm run evidence:record -- gate --requirement PAY-CHECKOUT-001 --attempt 1 --ver
 ```
 
 ```bash
-npm run evidence:record -- effort --requirement PAY-CHECKOUT-001 --minutes 45
+npm run evidence:effort -- --requirement PAY-CHECKOUT-001 --minutes 45
 ```
 
 ```bash
@@ -639,7 +639,8 @@ quality. `--failure-class ENV` on a failed CI row keeps an infrastructure outage
 test failure.
 
 **Record the gate verdict from outside the gate.** `pre-merge-qa-gate` has no Write and no Bash by
-design, so the thing being measured never writes its own scorecard.
+design, so the thing being measured never writes its own scorecard. Its accepted verdict now outputs
+the exact append command; run it once for each accepted requirement.
 
 ### 7.5 Durable M2
 

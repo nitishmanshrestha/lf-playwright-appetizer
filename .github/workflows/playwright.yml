@@ -13,6 +13,10 @@ on:
         default: smoke
         type: choice
         options: [smoke, all]
+      task_id:
+        description: Verified task id
+        required: true
+        type: string
 
 permissions:
   contents: read
@@ -31,6 +35,12 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
       - run: npm ci
+      - name: Verify pull-request task manifest
+        if: github.event_name == 'pull_request'
+        run: npm run task:check
+      - name: Verify manually selected task manifest
+        if: github.event_name == 'workflow_dispatch'
+        run: npm run task:check -- --id "${{ inputs.task_id }}"
       - run: npx playwright install --with-deps chromium
       - name: Run framework gates
         run: |
@@ -54,8 +64,8 @@ jobs:
       # NOT persist to the tracked evidence/ci-history.jsonl, and a job that never starts records
       # nothing at all. Backfill from the Actions API is the only mechanism that sees both cases.
       # See docs/START-HERE.md.
-      - name: Record CI outcome for M2
-        if: always() && job.status != 'cancelled'
+      - name: Record first-attempt CI outcome for M2
+        if: always() && github.run_attempt == 1
         env:
           TEST_OUTCOME: ${{ steps.smoke.outcome }}
           TRIGGER: ${{ github.event_name == 'pull_request' && 'pr' || (github.event_name == 'push' && 'push' || 'manual') }}
