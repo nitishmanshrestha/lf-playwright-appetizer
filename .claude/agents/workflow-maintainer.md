@@ -20,7 +20,7 @@ Keep the workflow layer small, clear, and focused.
 
 - User asks "do we need this script?"
 - User says "is this redundant?"
-- Deciding what to keep/remove from `scripts/`, `.github/agents/`, `.github/skills/`
+- Deciding what to keep/remove from `scripts/`, `.claude/agents/`, `.github/agents/`
 - Consolidating or simplifying workflow documentation
 
 ## Decision Rule
@@ -111,7 +111,7 @@ and `README.md` — is not independently editable or deletable. Change `harness.
 
 ## Required Reads
 
-- `docs/04-reference/workflow-utilities.md`
+- `docs/reference/workflow-utilities.md`
 - `.github/copilot-instructions.md`
 - `package.json` (check script usage)
 - `.github/doc-impact-map.json` (check impact triggers)

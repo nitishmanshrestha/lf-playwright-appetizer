@@ -14,17 +14,17 @@ Work through the four phases below in strict order. **Stop and ask the user befo
 
 Ask the user for the following before doing anything else. Populate these values — they are used in every subsequent step.
 
-| Input | Description | Default if skipped |
-|-------|-------------|-------------------|
-| `appBaseUrl` | The base URL of the app under test | `http://localhost:3000` |
-| `hasAuth` | Does the app require login? (yes/no) | yes |
-| `authUrl` | Login page path (e.g. `/login`) | `/login` |
-| `usernameLabel` | Accessible label or placeholder of the username input | `Username` |
-| `passwordLabel` | Accessible label or placeholder of the password input | `Password` |
-| `submitLabel` | Accessible name of the submit/login button | `Login` |
-| `testIdAttribute` | The HTML attribute used as test ID (`data-testid` or `data-test`) | `data-testid` |
-| `firstModuleName` | Name of the first feature/module to test (snake_case) | required |
-| `projectName` | Playwright project name for the real app | `chromium` |
+| Input             | Description                                                       | Default if skipped      |
+| ----------------- | ----------------------------------------------------------------- | ----------------------- |
+| `appBaseUrl`      | The base URL of the app under test                                | `http://localhost:3000` |
+| `hasAuth`         | Does the app require login? (yes/no)                              | yes                     |
+| `authUrl`         | Login page path (e.g. `/login`)                                   | `/login`                |
+| `usernameLabel`   | Accessible label or placeholder of the username input             | `Username`              |
+| `passwordLabel`   | Accessible label or placeholder of the password input             | `Password`              |
+| `submitLabel`     | Accessible name of the submit/login button                        | `Login`                 |
+| `testIdAttribute` | The HTML attribute used as test ID (`data-testid` or `data-test`) | `data-testid`           |
+| `firstModuleName` | Name of the first feature/module to test (snake_case)             | required                |
+| `projectName`     | Playwright project name for the real app                          | `chromium`              |
 
 Present a summary of the collected values and ask: **"Are these correct? Shall I proceed?"** Wait for confirmation.
 
@@ -65,18 +65,21 @@ playwright/configs/api/modules/example/     → delete entire folder
 Remove only the lines that reference sample helpers. Do not touch common helpers (`api`, `har`, `nav`, `ui`, `evidence`).
 
 **Remove these imports:**
+
 ```ts
 import { ExampleHelpers } from "../support/helpers/modules/example.helpers";
 import { SaucedemoHelpers } from "../support/helpers/modules/saucedemo.helpers";
 ```
 
 **Remove from `CustomFixtures` type:**
+
 ```ts
 exampleHelpers: ExampleHelpers;
 saucedemoHelpers: SaucedemoHelpers;
 ```
 
 **Remove from `test.extend()`:**
+
 ```ts
 exampleHelpers: async ({ page }, use) => {
   await use(new ExampleHelpers(page));
@@ -109,6 +112,7 @@ SESSION_VALIDATE_URL=/api/v1/me
 Replace the `projects` array. Use `<projectName>` and `<appBaseUrl>` from Phase 1.
 
 If `hasAuth` is **yes**:
+
 ```ts
 projects: [
   {
@@ -133,6 +137,7 @@ projects: [
 ```
 
 If `hasAuth` is **no**:
+
 ```ts
 projects: [
   {
@@ -225,16 +230,19 @@ export class <FirstModuleName>Helpers {
 In `playwright/fixtures/base.fixture.ts`:
 
 Add import:
+
 ```ts
 import { <FirstModuleName>Helpers } from "../support/helpers/modules/<firstModuleName>.helpers";
 ```
 
 Add to `CustomFixtures` type:
+
 ```ts
 <firstModuleName>Helpers: <FirstModuleName>Helpers;
 ```
 
 Add to `test.extend()`:
+
 ```ts
 <firstModuleName>Helpers: async ({ page }, use) => {
   await use(new <FirstModuleName>Helpers(page));
@@ -268,6 +276,7 @@ npm run report
 ```
 
 If tests fail, diagnose using:
+
 ```bash
 npm run test:debug
 ```

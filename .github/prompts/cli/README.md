@@ -63,5 +63,4 @@ CLI-based prompts must still obey the same framework rules:
 ## Related
 
 - [Prompts Index](../README.md)
-- [../../../docs/04-reference/workflow-utilities.md](../../../docs/04-reference/workflow-utilities.md)
-- [../../../docs/workflow.md](../../../docs/workflow.md)
+- [../../../docs/reference/workflow-utilities.md](../../../docs/reference/workflow-utilities.md)

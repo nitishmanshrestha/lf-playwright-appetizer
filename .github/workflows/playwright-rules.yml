@@ -30,7 +30,10 @@ on:
       - "harness/**"
       - "harness.config.json"
       - "package.json"
-      - "scripts/harness/**"
+      - "scripts/engine/**"
+      - "scripts/check-task.mjs"
+      - "evidence/tasks/**"
+      - "docs/tasks/**"
       - "CLAUDE.md"
       - "README.md"
 
@@ -49,6 +52,11 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "20"
+
+      - run: npm ci
+
+      - name: Verify task manifest
+        run: npm run task:check
 
       - name: Verify harness projections
         run: npm run harness:check && npm run harness:test

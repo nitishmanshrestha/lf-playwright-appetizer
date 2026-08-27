@@ -214,7 +214,7 @@ Foundation scaffolded. Next steps:
    Edit .env — never commit real values
 
 3. Write your tests
-   Read: docs/02-guides/writing-tests.md
+   Read: docs/guides/writing-tests.md
    Tests live in: playwright/tests/<moduleName>/<smoke|e2e>/
 
 4. Run

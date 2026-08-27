@@ -97,7 +97,11 @@ File: `playwright/tests/{{moduleName}}/e2e/{{moduleName}}-{{featureName}}.spec.t
 
 ### 3g. DDT Candidate Detection (auto)
 
-- If `{{ddtEnabled}}` is true (default), run the `identify-ddt-candidates` skill on the captured flow after extracting selectors.
+- If `{{ddtEnabled}}` is true (default), judge the captured flow for data-driven testing:
+  a flow is a DDT candidate only when all four hold: it follows the **same flow** with
+  **different input data**, has **similar or identical assertions** per variation, has **3+ valid
+  scenarios**, and needs **no per-scenario setup or teardown**. If any one fails, write a
+  single-scenario spec instead — a `for...of` over branching flows is harder to read than three tests.
 - If the skill returns `DDT_CANDIDATE`:
   - Create a JSON fixture under `playwright/testdata/{{moduleName}}/{{featureName}}-data.json` with dataset objects including assertion values.
   - Generate a parameterized spec under `playwright/tests/{{moduleName}}/smoke/{{featureName}}-ddt.spec.ts` using a `for...of` loop.

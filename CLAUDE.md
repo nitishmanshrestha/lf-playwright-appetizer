@@ -79,7 +79,7 @@ NEVER  →  a test with no requirement tag, more than one, or an unknown id    e
 | `locator-priority` | Semantic locators are more stable and accessible. | QA gate |
 | `narrow-before-index` | Index-based locators silently target the wrong element when the UI changes. | QA gate |
 | `search-before-create` | Duplicate owners cause the same app change to need multiple fixes. | QA gate |
-| `one-requirement-tag` | The title survives every reporter and the tag supports filtering; together they make coverage computable. | QA gate |
+| `one-requirement-tag` | The title survives every reporter and the tag supports filtering; together they make coverage computable. | Hook + CI |
 
 <!-- HARNESS:RULES:END -->
 
@@ -91,13 +91,12 @@ Zero tests is valid before project intake. `npm test -- --list` and `npm test` m
 ## Verification
 
 ```bash
-npm run harness:check
-npm run harness:test
-npm run check:rules
-npm run lint
-npm test
-npm run evidence:build
+npm run verify
 ```
 
+Runs `harness:check` → `harness:test` → `harness:format:check` → `check:rules` → `tsc --noEmit` →
+`npm test` (with `lint` via `pretest`) → `evidence:build`. Run them individually to isolate a failure.
+
 Do not claim execution, coverage, or a metric without the corresponding command or source
-evidence. Optional paid services cannot be required for the baseline workflow.
+evidence. Optional paid services cannot be required for the baseline workflow — CI is a backstop for
+human-authored code, not the enforcement point. The write-time hooks are, and they cost nothing.

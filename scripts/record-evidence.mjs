@@ -1,8 +1,10 @@
 #!/usr/bin/env node
-// Appends validated entries to the three evidence ledgers that feed M1, M2, and M4.
+// Appends validated entries to the evidence ledgers that feed M1, M2, and M4.
 // scripts/evidence.mjs READS these; nothing else writes them.
 //
 //   node scripts/record-evidence.mjs gate   --requirement <id> --attempt 1 --verdict PASS
+//   node scripts/record-evidence.mjs gate   --requirement <id> --attempt 1 --verdict PASS_WITH_ACTIONS \
+//        --actions "named follow-up|another follow-up" [--resolution "optional note"]
 //   node scripts/record-evidence.mjs ci     --pipeline <id> --trigger pr --attempt 1 --outcome passed
 //   node scripts/record-evidence.mjs effort --requirement <id> --minutes 45
 //
@@ -13,6 +15,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { parseArgs, readJsonLines } from "./lib/cli.mjs";
 
 const VERDICTS = new Set(["PASS", "PASS_WITH_ACTIONS", "BLOCK"]);
 const TRIGGERS = new Set(["pr", "push", "manual", "schedule"]);
@@ -24,15 +27,6 @@ const LEDGERS = {
   effort: "effort-log.jsonl",
 };
 
-function readLines(file) {
-  if (!fs.existsSync(file)) return [];
-  return fs
-    .readFileSync(file, "utf8")
-    .split(/\r?\n/)
-    .filter(Boolean)
-    .map((line) => JSON.parse(line));
-}
-
 function requirementIds(root) {
   const file = path.join(root, "evidence", "requirements.json");
   if (!fs.existsSync(file)) return null;
@@ -42,7 +36,8 @@ function requirementIds(root) {
 
 function positiveInteger(value, field) {
   const n = Number(value);
-  if (!Number.isInteger(n) || n < 1) throw new Error(`--${field} must be an integer >= 1`);
+  if (!Number.isInteger(n) || n < 1)
+    throw new Error(`--${field} must be an integer >= 1`);
   return n;
 }
 
@@ -59,18 +54,65 @@ function knownRequirement(root, id) {
   return id;
 }
 
-export function buildEntry(kind, args, root = process.cwd(), now = new Date().toISOString()) {
+/** Pipe-separated named follow-ups for PASS_WITH_ACTIONS. Empty / missing → []. */
+export function parseNamedActions(raw) {
+  if (raw === undefined || raw === null || raw === true || raw === false) {
+    return [];
+  }
+  return String(raw)
+    .split("|")
+    .map((part) => part.trim())
+    .filter(Boolean);
+}
+
+export function buildEntry(
+  kind,
+  args,
+  root = process.cwd(),
+  now = new Date().toISOString(),
+) {
   if (kind === "gate") {
     const verdict = String(args.verdict ?? "").toUpperCase();
     if (!VERDICTS.has(verdict)) {
       throw new Error(`--verdict must be one of ${[...VERDICTS].join(" | ")}`);
     }
-    return {
+    const actions = parseNamedActions(args.actions);
+    const resolution =
+      args.resolution === undefined ||
+      args.resolution === true ||
+      args.resolution === false
+        ? null
+        : String(args.resolution).trim() || null;
+
+    // PASS_WITH_ACTIONS is merge-ready with named non-blocking follow-ups. Actions that would
+    // block merge belong under BLOCK, not here — so the ledger requires the names.
+    if (verdict === "PASS_WITH_ACTIONS" && actions.length === 0) {
+      throw new Error(
+        'PASS_WITH_ACTIONS requires --actions "follow-up one|follow-up two"',
+      );
+    }
+    if (verdict !== "PASS_WITH_ACTIONS" && actions.length > 0) {
+      throw new Error(
+        "--actions is only valid with --verdict PASS_WITH_ACTIONS",
+      );
+    }
+    if (verdict !== "PASS_WITH_ACTIONS" && resolution) {
+      throw new Error(
+        "--resolution is only valid with --verdict PASS_WITH_ACTIONS",
+      );
+    }
+
+    const entry = {
       requirementId: knownRequirement(root, args.requirement),
       attempt: positiveInteger(args.attempt ?? 1, "attempt"),
       verdict,
       timestamp: args.timestamp ?? now,
     };
+    if (verdict === "PASS_WITH_ACTIONS") {
+      entry.actions = actions;
+      entry.resolution = resolution;
+    }
+    return entry;
   }
 
   if (kind === "ci") {
@@ -83,7 +125,9 @@ export function buildEntry(kind, args, root = process.cwd(), now = new Date().to
     if (!args.pipeline) throw new Error("--pipeline is required");
     const failureClass = args["failure-class"] ?? null;
     if (outcome === "passed" && failureClass) {
-      throw new Error("--failure-class is only meaningful with --outcome failed");
+      throw new Error(
+        "--failure-class is only meaningful with --outcome failed",
+      );
     }
     return {
       pipelineId: String(args.pipeline),
@@ -107,18 +151,23 @@ export function buildEntry(kind, args, root = process.cwd(), now = new Date().to
     };
   }
 
-  throw new Error(`Unknown ledger "${kind}". Use: ${Object.keys(LEDGERS).join(" | ")}`);
+  throw new Error(
+    `Unknown ledger "${kind}". Use: ${Object.keys(LEDGERS).join(" | ")}`,
+  );
 }
 
 // A double-append would inflate M1/M2 with a row that looks like independent evidence.
 export function findDuplicate(kind, entry, existing) {
   if (kind === "gate") {
     return existing.find(
-      (e) => e.requirementId === entry.requirementId && e.attempt === entry.attempt,
+      (e) =>
+        e.requirementId === entry.requirementId && e.attempt === entry.attempt,
     );
   }
   if (kind === "ci") {
-    return existing.find((e) => e.pipelineId === entry.pipelineId && e.attempt === entry.attempt);
+    return existing.find(
+      (e) => e.pipelineId === entry.pipelineId && e.attempt === entry.attempt,
+    );
   }
   return undefined;
 }
@@ -126,7 +175,7 @@ export function findDuplicate(kind, entry, existing) {
 export function record(kind, args, root = process.cwd()) {
   const entry = buildEntry(kind, args, root);
   const file = path.join(root, "evidence", LEDGERS[kind]);
-  const existing = readLines(file);
+  const existing = readJsonLines(file);
 
   const duplicate = findDuplicate(kind, entry, existing);
   if (duplicate && !args.force) {
@@ -142,23 +191,9 @@ export function record(kind, args, root = process.cwd()) {
   return { file, entry, total: existing.length + 1 };
 }
 
-function parseArgs(tokens) {
-  const args = {};
-  for (let i = 0; i < tokens.length; i += 1) {
-    if (!tokens[i].startsWith("--")) continue;
-    const key = tokens[i].slice(2);
-    const next = tokens[i + 1];
-    if (!next || next.startsWith("--")) {
-      args[key] = true;
-      continue;
-    }
-    args[key] = next;
-    i += 1;
-  }
-  return args;
-}
-
-const isMain = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
+const isMain =
+  process.argv[1] &&
+  path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
 if (isMain) {
   try {
     const [kind, ...rest] = process.argv.slice(2);
@@ -167,11 +202,14 @@ if (isMain) {
         [
           "Usage:",
           "  record-evidence.mjs gate   --requirement <id> --attempt <n> --verdict PASS|PASS_WITH_ACTIONS|BLOCK",
+          '                         [--actions "a|b" --resolution "note"]  # required/only for PASS_WITH_ACTIONS',
           "  record-evidence.mjs ci     --pipeline <id> --trigger pr|push|manual|schedule --attempt <n> --outcome passed|failed [--failure-class ENV]",
           "  record-evidence.mjs effort --requirement <id> --minutes <n> [--accepted false]",
           "",
-          "Only attempt 1 counts toward M1 and M2 — measuring after repairs measures persistence,",
-          "not quality. M2 ignores rows with --failure-class ENV so outages are not test failures.",
+          "PASS_WITH_ACTIONS means merge-ready now with named non-blocking follow-ups (preserved on",
+          "the row). Only attempt 1 counts toward M1 and M2 — measuring after repairs measures",
+          "persistence, not quality. M2 ignores rows with --failure-class ENV so outages are not",
+          "test failures.",
         ].join("\n"),
       );
       process.exit(kind ? 0 : 2);

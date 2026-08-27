@@ -88,6 +88,5 @@ export class ProductsHelpers {
 
 ## Required Reads
 
-- `docs/04-reference/playwright-cli-agents.md`
+- `docs/reference/playwright-cli-agents.md`
 - `.github/prompts/cli/README.md`
-- `.github/skills/playwright-cli-workflow/SKILL.md`

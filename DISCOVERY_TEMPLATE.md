@@ -3,10 +3,10 @@
 > Copy this template and fill it in as you explore a new application.
 > Use Playwright Codegen to interact with the app and capture selectors.
 
-**Project Name:** ******\_\_\_\_******  
-**App URL:** ******\_\_\_\_******  
-**Explorer Name:** ******\_\_\_\_******  
-**Date:** ******\_\_\_\_******
+**Project Name:** **\*\***\_\_\_\_**\*\***  
+**App URL:** **\*\***\_\_\_\_**\*\***  
+**Explorer Name:** **\*\***\_\_\_\_**\*\***  
+**Date:** **\*\***\_\_\_\_**\*\***
 
 ---
 
@@ -347,9 +347,9 @@ _Example:_
 
 ## Sign-Off
 
-**Explorer:** ************\_************ **Date:** ****\_****
+**Explorer:** \***\*\*\*\*\*\*\***\_\***\*\*\*\*\*\*\*** **Date:** \***\*\_\*\***
 
-**Reviewed By:** ************\_************ **Date:** ****\_****
+**Reviewed By:** \***\*\*\*\*\*\*\***\_\***\*\*\*\*\*\*\*** **Date:** \***\*\_\*\***
 
 **Approved For Implementation:** ☐ Yes ☐ No ☐ With changes
 

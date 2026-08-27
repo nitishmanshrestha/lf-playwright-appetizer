@@ -1,15 +1,20 @@
 {
-  "$comment": "The source of truth for this repo's harness. Policy lives here once; generated tool projections are refreshed with npm run harness:sync and verified with npm run harness:check. Hook scripts remain executable engine code.",
+  "$comment": "GENERATED from docs/harness/profiles by compose-harness-config.mjs. Policy lives in the adapter baseline (playwright.json); project facts live in the profile (playwright-boilerplate). Re-compose after editing either, then run npm run harness:sync.",
   "version": 1,
   "framework": "playwright",
-  "adapters": {
-    "claude": { "enabled": true },
-    "copilot": { "enabled": true }
-  },
   "agentFileExtension": ".md",
+  "adapters": {
+    "claude": {
+      "enabled": true
+    },
+    "copilot": {
+      "enabled": true
+    }
+  },
   "project": {
     "name": "playwright-automation-boilerplate",
     "architecture": "Config → Helpers → Tests",
+    "pattern": "helper-first",
     "testRoot": "playwright",
     "configRoot": "playwright/configs",
     "commandRoot": "playwright/support/helpers",
@@ -26,10 +31,21 @@
   "loops": {
     "gateRepairLimit": 3
   },
+  "wiring": {
+    "packageManager": "npm",
+    "workspacePackage": false,
+    "verifyScript": "npm run verify"
+  },
+  "strategy": {
+    "auth": "storage-state",
+    "testData": "fresh",
+    "credentialSource": "ci-secret"
+  },
   "qaFoundations": "harness/qa-automation-foundations.md",
   "rules": [
     {
       "id": "no-hard-wait",
+      "concern": "WAIT",
       "severity": "block",
       "enforcement": "Hook + CI",
       "never": "page.waitForTimeout(<number>)",
@@ -39,6 +55,7 @@
     },
     {
       "id": "no-hardcoded-selector",
+      "concern": "SELECTOR",
       "severity": "block",
       "enforcement": "Hook + CI",
       "never": "a selector literal in a spec or helper",
@@ -48,6 +65,7 @@
     },
     {
       "id": "no-hardcoded-route",
+      "concern": "ROUTE",
       "severity": "block",
       "enforcement": "Hook + CI",
       "never": "a route or endpoint literal when config exists",
@@ -57,6 +75,7 @@
     },
     {
       "id": "no-page-object",
+      "concern": "ARCH-BOUNDARY",
       "severity": "block",
       "enforcement": "Hook + CI",
       "never": "page-object classes, action layers, or wrappers outside helpers/",
@@ -66,6 +85,7 @@
     },
     {
       "id": "no-credential-literal",
+      "concern": "CRED",
       "severity": "block",
       "enforcement": "Hook + CI",
       "never": "a password, secret, API key, or token assigned a literal string",
@@ -75,6 +95,7 @@
     },
     {
       "id": "storage-state-auth",
+      "concern": "CACHED-AUTH",
       "severity": "block",
       "enforcement": "Hook + CI",
       "never": "login in beforeEach()",
@@ -84,6 +105,7 @@
     },
     {
       "id": "base-fixture-import",
+      "concern": "ARCH-BOUNDARY",
       "severity": "block",
       "enforcement": "Hook + CI",
       "never": "a spec importing test directly from @playwright/test",
@@ -93,6 +115,7 @@
     },
     {
       "id": "smoke-read-only",
+      "concern": "SMOKE-RO",
       "severity": "block",
       "enforcement": "Hook + CI",
       "never": "POST, PUT, PATCH, or DELETE in a smoke spec",
@@ -102,6 +125,7 @@
     },
     {
       "id": "locator-priority",
+      "concern": "LOCATOR-PRIORITY",
       "severity": "review",
       "enforcement": "QA gate",
       "never": "skip semantic locators without a reason",
@@ -111,6 +135,7 @@
     },
     {
       "id": "narrow-before-index",
+      "concern": "LOCATOR-NARROW",
       "severity": "review",
       "enforcement": "QA gate",
       "never": "use first() or nth() where a filter can identify the element",
@@ -120,6 +145,7 @@
     },
     {
       "id": "search-before-create",
+      "concern": "SEARCH-FIRST",
       "severity": "review",
       "enforcement": "QA gate",
       "never": "a new config, helper, or spec without searching first",
@@ -129,8 +155,9 @@
     },
     {
       "id": "one-requirement-tag",
-      "severity": "review",
-      "enforcement": "QA gate",
+      "concern": "TRACE",
+      "severity": "block",
+      "enforcement": "Hook + CI",
       "never": "a test with no requirement tag, more than one, or an unknown id",
       "instead": "exactly one known requirement id in the title and as a tag, plus Type, Priority, and tier tags",
       "why": "The title survives every reporter and the tag supports filtering; together they make coverage computable.",
@@ -143,7 +170,14 @@
       "role": "GATHER",
       "description": "Derive an approved project and application contract from verified sources before any test generation.",
       "model": "sonnet",
-      "tools": ["Read", "Write", "Edit", "Grep", "Glob", "Bash"],
+      "tools": [
+        "Read",
+        "Write",
+        "Edit",
+        "Grep",
+        "Glob",
+        "Bash"
+      ],
       "when": "Start a new project or module from no existing automation context"
     },
     {
@@ -151,7 +185,14 @@
       "role": "BUILD",
       "description": "Implement Playwright tests and helpers using the helper-first Config → Helpers → Tests architecture.",
       "model": "sonnet",
-      "tools": ["Read", "Write", "Edit", "Grep", "Glob", "Bash"],
+      "tools": [
+        "Read",
+        "Write",
+        "Edit",
+        "Grep",
+        "Glob",
+        "Bash"
+      ],
       "when": "Build a requirement-backed helper-first Playwright module"
     },
     {
@@ -159,7 +200,13 @@
       "role": "DIAGNOSE",
       "description": "Debug a failing Playwright test, trace root cause, and propose an exact compliant fix.",
       "model": "opus",
-      "tools": ["Read", "Grep", "Glob", "Bash", "Edit"],
+      "tools": [
+        "Read",
+        "Grep",
+        "Glob",
+        "Bash",
+        "Edit"
+      ],
       "when": "Trace and repair a failing test"
     },
     {
@@ -168,7 +215,11 @@
       "description": "Evaluate supplied change and command evidence through the complete 6-phase pre-merge QA gate.",
       "model": "opus",
       "permissionMode": "plan",
-      "tools": ["Read", "Grep", "Glob"],
+      "tools": [
+        "Read",
+        "Grep",
+        "Glob"
+      ],
       "when": "Evaluate supplied diff and verification evidence and return the final QA verdict",
       "readOnlyRationale": "Read/search only by design: the gate cannot edit files or execute shell commands, so the builder never grades its own output."
     },
@@ -177,7 +228,12 @@
       "role": "DISCOVER",
       "description": "Use Playwright CLI for token-efficient browser discovery, debugging, and codegen-first scaffolding.",
       "model": "sonnet",
-      "tools": ["Read", "Grep", "Glob", "Bash"],
+      "tools": [
+        "Read",
+        "Grep",
+        "Glob",
+        "Bash"
+      ],
       "when": "Use CLI-first browser discovery or codegen"
     },
     {
@@ -185,7 +241,12 @@
       "role": "SHIP",
       "description": "Create a pull request with the repository's standard generated description.",
       "model": "sonnet",
-      "tools": ["Read", "Grep", "Glob", "Bash"],
+      "tools": [
+        "Read",
+        "Grep",
+        "Glob",
+        "Bash"
+      ],
       "when": "Opening a pull request with a generated description"
     },
     {
@@ -193,15 +254,30 @@
       "role": "MAINTAIN",
       "description": "Simplify repository workflow scripts, agents, skills, and docs without duplicating ownership.",
       "model": "sonnet",
-      "tools": ["Read", "Grep", "Glob", "Bash", "Edit"],
+      "tools": [
+        "Read",
+        "Grep",
+        "Glob",
+        "Bash",
+        "Edit"
+      ],
       "when": "Simplify workflow scripts, agents, skills, or docs"
     }
   ],
   "hooks": {
-    "prompt": ["prompt-duplication-guard.mjs"],
-    "preWrite": ["pre-validate-playwright-rules.mjs"],
-    "postWrite": ["validate-playwright-rules.mjs"],
-    "stop": ["session-end-reminder.mjs"]
+    "prompt": [
+      "harness-config-gate.mjs",
+      "prompt-duplication-guard.mjs"
+    ],
+    "preWrite": [
+      "pre-validate-playwright-rules.mjs"
+    ],
+    "postWrite": [
+      "validate-playwright-rules.mjs"
+    ],
+    "stop": [
+      "session-end-reminder.mjs"
+    ]
   },
   "permissions": {
     "defaultMode": "plan",
@@ -218,6 +294,8 @@
       "Bash(grep -r* playwright/*)",
       "Bash(find playwright/*)"
     ],
-    "deny": ["WebSearch"]
+    "deny": [
+      "WebSearch"
+    ]
   }
 }

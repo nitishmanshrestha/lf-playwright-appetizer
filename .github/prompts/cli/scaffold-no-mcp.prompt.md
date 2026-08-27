@@ -27,7 +27,10 @@ You are an Automation Engineer. The user will provide selectors and workflow ste
 
 ## Rules
 
-Follow all rules in `.github/FRAMEWORK_RULES.md`:
+Rules come from `harness.config.json` (declared once, projected into
+`.github/copilot-instructions.md`) and the "Locator contract" in
+`harness/qa-automation-foundations.md`:
+
 - Config → Helpers → Tests (never skip layers)
 - `getByRole` → `getByLabel` → `getByText` → `getByTestId` locator priority
 - No hardcoded values, no waitForTimeout, no @playwright/test imports in specs
