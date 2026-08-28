@@ -186,6 +186,32 @@ export const rules = [
       /(?:test\.)?before(?:Each|All)\s*\([\s\S]{0,400}?(?:(?:password|passwd)[\s\S]{0,80}?\.fill\(|\.fill\(\s*[^)]{0,80}?(?:password|passwd))/gi,
   },
   {
+    ruleId: "focused-or-quarantined-test",
+    fallback:
+      "Focused test or unrecorded quarantine. Remove .only; a skip/fixme needs // @quarantine ISSUE-123: reason directly above it.",
+    appliesTo: (p) => TESTS_SPEC_RE.test(p),
+    check: ({ content, message, push }) => {
+      const selectionRe = /\btest(?:\.describe)?\.(only|skip|fixme)\s*\(/g;
+      let match;
+      while ((match = selectionRe.exec(content)) !== null) {
+        const lineNumber = lineNumberForIndex(content, match.index);
+        if (match[1] === "only") {
+          push(lineNumber, `${message} (.only is never permitted.)`);
+          continue;
+        }
+        const lineStart = content.lastIndexOf("\n", match.index - 1) + 1;
+        const before = content.slice(0, lineStart).replace(/\r?\n$/, "");
+        const previousLine = before.slice(before.lastIndexOf("\n") + 1);
+        if (!/^\s*\/\/\s*@quarantine\s+[A-Z][A-Z0-9]*-\d+\s*:\s*\S.*\s*$/.test(previousLine)) {
+          push(
+            lineNumber,
+            `${message} (add the quarantine record directly above this skip/fixme.)`,
+          );
+        }
+      }
+    },
+  },
+  {
     // Exactly one requirement tag per test, plus one Type and one Priority tag, with the title
     // requirement id matching the requirement tag. Structural and single-file: whether the id is
     // *active* and unique across the repository is graded by evidence:build and check:requirements,

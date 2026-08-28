@@ -62,18 +62,19 @@ npm run harness:check
 <!-- Generated from harness.config.json — run `npm run harness:sync`. Do not edit by hand. -->
 
 ```text
-NEVER  →  page.waitForTimeout(<number>)                                      waitForResponse() or a deterministic expect() assertion
-NEVER  →  a selector literal in a spec or helper                             constants from playwright/configs/ui/**
-NEVER  →  a route or endpoint literal when config exists                     constants from playwright/configs/app/routes.ts or configs/api/**
-NEVER  →  page-object classes, action layers, or wrappers outside helpers/   helper-first code in playwright/support/helpers/**
-NEVER  →  a password, secret, API key, or token assigned a literal string    environment variables loaded from a gitignored .env or CI secret
-NEVER  →  login in beforeEach()                                              a storageState setup-project dependency
-NEVER  →  a spec importing test directly from @playwright/test               test and expect from playwright/fixtures/base.fixture.ts
-NEVER  →  POST, PUT, PATCH, or DELETE in a smoke spec                        read-only assertions; put mutations in e2e coverage
-NEVER  →  skip semantic locators without a reason                            getByRole(), getByLabel(), getByText(), then getByTestId()
-NEVER  →  use first() or nth() where a filter can identify the element       filter({ hasText }) or filter({ has })
-NEVER  →  a new config, helper, or spec without searching first              search literal selectors, routes, and endpoints by value
-NEVER  →  a test with no requirement tag, more than one, or an unknown id    exactly one known requirement id in the title and as a tag, plus Type, Priority, and tier tags
+NEVER  →  page.waitForTimeout(<number>)                                                   waitForResponse() or a deterministic expect() assertion
+NEVER  →  a selector literal in a spec or helper                                          constants from playwright/configs/ui/**
+NEVER  →  a route or endpoint literal when config exists                                  constants from playwright/configs/app/routes.ts or configs/api/**
+NEVER  →  page-object classes, action layers, or wrappers outside helpers/                helper-first code in playwright/support/helpers/**
+NEVER  →  a password, secret, API key, or token assigned a literal string                 environment variables loaded from a gitignored .env or CI secret
+NEVER  →  login in beforeEach()                                                           a storageState setup-project dependency
+NEVER  →  a spec importing test directly from @playwright/test                            test and expect from playwright/fixtures/base.fixture.ts
+NEVER  →  POST, PUT, PATCH, or DELETE in a smoke spec                                     read-only assertions; put mutations in e2e coverage
+NEVER  →  test.only()/test.describe.only(), or skip/fixme without a recorded quarantine   run focused tests only from the CLI; put // @quarantine ISSUE-123: reason directly above a deliberate skip or fixme
+NEVER  →  skip semantic locators without a reason                                         getByRole(), getByLabel(), getByText(), then getByTestId()
+NEVER  →  use first() or nth() where a filter can identify the element                    filter({ hasText }) or filter({ has })
+NEVER  →  a new config, helper, or spec without searching first                           search literal selectors, routes, and endpoints by value
+NEVER  →  a test with no requirement tag, more than one, or an unknown id                 exactly one known requirement id in the title and as a tag, plus Type, Priority, and tier tags
 ```
 
 | Rule | Why it exists | Enforcement |
@@ -86,6 +87,7 @@ NEVER  →  a test with no requirement tag, more than one, or an unknown id    e
 | `storage-state-auth` | Authentication should be isolated and cached, not repeated in every test. | Hook + CI |
 | `base-fixture-import` | The fixture is the single injection point for helpers. | Hook + CI |
 | `smoke-read-only` | Smoke coverage must be safe against shared and production-like environments. | Hook + CI |
+| `focused-or-quarantined-test` | A focused test can hide suite failures, while an unrecorded skip hides risk with no owner. | Hook + CI |
 | `locator-priority` | Semantic locators are more stable and accessible. | QA gate |
 | `narrow-before-index` | Index-based locators silently target the wrong element when the UI changes. | QA gate |
 | `search-before-create` | Duplicate owners cause the same app change to need multiple fixes. | QA gate |

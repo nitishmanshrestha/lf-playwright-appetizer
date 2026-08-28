@@ -110,9 +110,26 @@ jobs:
       - run: npm ci
       - run: npx playwright install --with-deps chromium
       - name: Run E2E tests
+        id: e2e
         run: npm test
         env:
           BASE_URL: ${{ secrets.BASE_URL }}
+      - name: Record first-attempt CI outcome for M2
+        if: always() && github.run_attempt == 1
+        env:
+          TEST_OUTCOME: ${{ steps.e2e.outcome }}
+          TRIGGER: ${{ github.event_name == 'pull_request' && 'pr' || (github.event_name == 'push' && 'push' || 'manual') }}
+        run: |
+          case "$TEST_OUTCOME" in
+            success) CLASS="" ; RESULT="passed" ;;
+            failure) CLASS="" ; RESULT="failed" ;;
+            *)       CLASS="--failure-class ENV" ; RESULT="failed" ;;
+          esac
+          node scripts/record-evidence.mjs ci \
+            --pipeline "${{ github.run_id }}-e2e" \
+            --trigger "$TRIGGER" \
+            --attempt "${{ github.run_attempt }}" \
+            --outcome "$RESULT" $CLASS
       - name: Build machine evidence
         if: always()
         run: npm run evidence:build

@@ -30,11 +30,16 @@ the read-only gate must never append its own evidence. Output no append command 
 
 ## Phase 1: Architecture
 
+Read `harness.config.json` → `project.pattern` before evaluating this phase. The ARCH-BOUNDARY
+checks (marked ‡) apply only to `helper-first` and `command-first` projects. A project declaring
+`pom`, `bdd-pom`, or `data-driven` is not violating the rule by using page objects — it is using
+its declared architecture.
+
 - Config → Helpers → Tests direction is preserved
 - No hardcoded selectors, routes, or endpoints
 - Specs import test and expect from `base.fixture.ts`
-- No page-object or action-layer wrapper is introduced
 - No duplicate config, helper, or test ownership
+- ‡ No page-object or action-layer wrapper is introduced _(skip if `project.pattern` is `pom`, `bdd-pom`, or `data-driven`)_
 
 ## Phase 2: Config Completeness
 
@@ -108,4 +113,5 @@ ACTIONS:
 EVIDENCE APPEND:
 - Run after this response, once per accepted requirement: npm run evidence:record -- gate --requirement [id] --attempt 1 --verdict [PASS | PASS_WITH_ACTIONS]
 - For PASS_WITH_ACTIONS, include the exact named --actions "a|b" and optional --resolution values from this verdict.
+- Record QA effort for M4 (feeds the effort-per-scenario metric): npm run evidence:effort -- --requirement [id] --minutes [actual minutes spent]
 ```
