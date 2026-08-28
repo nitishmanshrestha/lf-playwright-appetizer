@@ -104,6 +104,34 @@ another repository `BLOCK` rule still blocks the merge regardless of score.
 The gate reports scenario Type, Priority, and reason; the per-test score and deductions; the
 overall verdict; and any gaps or risks. It never invents evidence or coverage.
 
+### Verdict meanings
+
+| Verdict             | Merge?   | Follow-ups                                                            |
+| ------------------- | -------- | --------------------------------------------------------------------- |
+| `PASS`              | Yes      | None required                                                         |
+| `PASS_WITH_ACTIONS` | Yes, now | Named non-blocking follow-ups only — never a substitute for a blocker |
+| `BLOCK`             | No       | Blockers with file:line; fix before merge                             |
+
+`PASS_WITH_ACTIONS` counts as accepted for M1. Named actions (and optional resolution notes) are
+preserved on the gate ledger row and surfaced in `metrics.json` as `gateFollowUps`.
+
+### Role contracts
+
+Each role has a fixed scope. Crossing it — grading your own work, writing files from EVALUATE,
+running DIAGNOSE speculatively — defeats the separation that makes AI output trustworthy.
+
+| Role     | Agent                     | Precondition                          | Input                          | Output                                     | Permissions       | Cannot                              |
+| -------- | ------------------------- | ------------------------------------- | ------------------------------ | ------------------------------------------ | ----------------- | ----------------------------------- |
+| GATHER   | `project-bootstrapper`    | New project or module, no context yet | App source, product docs       | `docs/application-intelligence/**`, requirement drafts | Read + Write docs | Write specs or helpers              |
+| DISCOVER | `playwright-cli`          | Context established                   | App URL or source              | Validated selectors and routes in configs  | Read + Write configs | Write specs or issue verdicts    |
+| BUILD    | `playwright-test-automation` | One active requirement id approved | A single `active` requirement  | Config constants, helpers, one spec        | Read + Write `playwright/**` | Issue verdicts, invoke gate  |
+| EVALUATE | `pre-merge-qa-gate`       | BUILD has run and provided evidence   | Changed files + command output | Verdict (PASS / PASS_WITH_ACTIONS / BLOCK) | **Read only** (no Write, no Bash) | Fix findings, append evidence |
+| DIAGNOSE | `playwright-bug-hunter`   | A reproducible failure exists         | Failure evidence               | Root cause + targeted fix                  | Read + Write `playwright/**` | Run speculatively, grade output |
+
+Repairs by BUILD after a BLOCK verdict count against `loops.gateRepairLimit` (default 3). Reaching
+the limit without a PASS escalates to the human with the remaining evidence-backed blockers — the
+loop does not continue indefinitely.
+
 ## Required Input Evidence
 
 The invocation must identify the changed files and provide command output for:
@@ -128,11 +156,16 @@ the read-only gate must never append its own evidence. Output no append command 
 
 ## Phase 1: Architecture
 
+Read `harness.config.json` → `project.pattern` before evaluating this phase. The ARCH-BOUNDARY
+checks (marked ‡) apply only to `helper-first` and `command-first` projects. A project declaring
+`pom`, `bdd-pom`, or `data-driven` is not violating the rule by using page objects — it is using
+its declared architecture.
+
 - Config → Helpers → Tests direction is preserved
 - No hardcoded selectors, routes, or endpoints
 - Specs import test and expect from `base.fixture.ts`
-- No page-object or action-layer wrapper is introduced
 - No duplicate config, helper, or test ownership
+- ‡ No page-object or action-layer wrapper is introduced _(skip if `project.pattern` is `pom`, `bdd-pom`, or `data-driven`)_
 
 ## Phase 2: Config Completeness
 
@@ -206,4 +239,5 @@ ACTIONS:
 EVIDENCE APPEND:
 - Run after this response, once per accepted requirement: npm run evidence:record -- gate --requirement [id] --attempt 1 --verdict [PASS | PASS_WITH_ACTIONS]
 - For PASS_WITH_ACTIONS, include the exact named --actions "a|b" and optional --resolution values from this verdict.
+- Record QA effort for M4 (feeds the effort-per-scenario metric): npm run evidence:effort -- --requirement [id] --minutes [actual minutes spent]
 ```

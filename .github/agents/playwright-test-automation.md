@@ -110,6 +110,34 @@ another repository `BLOCK` rule still blocks the merge regardless of score.
 The gate reports scenario Type, Priority, and reason; the per-test score and deductions; the
 overall verdict; and any gaps or risks. It never invents evidence or coverage.
 
+### Verdict meanings
+
+| Verdict             | Merge?   | Follow-ups                                                            |
+| ------------------- | -------- | --------------------------------------------------------------------- |
+| `PASS`              | Yes      | None required                                                         |
+| `PASS_WITH_ACTIONS` | Yes, now | Named non-blocking follow-ups only — never a substitute for a blocker |
+| `BLOCK`             | No       | Blockers with file:line; fix before merge                             |
+
+`PASS_WITH_ACTIONS` counts as accepted for M1. Named actions (and optional resolution notes) are
+preserved on the gate ledger row and surfaced in `metrics.json` as `gateFollowUps`.
+
+### Role contracts
+
+Each role has a fixed scope. Crossing it — grading your own work, writing files from EVALUATE,
+running DIAGNOSE speculatively — defeats the separation that makes AI output trustworthy.
+
+| Role     | Agent                     | Precondition                          | Input                          | Output                                     | Permissions       | Cannot                              |
+| -------- | ------------------------- | ------------------------------------- | ------------------------------ | ------------------------------------------ | ----------------- | ----------------------------------- |
+| GATHER   | `project-bootstrapper`    | New project or module, no context yet | App source, product docs       | `docs/application-intelligence/**`, requirement drafts | Read + Write docs | Write specs or helpers              |
+| DISCOVER | `playwright-cli`          | Context established                   | App URL or source              | Validated selectors and routes in configs  | Read + Write configs | Write specs or issue verdicts    |
+| BUILD    | `playwright-test-automation` | One active requirement id approved | A single `active` requirement  | Config constants, helpers, one spec        | Read + Write `playwright/**` | Issue verdicts, invoke gate  |
+| EVALUATE | `pre-merge-qa-gate`       | BUILD has run and provided evidence   | Changed files + command output | Verdict (PASS / PASS_WITH_ACTIONS / BLOCK) | **Read only** (no Write, no Bash) | Fix findings, append evidence |
+| DIAGNOSE | `playwright-bug-hunter`   | A reproducible failure exists         | Failure evidence               | Root cause + targeted fix                  | Read + Write `playwright/**` | Run speculatively, grade output |
+
+Repairs by BUILD after a BLOCK verdict count against `loops.gateRepairLimit` (default 3). Reaching
+the limit without a PASS escalates to the human with the remaining evidence-backed blockers — the
+loop does not continue indefinitely.
+
 ## Search Before Creating
 
 Search selector, route, endpoint, config, helper, and fixture values across the repository. Reuse

@@ -124,6 +124,16 @@
       "message": "Write request in smoke suite. Smoke tests must remain read-only."
     },
     {
+      "id": "focused-or-quarantined-test",
+      "concern": "FOCUSED-QUARANTINED",
+      "severity": "block",
+      "enforcement": "Hook + CI",
+      "never": "test.only()/test.describe.only(), or skip/fixme without a recorded quarantine",
+      "instead": "run focused tests only from the CLI; put // @quarantine ISSUE-123: reason directly above a deliberate skip or fixme",
+      "why": "A focused test can hide suite failures, while an unrecorded skip hides risk with no owner.",
+      "message": "Focused test or unrecorded quarantine. Remove .only; a skip/fixme needs // @quarantine ISSUE-123: reason directly above it."
+    },
+    {
       "id": "locator-priority",
       "concern": "LOCATOR-PRIORITY",
       "severity": "review",

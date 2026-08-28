@@ -33,6 +33,10 @@ const SAMPLES = {
   "storage-state-auth": [SPEC, "test.beforeEach(async ({ page }) => { await login(page, u); });"],
   "base-fixture-import": [SPEC, 'import { test } from "@playwright/test";'],
   "smoke-read-only": [SPEC, 'await request.post("/api/orders", {});'],
+  "focused-or-quarantined-test": [
+    SPEC,
+    'test.only("[REQ-1] cart", { tag: ["@REQ-1", "@smoke", "@P0"] }, async () => {});',
+  ],
   // Untagged test: no [REQUIREMENT-ID] title prefix and no tag option at all.
   "one-requirement-tag": [SPEC, 'test("cart totals", async () => {});'],
 };
