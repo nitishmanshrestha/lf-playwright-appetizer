@@ -60,6 +60,7 @@ NEVER  →  a password, secret, API key, or token assigned a literal string     
 NEVER  →  login in beforeEach()                                                           a storageState setup-project dependency
 NEVER  →  a spec importing test directly from @playwright/test                            test and expect from playwright/fixtures/base.fixture.ts
 NEVER  →  POST, PUT, PATCH, or DELETE in a smoke spec                                     read-only assertions; put mutations in e2e coverage
+NEVER  →  a SQL literal in a spec or helper                                               a frozen entry from playwright/configs/db/** passed to the db fixture
 NEVER  →  test.only()/test.describe.only(), or skip/fixme without a recorded quarantine   run focused tests only from the CLI; put // @quarantine ISSUE-123: reason directly above a deliberate skip or fixme
 NEVER  →  skip semantic locators without a reason                                         getByRole(), getByLabel(), getByText(), then getByTestId()
 NEVER  →  use first() or nth() where a filter can identify the element                    filter({ hasText }) or filter({ has })
@@ -77,6 +78,7 @@ NEVER  →  a test with no requirement tag, more than one, or an unknown id     
 | `storage-state-auth` | Authentication should be isolated and cached, not repeated in every test. | Hook + CI |
 | `base-fixture-import` | The fixture is the single injection point for helpers. | Hook + CI |
 | `smoke-read-only` | Smoke coverage must be safe against shared and production-like environments. | Hook + CI |
+| `no-sql-literal` | A query is the datastore contract. One schema change should mean one config edit, not a grep across specs. | Hook + CI |
 | `focused-or-quarantined-test` | A focused test can hide suite failures, while an unrecorded skip hides risk with no owner. | Hook + CI |
 | `locator-priority` | Semantic locators are more stable and accessible. | QA gate |
 | `narrow-before-index` | Index-based locators silently target the wrong element when the UI changes. | QA gate |

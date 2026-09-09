@@ -3,7 +3,7 @@
   "version": 1,
   "framework": "playwright",
   "agentFileExtension": ".md",
-  "architecture": "Config \u2192 Helpers \u2192 Tests",
+  "architecture": "Config → Helpers → Tests",
   "pattern": "helper-first",
   "paths": {
     "testRoot": "playwright",
@@ -115,6 +115,16 @@
       "message": "Write request in smoke suite. Smoke tests must remain read-only."
     },
     {
+      "id": "no-sql-literal",
+      "concern": "QUERY",
+      "severity": "block",
+      "enforcement": "Hook + CI",
+      "never": "a SQL literal in a spec or helper",
+      "instead": "a frozen entry from playwright/configs/db/** passed to the db fixture",
+      "why": "A query is the datastore contract. One schema change should mean one config edit, not a grep across specs.",
+      "message": "Hardcoded SQL. Move the query to playwright/configs/db/** and use the db fixture."
+    },
+    {
       "id": "focused-or-quarantined-test",
       "concern": "FOCUSED-QUARANTINED",
       "severity": "block",
@@ -177,7 +187,7 @@
     {
       "name": "playwright-test-automation",
       "role": "BUILD",
-      "description": "Implement Playwright tests and helpers using the helper-first Config \u2192 Helpers \u2192 Tests architecture.",
+      "description": "Implement Playwright tests and helpers using the helper-first Config → Helpers → Tests architecture.",
       "model": "sonnet",
       "tools": ["Read", "Write", "Edit", "Grep", "Glob", "Bash"],
       "when": "Build a requirement-backed helper-first Playwright module"

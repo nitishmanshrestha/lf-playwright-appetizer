@@ -33,6 +33,13 @@ const SAMPLES = {
   "storage-state-auth": [SPEC, "test.beforeEach(async ({ page }) => { await login(page, u); });"],
   "base-fixture-import": [SPEC, 'import { test } from "@playwright/test";'],
   "smoke-read-only": [SPEC, 'await request.post("/api/orders", {});'],
+  // A query is the datastore's contract and belongs in playwright/configs/db/**, for the same
+  // reason a route does. The sample is a helper, not a smoke spec: write SQL in a smoke spec fires
+  // smoke-read-only as well, and a sample that proves two rules proves neither cleanly.
+  "no-sql-literal": [
+    HELPER,
+    'const rows = await db.query("SELECT id, total FROM orders WHERE id = 1");',
+  ],
   "focused-or-quarantined-test": [
     SPEC,
     'test.only("[REQ-1] cart", { tag: ["@REQ-1", "@smoke", "@P0"] }, async () => {});',

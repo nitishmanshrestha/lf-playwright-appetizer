@@ -39,13 +39,13 @@ actually uses. Skip this phase for a brand-new repo with no tests.
 
 **Scan for signals** — grep and glob the test directory:
 
-| Signal | What to look for | Pattern it points to |
-|---|---|---|
-| `*.page.ts / *.page.js` files, imports from `pages/` | Page object classes | `pom` |
-| `*.feature` files, `step_definitions/` or `steps/` directory | Cucumber/Gherkin | `bdd-pom` |
-| `cy.*` custom commands, `cypress/support/commands/` | Command-first | `command-first` |
-| Helper classes injected via `test.extend` or `base.fixture.ts` | Helper-first | `helper-first` |
-| Parameterised tests driven by `*.json` / `*.csv` data files | Data-driven | `data-driven` |
+| Signal                                                         | What to look for    | Pattern it points to |
+| -------------------------------------------------------------- | ------------------- | -------------------- |
+| `*.page.ts / *.page.js` files, imports from `pages/`           | Page object classes | `pom`                |
+| `*.feature` files, `step_definitions/` or `steps/` directory   | Cucumber/Gherkin    | `bdd-pom`            |
+| `cy.*` custom commands, `cypress/support/commands/`            | Command-first       | `command-first`      |
+| Helper classes injected via `test.extend` or `base.fixture.ts` | Helper-first        | `helper-first`       |
+| Parameterised tests driven by `*.json` / `*.csv` data files    | Data-driven         | `data-driven`        |
 
 **Classify** — count how many spec files exhibit each signal:
 
