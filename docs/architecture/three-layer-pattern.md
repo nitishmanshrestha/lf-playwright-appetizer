@@ -198,6 +198,61 @@ test("should login successfully", async ({ page }) => {
 });
 ```
 
+## The Datastore Layer
+
+A project that declares `profile.datastore` gets a fourth place to assert — the database itself —
+and it uses **the same three layers**, not a new pattern beside them:
+
+```
+        TESTS      await db.row(ORDERS_DB.FIND_ORDER_BY_ID, { id })
+          │
+       HELPERS     DbHelpers — query / row / count, driver-agnostic
+          │
+        CONFIG     playwright/configs/db/** — the SQL, frozen, named parameters
+```
+
+**A query is config, for the same reason a selector is.** It is the datastore's contract, so a schema
+change should mean one config edit rather than a grep across specs. The `no-sql-literal` rule refuses
+SQL written anywhere else, exactly as `no-hardcoded-selector` refuses a selector literal.
+
+```typescript
+// playwright/configs/db/modules/orders/orders.db.ts
+export const ORDERS_DB = Object.freeze({
+  FIND_ORDER_BY_ID: Object.freeze<QueryEntry>({
+    name: "orders.findById",
+    sql: "SELECT id, status, total_minor FROM orders WHERE id = :id",
+    mutates: false,
+  }),
+});
+```
+
+Named parameters only. Interpolating a query turns a verification test into an injection vector
+against the very database it is meant to verify.
+
+### Why this layer looks different in Cypress
+
+This is the one place the two adapters genuinely diverge, and it is worth knowing why:
+
+|            | Playwright                                     | Cypress                                                      |
+| ---------- | ---------------------------------------------- | ------------------------------------------------------------ |
+| Access     | the driver, directly                           | `cy.task("db:query")`                                        |
+| Reason     | the test already runs in Node                  | the test runs in a browser sandbox that cannot open a socket |
+| Connection | **worker-scoped** fixture, one pool per worker | pool closed on `after:run`                                   |
+
+Everything above that line — query config, the `mutates` declaration, the helper surface, the rules —
+is identical in both.
+
+### What the helper refuses
+
+`db.row()` throws on **zero** rows as well as on two or more. A query that quietly matches nothing is
+the most common false pass at this layer: the assertion never runs, and the test goes green having
+proved the row's _absence_.
+
+The driver itself is not shipped. `profile.datastore.driver` declares which one the project uses, and
+wiring is one function — see
+[`playwright/support/helpers/common/DB-README.md`](../../playwright/support/helpers/common/DB-README.md).
+What to cover once it is wired is in [`backend-testing-coverage.md`](../backend-testing-coverage.md).
+
 ## Principles
 
 1. **Separation of Concerns** — Each layer has one job
