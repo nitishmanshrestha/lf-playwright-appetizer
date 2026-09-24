@@ -43,3 +43,28 @@ assert.deepEqual(
   ).map(({ message }) => message),
   ["Page-object or action-layer dependency. Use the helper-first architecture."],
 );
+
+const focused = scanContent(
+  "playwright/tests/cart/smoke/cart.spec.ts",
+  'test.only("[REQ-1] cart", { tag: ["@REQ-1", "@smoke", "@P0"] }, async () => {});',
+  { selectors: new Set(), routes: new Set(), endpoints: new Set() },
+  root,
+);
+assert.deepEqual(
+  focused.map(({ message }) => message),
+  [
+    "Focused test or unrecorded quarantine. Remove .only; a skip/fixme needs // @quarantine ISSUE-123: reason directly above it. (.only is never permitted.)",
+  ],
+);
+
+assert.equal(
+  scanContent(
+    "playwright/tests/cart/smoke/cart.spec.ts",
+    "// @quarantine QA-123: payment sandbox is unavailable\n" +
+      'test.fixme("[REQ-1] cart", { tag: ["@REQ-1", "@smoke", "@P0"] }, async () => {});',
+    { selectors: new Set(), routes: new Set(), endpoints: new Set() },
+    root,
+  ).length,
+  0,
+  "a recorded quarantine must stay scannable without being blocked",
+);

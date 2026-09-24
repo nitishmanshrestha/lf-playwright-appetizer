@@ -22,21 +22,21 @@ permissions:
   contents: read
 
 env:
-  NODE_VERSION: "20"
+  NODE_VERSION: "24"
 
 jobs:
   smoke:
     name: Smoke
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
       - run: npm ci
       - name: Verify pull-request task manifest
-        if: github.event_name == 'pull_request'
+        if: github.event_name == 'pull_request' && startsWith(github.head_ref, 'task/')
         run: npm run task:check
       - name: Verify manually selected task manifest
         if: github.event_name == 'workflow_dispatch'
@@ -85,7 +85,7 @@ jobs:
         run: npm run evidence:build
       - name: Upload reports and evidence
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: playwright-smoke-${{ github.run_id }}
           if-no-files-found: warn
@@ -102,23 +102,40 @@ jobs:
       github.event_name == 'push' ||
       (github.event_name == 'workflow_dispatch' && inputs.test_scope == 'all')
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
       - run: npm ci
       - run: npx playwright install --with-deps chromium
       - name: Run E2E tests
+        id: e2e
         run: npm test
         env:
           BASE_URL: ${{ secrets.BASE_URL }}
+      - name: Record first-attempt CI outcome for M2
+        if: always() && github.run_attempt == 1
+        env:
+          TEST_OUTCOME: ${{ steps.e2e.outcome }}
+          TRIGGER: ${{ github.event_name == 'pull_request' && 'pr' || (github.event_name == 'push' && 'push' || 'manual') }}
+        run: |
+          case "$TEST_OUTCOME" in
+            success) CLASS="" ; RESULT="passed" ;;
+            failure) CLASS="" ; RESULT="failed" ;;
+            *)       CLASS="--failure-class ENV" ; RESULT="failed" ;;
+          esac
+          node scripts/record-evidence.mjs ci \
+            --pipeline "${{ github.run_id }}-e2e" \
+            --trigger "$TRIGGER" \
+            --attempt "${{ github.run_attempt }}" \
+            --outcome "$RESULT" $CLASS
       - name: Build machine evidence
         if: always()
         run: npm run evidence:build
       - name: Upload reports and evidence
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: playwright-e2e-${{ github.run_id }}
           if-no-files-found: warn

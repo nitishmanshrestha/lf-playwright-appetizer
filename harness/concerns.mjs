@@ -51,6 +51,15 @@ export const CONCERNS = {
     summary: "search by value before creating a new asset",
     why: "Duplicate owners cause one app change to need multiple fixes.",
   },
+  QUERY: {
+    tier: 1,
+    summary: "no datastore query literals outside config",
+    why:
+      "A query is the datastore's contract, exactly as a route is the HTTP contract: a schema " +
+      "change should have one owner, not a grep across specs. Distinct from ROUTE because the " +
+      "message and the config root differ, and because a query carries write capability a route " +
+      "does not. A project with no datastore never trips it — there is no query to place.",
+  },
   TRACE: {
     tier: 1,
     ratchet: true,
@@ -59,6 +68,11 @@ export const CONCERNS = {
     ratchetNote:
       "Spec §6.4: onboard at `review` so an existing untagged suite can adopt at all, then ratchet " +
       "to `block` after the project's first clean sprint. The ratchet date is recorded in the profile.",
+  },
+  "FOCUSED-QUARANTINED": {
+    tier: 1,
+    summary: "no focused tests; skipped tests need a recorded quarantine",
+    why: "A focused test can hide suite failures, while an unrecorded skip hides risk with no owner.",
   },
   "LOCATOR-PRIORITY": {
     tier: 1,

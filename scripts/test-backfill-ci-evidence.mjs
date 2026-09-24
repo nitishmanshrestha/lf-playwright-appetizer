@@ -2,7 +2,7 @@
 // Self-check for the CI backfill classifier. Run: node scripts/test-backfill-ci-evidence.mjs
 // No network: classify() is pure, so the interesting logic is testable without gh.
 import assert from "node:assert/strict";
-import { classify } from "./backfill-ci-evidence.mjs";
+import { classify, firstAttemptRun } from "./backfill-ci-evidence.mjs";
 
 const withSteps = [{ steps: [{ name: "Run smoke tests" }] }];
 const noSteps = [{ steps: [] }];
@@ -18,7 +18,11 @@ const pass = classify({
 });
 assert.equal(pass.trigger, "pr");
 assert.equal(pass.outcome, "passed");
-assert.equal(pass["failure-class"], undefined, "a pass must never carry a failure class");
+assert.equal(
+  pass["failure-class"],
+  undefined,
+  "a pass must never carry a failure class",
+);
 
 // Tests ran and failed — a genuine test failure, counts against M2.
 const realFail = classify({
@@ -29,7 +33,11 @@ const realFail = classify({
   runAttempt: 1,
 });
 assert.equal(realFail.outcome, "failed");
-assert.equal(realFail["failure-class"], undefined, "a real test failure must NOT be excluded");
+assert.equal(
+  realFail["failure-class"],
+  undefined,
+  "a real test failure must NOT be excluded",
+);
 
 // The billing-lock / never-started case: zero steps executed. Infrastructure, not a test signal.
 const neverStarted = classify({
@@ -40,25 +48,48 @@ const neverStarted = classify({
   runAttempt: 1,
 });
 assert.equal(neverStarted.outcome, "failed");
-assert.equal(neverStarted["failure-class"], "ENV", "a run that never started must be ENV");
+assert.equal(
+  neverStarted["failure-class"],
+  "ENV",
+  "a run that never started must be ENV",
+);
 
 // Event mapping.
 assert.equal(
-  classify({ databaseId: 4, event: "push", conclusion: "success", jobs: withSteps }).trigger,
+  classify({
+    databaseId: 4,
+    event: "push",
+    conclusion: "success",
+    jobs: withSteps,
+  }).trigger,
   "push",
 );
 assert.equal(
-  classify({ databaseId: 5, event: "workflow_dispatch", conclusion: "success", jobs: withSteps })
-    .trigger,
+  classify({
+    databaseId: 5,
+    event: "workflow_dispatch",
+    conclusion: "success",
+    jobs: withSteps,
+  }).trigger,
   "manual",
 );
 assert.equal(
-  classify({ databaseId: 6, event: "schedule", conclusion: "success", jobs: withSteps }).trigger,
+  classify({
+    databaseId: 6,
+    event: "schedule",
+    conclusion: "success",
+    jobs: withSteps,
+  }).trigger,
   "schedule",
 );
 // An event M2 does not model is skipped, not guessed at.
 assert.equal(
-  classify({ databaseId: 7, event: "release", conclusion: "success", jobs: withSteps }),
+  classify({
+    databaseId: 7,
+    event: "release",
+    conclusion: "success",
+    jobs: withSteps,
+  }),
   null,
 );
 
@@ -75,12 +106,18 @@ assert.equal(
 );
 // snake_case from the raw REST API is accepted too.
 assert.equal(
-  classify({ id: 9, event: "pull_request", conclusion: "success", jobs: withSteps, run_attempt: 2 })
-    .attempt,
+  classify({
+    id: 9,
+    event: "pull_request",
+    conclusion: "success",
+    jobs: withSteps,
+    run_attempt: 2,
+  }).attempt,
   2,
 );
 assert.equal(
-  classify({ id: 9, event: "push", conclusion: "success", jobs: withSteps }).pipeline,
+  classify({ id: 9, event: "push", conclusion: "success", jobs: withSteps })
+    .pipeline,
   "9",
 );
 
@@ -94,5 +131,52 @@ const cancelledNoSteps = classify({
   runAttempt: 1,
 });
 assert.equal(cancelledNoSteps["failure-class"], "ENV");
+
+// A green retry must not be stored as attempt-1 passed. gh run list reports the
+// latest conclusion; M2 is first-attempt only.
+const retriedList = {
+  databaseId: 11,
+  event: "pull_request",
+  conclusion: "success",
+  createdAt: "2026-09-06T00:00:00Z",
+  jobs: withSteps,
+  runAttempt: 2,
+};
+const firstAttemptFailed = firstAttemptRun(retriedList, {
+  conclusion: "failure",
+  attempt: 1,
+  jobs: withSteps,
+});
+assert.equal(firstAttemptFailed.conclusion, "failure");
+assert.equal(firstAttemptFailed.runAttempt, 1);
+const retried = classify(firstAttemptFailed);
+assert.equal(retried.attempt, 1);
+assert.equal(retried.outcome, "failed");
+assert.equal(
+  retried["failure-class"],
+  undefined,
+  "attempt-1 test failure after a later green retry must still count against M2",
+);
+
+assert.equal(
+  firstAttemptRun(retriedList, null),
+  null,
+  "a missing attempt-1 view must skip, not invent attempt 1",
+);
+assert.equal(
+  firstAttemptRun(retriedList, { jobs: [], attempt: 1 }),
+  null,
+  "an attempt-1 view without a conclusion must skip",
+);
+// The previous catch path defaulted runAttempt to 1 and jobs to [] on a view
+// failure, then kept the list conclusion. That turns a green retry into an
+// attempt-1 pass (or a real failure into ENV). firstAttemptRun must refuse.
+assert.equal(
+  firstAttemptRun(
+    { ...retriedList, conclusion: "success" },
+    { conclusion: "", jobs: [], attempt: 1 },
+  ),
+  null,
+);
 
 console.log("[backfill] all checks passed");

@@ -186,6 +186,32 @@ export const rules = [
       /(?:test\.)?before(?:Each|All)\s*\([\s\S]{0,400}?(?:(?:password|passwd)[\s\S]{0,80}?\.fill\(|\.fill\(\s*[^)]{0,80}?(?:password|passwd))/gi,
   },
   {
+    ruleId: "focused-or-quarantined-test",
+    fallback:
+      "Focused test or unrecorded quarantine. Remove .only; a skip/fixme needs // @quarantine ISSUE-123: reason directly above it.",
+    appliesTo: (p) => TESTS_SPEC_RE.test(p),
+    check: ({ content, message, push }) => {
+      const selectionRe = /\btest(?:\.describe)?\.(only|skip|fixme)\s*\(/g;
+      let match;
+      while ((match = selectionRe.exec(content)) !== null) {
+        const lineNumber = lineNumberForIndex(content, match.index);
+        if (match[1] === "only") {
+          push(lineNumber, `${message} (.only is never permitted.)`);
+          continue;
+        }
+        const lineStart = content.lastIndexOf("\n", match.index - 1) + 1;
+        const before = content.slice(0, lineStart).replace(/\r?\n$/, "");
+        const previousLine = before.slice(before.lastIndexOf("\n") + 1);
+        if (!/^\s*\/\/\s*@quarantine\s+[A-Z][A-Z0-9]*-\d+\s*:\s*\S.*\s*$/.test(previousLine)) {
+          push(
+            lineNumber,
+            `${message} (add the quarantine record directly above this skip/fixme.)`,
+          );
+        }
+      }
+    },
+  },
+  {
     // Exactly one requirement tag per test, plus one Type and one Priority tag, with the title
     // requirement id matching the requirement tag. Structural and single-file: whether the id is
     // *active* and unique across the repository is graded by evidence:build and check:requirements,
@@ -278,5 +304,25 @@ export const rules = [
     fallback: "Write HTTP method in smoke suite. Smoke tests must remain read-only.",
     appliesTo: (p) => SMOKE_SPEC_RE.test(p),
     pattern: /\bmethod\s*:\s*['"](POST|PUT|PATCH|DELETE)['"]/gi,
+  },
+  {
+    // SMOKE-RO is layer-agnostic: a smoke suite that writes to the datastore breaks the same Tier 0
+    // boundary as one that POSTs, and on a shared environment it is worse — an HTTP write is at
+    // least mediated by the application's own rules. Same concern, same rule, wider net.
+    ruleId: "smoke-read-only",
+    fallback: "Datastore write in smoke suite. Smoke tests must remain read-only at every layer.",
+    appliesTo: (p) => SMOKE_SPEC_RE.test(p),
+    pattern:
+      /\b(INSERT\s+INTO|UPDATE\s+\w+\s+SET|DELETE\s+FROM|TRUNCATE|DROP\s+(TABLE|DATABASE|SCHEMA)|ALTER\s+TABLE)\b/gi,
+  },
+  {
+    // A query is the datastore's contract, exactly as a route is the HTTP contract. Matching the
+    // shape of a statement rather than the word SELECT alone keeps prose and column names from
+    // tripping it: the literal has to look like an actual query.
+    ruleId: "no-sql-literal",
+    fallback: "Hardcoded SQL. Move the query to playwright/configs/db/** and use the db fixture.",
+    appliesTo: (p) => SPEC_RE.test(p) || CODE_RE.test(p),
+    pattern:
+      /['"`][^'"`]*\b(SELECT\s+[\w*,\s.]+\s+FROM|INSERT\s+INTO|UPDATE\s+\w+\s+SET|DELETE\s+FROM|TRUNCATE\s+TABLE)\b[^'"`]*['"`]/gi,
   },
 ];
