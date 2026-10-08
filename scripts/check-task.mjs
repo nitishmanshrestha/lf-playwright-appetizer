@@ -32,7 +32,8 @@ export function resolveTaskId(
 ) {
   const explicit = typeof args.id === "string" ? args.id.trim() : "";
   if (explicit) return explicit;
-  return branch.startsWith("task/") ? branch.slice(5) : "";
+  const normalizedBranch = branch.replace(/^(refs\/heads\/|origin\/)/, "");
+  return normalizedBranch.startsWith("task/") ? normalizedBranch.slice(5) : "";
 }
 
 /**
@@ -56,7 +57,7 @@ export function changedFilesSince(verifiedCommit, git) {
 }
 
 export function unverifiedFiles(changed, allowed) {
-  return changed.filter((file) => file && !allowed.has(file));
+  return changed.filter((file) => !allowed.has(file));
 }
 
 function file(relative, root = ROOT) {
@@ -76,10 +77,16 @@ export function checkTask({
   id,
   root = ROOT,
   git = (args) =>
-    execFileSync("git", args, { cwd: root, encoding: "utf8" }).trim(),
+    execFileSync("git", args, {
+      cwd: root,
+      encoding: "utf8",
+      stdio: ["ignore", "pipe", "pipe"],
+    }).trim(),
 } = {}) {
   if (!id) throw new Error("--id is required (or use a task/<ID> branch)");
-  const task = readJson(file(path.join("evidence", "tasks", `${id}.json`), root));
+  const task = readJson(
+    file(path.join("evidence", "tasks", `${id}.json`), root),
+  );
   validateTask(task);
   if (task.status !== "verified")
     throw new Error(`task ${id} is ${task.status}, not verified`);
