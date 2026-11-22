@@ -21,9 +21,20 @@ export const GENERATED_AGENT_MARKER =
   "<!-- GENERATED FROM harness.config.json and harness/agents/. DO NOT EDIT. -->";
 export const GENERATED_HOOK_MARKER = "HARNESS_GENERATED_FROM";
 export const GENERATED_SKILL_MARKER = "HARNESS_GENERATED_SKILL_PROJECTION";
-export const KNOWN_ROLES = ["INTAKE", "BUILD", "DIAGNOSE", "EVALUATE"];
+export const KNOWN_ROLES = [
+  "INTAKE",
+  "GATHER",
+  "DISCOVER",
+  "CASES",
+  "BUILD",
+  "DIAGNOSE",
+  "EVALUATE",
+  "SHIP",
+  "MAINTAIN",
+];
 
-const SUPPORTED_FRAMEWORKS = new Set(["cypress", "playwright"]);
+// `source` is the engine's own adapter for product code (dev lanes).
+const SUPPORTED_FRAMEWORKS = new Set(["cypress", "playwright", "source"]);
 const SUPPORTED_AGENT_EXTENSIONS = new Set([".md", ".agent.md"]);
 const SUPPORTED_ENFORCEMENT = new Set(["Hook + CI", "CI", "QA gate"]);
 // Every AI tool the harness knows how to project into. A profile enables a subset; sync generates
@@ -53,11 +64,14 @@ export function isReadOnlyAgent(agent) {
   );
 }
 
+// A dev lane's config carries project.laneTeam; every other config is QA.
+const teamOf = (config) => config.project?.laneTeam ?? "qa";
+
 // Workflow policy, where its PRD material lives, and (for lane-based profiles) the lane's declared
 // mutation boundary.
 function governance(config) {
   return [
-    workflowGuidance(config.workflow),
+    workflowGuidance(config.workflow, teamOf(config)),
     sourcesGuidance(config.project?.sources, config.workflow),
     laneSafetyGuidance(config.project),
   ]
@@ -75,7 +89,7 @@ function validateConfig(config) {
   requireValue(workflowProblems.length === 0, workflowProblems.join("; "));
   requireValue(
     SUPPORTED_FRAMEWORKS.has(config.framework),
-    "framework must be cypress or playwright",
+    "framework must be cypress, playwright or source",
   );
   requireValue(
     config.adapters && typeof config.adapters === "object",
@@ -347,6 +361,13 @@ function readOnlyRationale(config) {
 
 function whereThingsLive(config) {
   const project = config.project;
+  if (config.framework === "source")
+    return [
+      "| Layer | Path |",
+      "|---|---|",
+      `| Source | \`${project.sourceRoot}\` |`,
+      `| Tests | \`${project.specGlob}\` |`,
+    ].join("\n");
   const commandLabel = config.framework === "cypress" ? "Commands" : "Helpers";
   return [
     "| Layer | Path |",
@@ -518,8 +539,8 @@ export function agentInstructions(repoRoot, config, agent) {
     .replaceAll("{{qaFoundations}}", foundations);
   // After the body so the role statement leads; the read-only evaluator gets its own stanza.
   const guidance = isReadOnlyAgent(agent)
-    ? evaluatorGuidance(config.workflow)
-    : workflowGuidance(config.workflow);
+    ? evaluatorGuidance(config.workflow, teamOf(config))
+    : workflowGuidance(config.workflow, teamOf(config));
   return `${body}\n\n${guidance}${skillsSection(config, agent)}`;
 }
 

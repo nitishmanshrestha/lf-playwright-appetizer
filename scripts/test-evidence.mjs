@@ -248,6 +248,84 @@ try {
       }),
     /does not match harness.config.json framework/,
   );
+  // A present JSON report with zero tests used to publish metrics.status "ready"
+  // while spec files existed — the same false-confidence class as a missing
+  // report, because evidence:build runs after a failed Cypress merge.
+  const emptyReportRoot = fixtureRoot();
+  roots.push(emptyReportRoot);
+  const emptyReport = path.join(emptyReportRoot, "empty-report.json");
+  fs.mkdirSync(
+    path.join(emptyReportRoot, "cypress", "tests", "checkout", "smoke"),
+    { recursive: true },
+  );
+  fs.writeFileSync(
+    path.join(
+      emptyReportRoot,
+      "cypress",
+      "tests",
+      "checkout",
+      "smoke",
+      "checkout-smoke.cy.js",
+    ),
+    "",
+  );
+  fs.writeFileSync(
+    emptyReport,
+    JSON.stringify({
+      stats: { start: "2026-01-01T00:00:00.000Z", duration: 0 },
+      results: [],
+    }),
+  );
+  assert.throws(
+    () =>
+      buildEvidence({
+        root: emptyReportRoot,
+        framework: "cypress",
+        reportPath: emptyReport,
+        runId: "empty-report-run",
+      }),
+    /0 tests/,
+  );
+
+  // Same guard, other adapter. It sits after the normalize branch so one check covers
+  // both, but normalizePlaywright reads a different report shape — a Playwright run
+  // that writes {suites: []} has to reach the throw too, or the adapter this engine
+  // was extracted to serve keeps the hole the Cypress side just closed.
+  const emptyPlaywrightRoot = fixtureRoot();
+  roots.push(emptyPlaywrightRoot);
+  const emptyPlaywrightReport = path.join(
+    emptyPlaywrightRoot,
+    "empty-report.json",
+  );
+  const emptyPlaywrightSpecDir = path.join(
+    emptyPlaywrightRoot,
+    "playwright",
+    "tests",
+    "checkout",
+    "smoke",
+  );
+  fs.mkdirSync(emptyPlaywrightSpecDir, { recursive: true });
+  fs.writeFileSync(
+    path.join(emptyPlaywrightSpecDir, "checkout-smoke.spec.ts"),
+    "export {};\n",
+  );
+  fs.writeFileSync(
+    emptyPlaywrightReport,
+    JSON.stringify({
+      stats: { startTime: "2026-01-01T00:00:00.000Z", duration: 0 },
+      suites: [],
+    }),
+  );
+  assert.throws(
+    () =>
+      buildEvidence({
+        root: emptyPlaywrightRoot,
+        framework: "playwright",
+        reportPath: emptyPlaywrightReport,
+        runId: "empty-playwright-report-run",
+      }),
+    /0 tests/,
+  );
 
   const emptyRoot = fs.mkdtempSync(
     path.join(os.tmpdir(), "harness-evidence-empty-"),
@@ -333,6 +411,31 @@ try {
 
   writeLayers(["ui", "ui"]);
   assert.throws(build, /repeats a layer/, "a repeated layer must be rejected");
+  // A TypeScript-only suite with no report must fail, not publish status "ready".
+  // Matching only .cy.js used to treat *.cy.ts as "no tests exist".
+  const tsOnlyRoot = fixtureRoot();
+  roots.push(tsOnlyRoot);
+  const tsSpecDir = path.join(
+    tsOnlyRoot,
+    "cypress",
+    "tests",
+    "checkout",
+    "smoke",
+  );
+  fs.mkdirSync(tsSpecDir, { recursive: true });
+  fs.writeFileSync(
+    path.join(tsSpecDir, "checkout-smoke.cy.ts"),
+    "export {};\n",
+  );
+  assert.throws(
+    () =>
+      buildEvidence({
+        root: tsOnlyRoot,
+        framework: "cypress",
+        reportPath: "missing.json",
+      }),
+    /Report is missing while 1 test file/,
+  );
 } finally {
   for (const root of roots) fs.rmSync(root, { recursive: true, force: true });
 }

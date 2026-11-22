@@ -27,6 +27,7 @@ import {
   loadAllowlist,
   scanContent,
 } from "./shared-rules.mjs";
+import { formatViolation } from "./rule-engine.mjs";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -55,7 +56,7 @@ function report(violations, label, failCode) {
   console.error("");
   console.error(`❌ [${label}] Playwright rule violations detected:`);
   for (const v of violations) {
-    console.error(`  ${toPosix(v.filePath)}:${v.lineNumber} -> ${v.message}`);
+    console.error(formatViolation(v));
   }
   console.error("");
   process.exit(failCode);
@@ -128,7 +129,7 @@ if (process.argv.includes("--all")) {
   console.error("");
   console.error("❌ [POST-CHECK] Playwright rule violations detected in written file.");
   for (const v of violations) {
-    console.error(`  ${toPosix(v.filePath)}:${v.lineNumber} -> ${v.message}`);
+    console.error(formatViolation(v));
   }
   console.error("");
   console.error("Correct these violations before committing.");
