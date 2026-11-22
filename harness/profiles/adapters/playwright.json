@@ -236,6 +236,7 @@
     }
   ],
   "hooks": {
+    "sessionStart": ["doctor-notify.mjs"],
     "prompt": ["harness-config-gate.mjs", "prompt-duplication-guard.mjs"],
     "preWrite": ["pre-validate-playwright-rules.mjs"],
     "postWrite": ["validate-playwright-rules.mjs"],
